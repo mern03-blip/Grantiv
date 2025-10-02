@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Form, Input, message } from "antd";
@@ -5,28 +6,54 @@ import {
   EyeInvisibleOutlined,
   EyeTwoTone,
 } from "@ant-design/icons";
-import { Google, Apple, User, Mail } from "../../assets/image";
+import { User, Mail } from "../../assets/image";
 import { FiLock } from "react-icons/fi";
-import React from "react";
 import "./signup.css"
+import { userSignUp } from "../../api/auth/auth";
+
 const SignUp = () => {
+
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // The onFinish handler is called when the form is submitted successfully
-  const onFinish = (values) => {
-    console.log("Form Submitted:", values);
-    setLoading(true);
+  const onFinish = async (values) => {
+    try {
+      setLoading(true);
 
-    setTimeout(() => {
+      // Extract only email and password
+      const { email, password } = values;
+      console.log(email, password);
+
+
+      const response = await userSignUp({ email, password });
+
+      if (response?.success) {
+        message.success(response.message || "Signup successful! Please verify your email.");
+
+        localStorage.setItem("email", email);
+
+        navigate("/auth");
+      } else {
+        message.error(response.message || "Signup failed. Please try again.");
+      }
+    } catch (error) {
       setLoading(false);
-      message.success("Account created successfully! Please log in.");
-      navigate("/auth"); // Navigate to your login/auth page
-    }, 2000);
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "An unknown error occurred during signup.";
+
+      if (errorMessage.toLowerCase().includes("email already exists")) {
+        message.error("An account with this email already exists. Please log in.");
+      } else {
+        message.error(errorMessage);
+      }
+    }
   };
 
+
   return (
-    // Main container to center the form card on the page
     <div className="w-full h-[100%] flex justify-center font-custom">
       <div className="w-[80%] p-6">
 
@@ -106,7 +133,7 @@ const SignUp = () => {
               {
                 pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])(?!.*\s).{6,128}$/,
                 message:
-                  "Password must include uppercase, lowercase, number",
+                  "Password must include uppercase, lowercase, number, and a special character",
               },
             ]}
           >

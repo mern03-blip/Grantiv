@@ -277,3 +277,8 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
 };
 
 export default GrantDetail;
+
+
+
+
+
