@@ -1,34 +1,80 @@
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Form, Input, Typography, Modal } from "antd";
+import { Button, Form, Input, Typography, Modal, message } from "antd";
 import { FiArrowLeft, FiLock } from "react-icons/fi";
 import { EyeTwoTone, EyeInvisibleOutlined, CloseOutlined } from "@ant-design/icons";
-// import { useUpdatePassword } from "../../firebase/collection/authHooks";
 import { FeaturedIcon } from "../../assets/image";
+import { resetPassword } from "../../api/endpoints/auth";
+import { useMutation } from "@tanstack/react-query";
 
 const { Title } = Typography;
 
 const ResetPassword = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  // const { mutate: resetPassword } = useUpdatePassword();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const onFinish = ({ newPassword }) => {
-    setLoading(true);
-    const email = localStorage.getItem("email") || `admin@gmail.com`;
-    const payload = { email, newPassword };
+  // const onFinish = async (values) => {
+  //   console.log("Form values:", values);
+  //   try {
+  //     setLoading(true);
 
-    resetPassword(payload, {
-      onSuccess: () => {
-        setLoading(false);
-        setIsModalVisible(true); // 👈 show popup
-      },
-      onError: () => {
-        setLoading(false);
-      },
-    });
+  //     // const email = localStorage.getItem("email") || "admin@gmail.com";
+  //     const resetToken = localStorage.getItem("otp");
+
+  //     const payload = {
+  //       // email,
+  //       resetToken,
+  //       newPassword: values.newPassword, // ✅ use values.newPassword
+  //     };
+
+  //     const res = await resetPassword(payload); // ✅ now defined
+
+  //     // Success case
+  //     setLoading(false);
+  //     setIsModalVisible(true); // show popup
+  //     console.log("Password reset success", res);
+  //   } catch (error) {
+  //     // Error case
+  //     setLoading(false);
+  //     console.error("Password reset failed", error);
+  //   }
+  // };
+
+  // ✅ React Query Mutation for Reset Password
+
+  const { mutate: handleResetPassword, isPending: loading } = useMutation({
+    mutationFn: async (payload) => await resetPassword(payload),
+    onSuccess: (res) => {
+      message.success(res?.message || "Password updated successfully!");
+      setIsModalVisible(true); // ✅ show success popup
+      localStorage.removeItem("otp");
+      localStorage.removeItem("email");
+    },
+    onError: (error) => {
+      const errorMessage =
+        error?.response?.data?.message ||
+        "An error occurred while resetting password";
+      message.error(errorMessage);
+    },
+  });
+
+  // ✅ Form Submit Handler
+  const onFinish = (values) => {
+    const resetToken = localStorage.getItem("otp");
+
+    if (!resetToken) {
+      message.error("OTP token not found. Please verify your OTP again.");
+      return;
+    }
+
+    const payload = {
+      resetToken,
+      newPassword: values.newPassword,
+    };
+    console.log(payload);
+
+    handleResetPassword(payload);
   };
 
   return (
@@ -94,7 +140,7 @@ const ResetPassword = () => {
             <Form.Item
               label={
                 <span className="font-b5  text-blackColor"
-              style={{ fontFamily: '"Poppins", sans-serif' }}
+                  style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   Confirm Password
                 </span>
@@ -136,9 +182,9 @@ const ResetPassword = () => {
               type="primary"
               htmlType="submit"
               loading={loading}
-              onClick={() => {
-                setIsModalVisible(true);
-              }}
+              // onClick={() => {
+              //   setIsModalVisible(true);
+              // }}
               className="w-full h-14 rounded-2xl font-bold !bg-mainColor border-none !font-custom"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >

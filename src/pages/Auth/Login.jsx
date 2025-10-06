@@ -1,62 +1,77 @@
+import React from "react";
 import { useState } from "react";
-import { Button, Col, Divider, Form, Input, Row, Typography, message } from "antd";
+import { Button, Col, Divider, Form, Input, message, Row, Typography } from "antd";
 import { FiMail, FiLock } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { Apple, Google } from "../../assets/image";
 import { EyeTwoTone, EyeInvisibleOutlined } from "@ant-design/icons";
-import React from "react";
+import { userLogin } from "../../api/endpoints/auth";
+import { useMutation } from "@tanstack/react-query";
 
 const { Title } = Typography;
 
 const Login = () => {
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const onFinish = async (values) => {
+  // ✅ TanStack Mutation for Login API
+  const { mutate: handleLogin, isPending: loading } = useMutation({
+    mutationFn: async ({ email, password }) => {
+      const response = await userLogin({ email, password });
+      return response;
+    },
+    onSuccess: (response, variables) => {
+
+      if (response?.token) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("userId", response.id);
+        message.success(response.message || "Login successful");
+        navigate("/");
+      } else {
+        message.error(response.message || "Invalid email or password");
+      }
+    },
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Login failed. Please try again.";
+      message.error(errorMessage);
+      console.error("Login Error:", error);
+    },
+  });
+
+  // ✅ Form Submit Handler
+  const onFinish = (values) => {
     const { email, password } = values;
-    setLoading(true);
-
-    // const auth = getAuth();
-    // setLoading(true);
-
-
-    try {
-      // const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // const user = userCredential.user;
-
-      // const userRef = doc(db, "users", user.uid);
-      // const userSnap = await getDoc(userRef);
-
-      // if (!userSnap.exists()) {
-      //   setLoading(false);
-      //   message.error("User record not found in Firestore.");
-      //   return;
-      // }
-
-      // const userData = userSnap.data();
-      // if (userData.role === "admin") {
-      //   localStorage.setItem("token", "1122");
-      //   message.success("Login successful");
-      //   setLoading(false);
-      //   navigate("/employees");
-      // } else {
-      //   setLoading(false);
-      //   message.error("You are not authorized to access this page.");
-      // }
-
-      // ✅ Default Direct Login
-      localStorage.setItem("token", "dummy-token");
-      localStorage.setItem("role", "admin");
-      message.success("Login successful (default mode)");
-      navigate("/");
-
-    } catch (error) {
-      message.error("Login failed.");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+    handleLogin({ email, password });
   };
+
+  // const onFinish = async (values) => {
+  //   const { email, password } = values;
+  //   setLoading(true);
+
+  //   try {
+  //     // Call your backend login API
+  //     const response = await userLogin({ email, password });
+
+  //     if (response?.token) {
+  //       // ✅ Save token in localStorage
+  //       localStorage.setItem("token", response.token);
+  //       localStorage.setItem("role", response.role || "user");
+
+  //       message.success(response.message || "Login successful");
+  //       navigate("/"); // Redirect to homepage or dashboard
+  //     } else {
+  //       message.error(response.message || "Invalid email or password");
+  //     }
+  //   } catch (error) {
+  //     // Handle error from backend or network
+  //     const errorMessage =
+  //       error.response?.data?.message || "Login failed. Please try again.";
+  //     message.error(errorMessage);
+  //     console.error("Login Error:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const preventCopyPaste = (e) => {
     e.preventDefault();
@@ -175,6 +190,10 @@ const Login = () => {
             Login
           </Button>
 
+          <Button onClick={() => message.info("This is a toast message!")}>
+            Toast
+          </Button>
+
           {/* Signup Link */}
           <p className="mt-10 text-center text-text1 text-gray-400 !font-custom"
             style={{ fontFamily: '"Poppins", sans-serif' }}
@@ -193,5 +212,6 @@ const Login = () => {
 };
 
 export default Login;
+
 
 

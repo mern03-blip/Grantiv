@@ -1,5 +1,7 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query'; // ⬅️ Import useQuery
 import { getGrantQuickReview } from '../../services/geminiService';
 import {
     SparklesIcon, HeartIcon, XIcon, BuildingOfficeIcon, BellIcon, SpinnerIcon
@@ -7,9 +9,39 @@ import {
 import useFocusTrap from '../../hooks/useFocusTrap';
 import useKeydown from '../../hooks/useKeydown';
 import { ReminderModal } from './ReminderModal';
-import { useNavigate } from 'react-router-dom';
+import { getGrantDetail } from '../../api/endpoints/grants'; // The grant fetching function
+import Loader from '../loading/Loader';
+import { useToggleFavoriteGrant } from "../../hooks/useToggleFavoriteGrant";
 
-const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, savedGrants, onToggleSave, onSetReminder }) => {
+
+// Utility function for TanStack Query
+const fetchGrant = async (id) => {
+    if (!id) return null;
+    const response = await getGrantDetail(id);
+    return response.data; // Assuming getGrant returns { data: grantObject }
+};
+
+const GrantDetail = ({ myGrants, matchPercentage, onApplyNow, onClose, savedGrants, onSetReminder }) => {
+    // 1. GET ID FROM URL
+    const { id } = useParams();
+    // console.log("grantId from URL:", id); // Use 'id' now
+
+    // 2. TANSTACK QUERY FOR FETCHING GRANT DATA
+    const {
+        data: grant,
+        isLoading,
+        error
+    } = useQuery({
+        // Query key: ['grant', id] ensures refetching when the URL ID changes
+        queryKey: ['grant', id],
+        // The query function is an anonymous arrow function that calls our fetcher
+        queryFn: () => fetchGrant(id),
+        // Only run the query if 'id' is present
+        enabled: !!id,
+        staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
+    });
+
+    // Existing states and refs
     const [activeTab, setActiveTab] = useState('Overview');
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
@@ -24,6 +56,14 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
     useKeydown('Escape', () => setIsReviewModalOpen(false));
     useFocusTrap(isReminderModalOpen ? reminderModalRef : { current: null });
     useKeydown('Escape', () => setIsReminderModalOpen(false));
+
+    // console.log("Fetched grant data:", grant); // Log the data returned by TanStack Query
+
+    // **********************************************
+    // REMAINDER OF YOUR COMPONENT LOGIC (UNCHANGED)
+    // **********************************************
+
+
 
     useEffect(() => {
         if (isReviewModalOpen || isReminderModalOpen) {
@@ -41,18 +81,28 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
     });
 
     const getDaysRemaining = () => {
-        const deadlineDate = new Date(grant?.deadline);
+        if (!grant?.closeDateTime) return -1;
+
+        const datePart = grant.closeDateTime.split(' ')[0];
+        const [day, monthStr, year] = datePart.split('-');
+
+        const monthIndex = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(monthStr);
+
+        const deadlineDate = new Date(year, monthIndex, day);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         deadlineDate.setHours(0, 0, 0, 0);
+
         const diffTime = deadlineDate.getTime() - today.getTime();
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
-    const daysRemaining = getDaysRemaining();
+
+    const daysRemaining = grant ? getDaysRemaining() : null;
 
     const tabs = ['Overview', 'Eligibility', 'Documents', 'Contacts'];
 
     const handleQuickReview = async () => {
+        if (!grant) return;
         setIsReviewModalOpen(true);
         if (reviewContent) return;
         setIsReviewLoading(true);
@@ -61,27 +111,44 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
         setIsReviewLoading(false);
     };
 
-    const currentGrantData = myGrants?.find(g => g.id === grant.id);
+    // Use 'id' for the lookup in myGrants
+    const currentGrantData = myGrants?.find(g => g.id === id);
 
     const TabContent = () => {
+        if (!grant) return null;
+
         switch (activeTab) {
             case 'Eligibility':
                 return (
                     <div>
                         <h4 className="text-lg font-bold font-heading mb-2 text-night dark:text-dark-text">Eligibility Requirements</h4>
-                        <p className="text-night/80 dark:text-dark-text/80 whitespace-pre-line">Eligiblity Section</p>
+                        <p className="text-night/80 dark:text-dark-text/80 whitespace-pre-line">{grant.eligibility}</p>
                     </div>
                 );
             case 'Documents':
-                return <p className="text-night/60 dark:text-dark-textMuted">Required documents will be listed here. (Placeholder)</p>;
+                return (
+                    <div>
+                        <h4 className="text-lg font-bold font-heading mb-2 text-night dark:text-dark-text">Application Instructions</h4>
+                        <p className="text-night/80 dark:text-dark-text/80 whitespace-pre-line">{grant.applicationInstructions}</p>
+                        <p className="text-night/60 dark:text-dark-textMuted mt-4">Required documents will be listed here. (Placeholder for specific document list)</p>
+                    </div>
+                );
             case 'Contacts':
-                return <p className="text-night/60 dark:text-dark-textMuted">Contact information for the funder will be available here. (Placeholder)</p>;
+                return (
+                    <div>
+                        <h4 className="text-lg font-bold font-heading mb-2 text-night dark:text-dark-text">Funder Contact</h4>
+                        <p className="text-night/80 dark:text-dark-text/80 mb-2">**Email:** {grant.contactEmail}</p>
+                        <p className="text-night/80 dark:text-dark-text/80">**Agency:** {grant.agency}</p>
+                    </div>
+                );
             case 'Overview':
             default:
                 return (
                     <div>
                         <h4 className="text-lg font-bold font-heading mb-2 text-night dark:text-dark-text">Description</h4>
-                        <p className="text-night/80 dark:text-dark-text/80 mb-4 whitespace-pre-line">{grant?.description}</p>
+                        <p className="text-night/80 dark:text-dark-text/80 mb-4 whitespace-pre-line">{grant.description}</p>
+                        <h4 className="text-lg font-bold font-heading mb-2 text-night dark:text-dark-text">Grant Activity Timeframe</h4>
+                        <p className="text-night/80 dark:text-dark-text/80 mb-4 whitespace-pre-line">{grant.grantActivityTimeframe}</p>
                         <h4 className="text-lg font-bold font-heading mb-2 text-night dark:text-dark-text">Funding Objectives</h4>
                         <ul className="list-disc list-inside text-night/80 dark:text-dark-text/80 space-y-1">
                             <li>Digital capacity building and infrastructure development</li>
@@ -94,15 +161,68 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
         }
     };
 
-    const isSaved = savedGrants?.some(g => g.id === grant.id);
+    // const isSaved = savedGrants?.some(g => g._id === grant?._id);
 
-    // New animation variants for the main component
+    const { mutate: toggleFavorite, isPending: isToggling } = useToggleFavoriteGrant();
+    const [isSaved, setIsSaved] = useState(
+        savedGrants?.some((g) => g._id === grant?._id)
+    );
+
+    const onToggleSave = (grant) => {
+        if (!grant?._id) return;
+
+        // 🔄 Optimistic update
+        setIsSaved((prev) => !prev);
+
+        toggleFavorite(grant._id, {
+
+            onSuccess: () => {
+                refetchSavedGrants(); // Refresh saved grants after toggle
+            },
+            onError: () => {
+                // Revert UI if request fails
+                setIsSaved((prev) => !prev);
+            },
+        });
+    };
+
+
     const variants = {
         hidden: { opacity: 0, y: 50, scale: 0.95 },
         visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: 'easeOut' } },
         exit: { opacity: 0, y: 50, scale: 0.95, transition: { duration: 0.4, ease: 'easeIn' } }
     };
 
+    // RENDER LOADING STATE (Managed by TanStack Query)
+    if (isLoading) {
+        return (
+            // <div className="flex justify-center items-center h-64">
+            //     <SpinnerIcon className="w-10 h-10 text-primary animate-spin" />
+            //     <p className="ml-3 text-night dark:text-dark-text">Loading Grant Details...</p>
+            // </div>
+            <Loader />
+        );
+    }
+
+    // RENDER NOT FOUND/ERROR STATE (Managed by TanStack Query)
+    if (error || !grant) {
+        return (
+            <div className="text-center p-12 bg-white dark:bg-dark-surface rounded-2xl shadow-lg max-w-5xl mx-auto my-12">
+                <h2 className="text-2xl font-bold text-red-600">Grant Not Found or Error</h2>
+                <p className="mt-2 text-night/80 dark:text-dark-text/80">The grant with ID "{id}" could not be loaded. ({error ? error.message : 'No data received'})</p>
+                <motion.button
+                    onClick={() => onClose ? onClose() : navigate('/dashboard')}
+                    className="mt-6 px-6 py-3 bg-primary font-semibold text-night rounded-lg hover:bg-secondary transition-colors duration-300"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                >
+                    Go Back to Dashboard
+                </motion.button>
+            </div>
+        );
+    }
+
+    // RENDER MAIN CONTENT
     return (
         <AnimatePresence>
             <motion.div
@@ -115,14 +235,14 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
                 {/* Header */}
                 <div className="flex justify-between items-start">
                     <div>
-                        <h2 className="text-3xl font-bold text-night dark:text-dark-text font-heading">{grant?.title ?? "N/A"}</h2>
+                        <h2 className="text-3xl font-bold text-night dark:text-dark-text font-heading">{grant.title ?? "N/A"}</h2>
                         <div className="flex items-center gap-4 mt-3 text-sm text-night/80 dark:text-dark-text/80">
                             <div className="flex items-center gap-2">
                                 <BuildingOfficeIcon className="w-5 h-5 text-night/50 dark:text-dark-textMuted" />
-                                <span>{grant?.funder ?? "N/A"}</span>
+                                <span>{grant.agency ?? "N/A"}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="bg-primary/20 text-secondary dark:bg-primary/10 dark:text-dark-primary px-2 py-0.5 rounded-full text-xs font-semibold">{grant?.category}</span>
+                                <span className="bg-primary/20 text-secondary dark:bg-primary/10 dark:text-dark-primary px-2 py-0.5 rounded-full text-xs font-semibold">{grant.selectionProcess}</span>
                             </div>
                             {typeof matchPercentage === 'number' && (
                                 <div className="bg-primary text-night font-bold text-sm px-3 py-1 rounded-md">
@@ -132,18 +252,24 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button
+                        {/* <button
                             onClick={() => onToggleSave(grant)}
                             className={`transition-colors p-1 ${isSaved ? 'text-primary' : 'text-night/50 dark:text-dark-textMuted hover:text-primary'}`}
                             aria-label={isSaved ? "Remove this grant from your saved list" : "Save this grant for later"}
                         >
+                            <HeartIcon className="w-6 h-6" isFilled={isSaved} onClick={() => onToggleSave(grant)} />
+                        </button> */}
+                        <button
+                            onClick={() => onToggleSave(grant)}
+                            disabled={isToggling}
+                            className={`transition-colors p-1 ${isSaved ? "text-primary" : "text-night/50 dark:text-dark-textMuted hover:text-primary"
+                                }`}
+                            aria-label={isSaved ? "Remove this grant from favorites" : "Add to favorites"}
+                        >
                             <HeartIcon className="w-6 h-6" isFilled={isSaved} />
                         </button>
+
                         <motion.button
-                            variants={variants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
                             onClick={() => onClose ? onClose() : navigate(-1)}
                             className="text-night/50 dark:text-dark-textMuted hover:text-night dark:hover:text-dark-text transition-colors" aria-label="Close grant details">
                             <XIcon className="w-6 h-6" />
@@ -157,7 +283,7 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div className="text-center md:text-left">
                         <p className="text-sm text-night/60 dark:text-dark-textMuted mb-1">Deadline</p>
-                        <p className="font-semibold text-night dark:text-dark-text">{new Date(grant?.deadline).toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        <p className="font-semibold text-night dark:text-dark-text">{new Date(grant.closeDateTime).toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                         {daysRemaining >= 0 ? (
                             <p className={`text-sm mt-1 font-medium ${daysRemaining < 14 ? 'text-red-600 dark:text-red-400' : 'text-orange-500 dark:text-orange-400'}`}>Closing in {daysRemaining} day{daysRemaining !== 1 && 's'}</p>
                         ) : (
@@ -166,11 +292,17 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
                     </div>
                     <div className="text-center md:text-left">
                         <p className="text-sm text-night/60 dark:text-dark-textMuted mb-1">Amount</p>
-                        <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">{currencyFormatter?.format(grant?.amount)}</p>
+                        <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">
+                            {
+                                grant?.totalAmountAvailable && !isNaN(Number(grant.totalAmountAvailable.replace(/[^0-9.]/g, '')))
+                                    ? currencyFormatter.format(Number(grant.totalAmountAvailable.replace(/[^0-9.]/g, '')))
+                                    : "Not Specified"
+                            }
+                        </p>
                     </div>
                     <div className="text-center md:text-left">
-                        <p className="text-sm text-night/60 dark:text-dark-textMuted mb-1">Per Organization</p>
-                        <p className="font-semibold text-night dark:text-dark-text">One application</p>
+                        <p className="text-sm text-night/60 dark:text-dark-textMuted mb-1">Location</p>
+                        <p className="font-semibold text-night dark:text-dark-text">{grant.location}</p>
                     </div>
                     <div className="text-center md:text-left">
                         <button
@@ -215,7 +347,7 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
                     <motion.button
                         onClick={() => onApplyNow(grant)}
                         className="px-6 py-3 bg-primary font-semibold text-night rounded-lg hover:bg-secondary transition-colors duration-300"
-                        aria-label={`Apply now for ${grant?.title}`}
+                        aria-label={`Apply now for ${grant.title}`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
@@ -224,7 +356,7 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
                     <motion.button
                         onClick={handleQuickReview}
                         className="px-6 py-3 bg-night dark:bg-dark-border font-semibold text-white dark:text-dark-text rounded-lg hover:bg-gray-800 dark:hover:bg-dark-border/50 transition-colors duration-300 flex items-center gap-2 border border-mercury/50 dark:border-dark-border"
-                        aria-label={`Get a quick AI-powered review of ${grant?.title}`}
+                        aria-label={`Get a quick AI-powered review of ${grant.title}`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
@@ -234,6 +366,7 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
                 </div>
             </motion.div>
 
+            {/* AI Review Modal */}
             <AnimatePresence>
                 {isReviewModalOpen && (
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setIsReviewModalOpen(false)}>
@@ -256,7 +389,7 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
                             </div>
                             {isReviewLoading ? (
                                 <div className="flex justify-center items-center h-48">
-                                    <SpinnerIcon className="w-10 h-10 text-primary" />
+                                    <SpinnerIcon className="w-10 h-10 text-primary animate-spin" />
                                 </div>
                             ) : (
                                 <div className="mt-4 text-night/80 dark:text-dark-text/90 whitespace-pre-wrap font-sans text-sm leading-relaxed max-h-[60vh] overflow-y-auto">
@@ -268,6 +401,7 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
                 )}
             </AnimatePresence>
 
+            {/* Reminder Modal */}
             <AnimatePresence>
                 {isReminderModalOpen && <ReminderModal modalRef={reminderModalRef} grant={grant} existingReminder={currentGrantData?.reminderDate} onClose={() => setIsReminderModalOpen(false)} onSetReminder={onSetReminder} />}
             </AnimatePresence>
@@ -277,8 +411,3 @@ const GrantDetail = ({ grant, myGrants, matchPercentage, onApplyNow, onClose, sa
 };
 
 export default GrantDetail;
-
-
-
-
-

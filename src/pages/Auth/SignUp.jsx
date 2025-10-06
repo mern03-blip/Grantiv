@@ -9,49 +9,85 @@ import {
 import { User, Mail } from "../../assets/image";
 import { FiLock } from "react-icons/fi";
 import "./signup.css"
-import { userSignUp } from "../../api/auth/auth";
+import { userSignUp } from "../../api/endpoints/auth";
+import { useMutation } from "@tanstack/react-query";
 
 const SignUp = () => {
 
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const onFinish = async (values) => {
-    try {
-      setLoading(true);
+  // const onFinish = async (values) => {
+  //   try {
+  //     setLoading(true);
 
-      // Extract only email and password
-      const { email, password } = values;
-      console.log(email, password);
+  //     // Extract only email and password
+  //     const { email, password } = values;
+  //     console.log(email, password);
 
 
+  //     const response = await userSignUp({ email, password });
+
+  //     if (response?.token) {
+  //       message.success(response.message || "Signup successful! Please verify your email.");
+
+  //       localStorage.setItem("email", email);
+
+  //       navigate("/auth");
+  //     } else {
+  //       message.error(response.message || "Signup failed. Please try again.");
+  //     }
+  //   } catch (error) {
+  //     setLoading(false);
+
+  //     const errorMessage =
+  //       error.response?.data?.message ||
+  //       error.message ||
+  //       "An unknown error occurred during signup.";
+
+  //     if (errorMessage.toLowerCase().includes("email already exists")) {
+  //       message.error("An account with this email already exists. Please log in.");
+  //     } else {
+  //       message.error(errorMessage);
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // ✅ TanStack Mutation Hook
+
+  const { mutate: handleSignUp, isPending: loading } = useMutation({
+    mutationFn: async ({ email, password }) => {
       const response = await userSignUp({ email, password });
-
-      if (response?.success) {
+      return response;
+    },
+    onSuccess: (response, variables) => {
+      if (response?.token) {
         message.success(response.message || "Signup successful! Please verify your email.");
-
-        localStorage.setItem("email", email);
-
+        localStorage.setItem("email", variables.email);
         navigate("/auth");
       } else {
         message.error(response.message || "Signup failed. Please try again.");
       }
-    } catch (error) {
-      setLoading(false);
-
+    },
+    onError: (error) => {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "An unknown error occurred during signup.";
-
       if (errorMessage.toLowerCase().includes("email already exists")) {
         message.error("An account with this email already exists. Please log in.");
       } else {
         message.error(errorMessage);
       }
-    }
-  };
+    },
+  });
 
+  // ✅ Form Submit Handler
+  const onFinish = (values) => {
+    const { email, password } = values;
+    handleSignUp({ email, password });
+  };
 
   return (
     <div className="w-full h-[100%] flex justify-center font-custom">

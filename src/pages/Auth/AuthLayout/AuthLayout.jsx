@@ -27,8 +27,8 @@
 //                 {/* Right Section */}
 
 //                 <div className="hidden md:flex flex-1 bg-bgColor  text-center   items-center justify-center h-auto w-auto">
-//                     {/* <img src={Logo} alt="Login Image" className=" object-fit h-[auto] w-[60%]" /> */}
-//                     <GrantivLogo className="h-[auto] w-[90%] mx-auto" />
+//                     <img src={Logo} alt="Login Image" className=" object-fit h-[auto] w-[60%]" />
+//                     {/* <GrantivLogo className="h-[auto] w-[90%] mx-auto" /> */}
 //                 </div>
 //             </div>
 
@@ -69,7 +69,8 @@ const AuthLayout = () => {
                 </AnimatePresence>
 
                 <div className="hidden md:flex flex-1 bg-bgColor text-center items-center justify-center h-auto w-auto">
-                    <GrantivLogo className="h-[auto] w-[90%] mx-auto" />
+                    {/* <GrantivLogo className="h-[auto] w-[90%] mx-auto" /> */}
+                    <img src={Logo} alt="Login Image" className=" object-fit h-[auto] w-[50%]" />
                 </div>
             </div>
         </>

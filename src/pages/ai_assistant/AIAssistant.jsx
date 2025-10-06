@@ -4,6 +4,8 @@ import {
     SparklesIcon, PaperAirplaneIcon, XIcon, ChevronLeftIcon, PaperclipIcon,
 } from '../../components/icons/Icons';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { handleGetFavoriteGrants } from '../../api/endpoints/grants';
 
 // --- MOCK DATA AND MOCKED FUNCTIONS ---
 // These replace the props and external service calls
@@ -83,11 +85,37 @@ const AIAssistant = () => {
 
     const navigate = useNavigate();
     const myGrants = mockGrants;
-    const savedGrants = mockGrants;
+    // const savedGrants = mockGrants;
     const businessProfile = mockBusinessProfile;
     const currentGrantKey = selectedGrant?.id || 'general';
     const messages = chatHistories[currentGrantKey] || [];
     const showIntro = messages.length <= 1;
+
+    // const { data: savedGrants = [], isLoading: isSavedLoading, refetch: refetchSavedGrants } = useQuery(
+    //     ['favoriteGrants'],
+    //     handleGetFavoriteGrants,
+    //     {
+    //         staleTime: 1000 * 60, // 1 min cache
+    //         retry: 1,
+    //     }
+    // );
+
+
+    const {
+        data: { data: savedGrants = [] } = {}, // Double destructuring happens here
+        isLoading: isSavedLoading,
+        refetch: refetchSavedGrants
+    } = useQuery({
+        queryKey: ['favoriteGrants'],
+        queryFn: handleGetFavoriteGrants,
+        staleTime: 1000 * 60, // 1 min
+        retry: 1,
+    });
+
+
+    console.log("Saved Grants in AI Assistant:", savedGrants);
+
+
 
     const onUpdateChatHistory = (key, action) => {
         setChatHistories(prev => {
@@ -233,18 +261,22 @@ const AIAssistant = () => {
     };
 
     const GrantSelectionButton = ({ isSelected, onClick, title, subtext }) => (
-        <motion.button
-            onClick={onClick}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`w-full p-3 border-l-4 text-left transition-colors duration-200 ${isSelected
-                ? 'bg-primary/80 dark:bg-primary/20 border-primary text-night dark:text-dark-primary'
-                : 'bg-transparent border-transparent text-night/70 dark:text-dark-textMuted hover:bg-mercury/50 dark:hover:bg-dark-border/20 hover:text-night dark:hover:text-dark-text'
-                }`}
-        >
-            <h4 className="font-bold text-sm font-heading truncate">{title}</h4>
-            <p className="text-xs opacity-80 mt-0.5 truncate">{subtext}</p>
-        </motion.button>
+        <>
+            {/* {console.log( title, subtext)} */}
+            <motion.button
+                onClick={onClick}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full p-3 border-l-4 text-left transition-colors duration-200 ${isSelected
+                    ? 'bg-primary/80 dark:bg-primary/20 border-primary text-night dark:text-dark-primary'
+                    : 'bg-transparent border-transparent text-night/70 dark:text-dark-textMuted hover:bg-mercury/50 dark:hover:bg-dark-border/20 hover:text-night dark:hover:text-dark-text'
+                    }`}
+            >
+                <h4 className="font-bold text-sm font-heading truncate">{title}</h4>
+                <p className="text-xs opacity-80 mt-0.5 truncate">{subtext}</p>
+            </motion.button>
+        </>
+
     );
 
     const lightPattern = `url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgODAwIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNFMkRGREUiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTcuMiA3LjJsNzE3LjIgNzE3LjIiIG9wYWNpdHk9Ii4xNSIvPjxwYXRoIGQ9Ik03MjQuNCA3LjJMNy4yIDcyNC40IiBvcGFjaXR5PSIuMTUiLz48cGF0aCBkPSJNNTAzLjIgNzI0LjRMMjIzLjIgNDQ0LjQiIG9wYWNpdHk9Ii4xNSIvPjxwYXRoIGQ9Ik0yOTUuNiA3LjJMNTc1LjYgMjg3LjIiIG9wYWNpdHk9Ii4xNSIvPjxwYXRoIGQ9Ik03OTIuOCAzOTIuOGMwLTIxNy0xNzUuMi0zOTIuOC0zOTIuOC0zOTIuOCIgb3BhY2l0eT0iLjIiLz48cGF0aCBkPSJNNy4yIDM5Mi44YzAtMjE3IDE3NS4yLTM5Mi44IDM5Mi44LTM5Mi44IiBvcGFjaXR5PSIuMiIvPjwvZz48L3N2Zz4=')`;
@@ -346,7 +378,7 @@ const AIAssistant = () => {
                             ))}
                         </>
                     )}
-                    {savedGrants.length > 0 && (
+                    {/* {savedGrants.length > 0 && (
                         <>
                             <p className="px-3 pt-4 pb-2 text-xs font-semibold uppercase tracking-wider transition-colors text-night/50 dark:text-dark-textMuted/70">Saved Opportunities</p>
                             {savedGrants.map(grant => (
@@ -360,7 +392,27 @@ const AIAssistant = () => {
                                 />
                             ))}
                         </>
+                    )} */}
+                    {isSavedLoading ? (
+                        <p className="px-3 py-2 text-xs text-center text-night/50 dark:text-dark-textMuted/70">Loading saved opportunities...</p>
+                    ) : savedGrants.length > 0 ? (
+                        <>
+                            <p className="px-3 pt-4 pb-2 text-xs font-semibold uppercase tracking-wider transition-colors text-night/50 dark:text-dark-textMuted/70">Saved Opportunities</p>
+                            {savedGrants.map(grant => (
+                                <GrantSelectionButton
+                                    key={grant.id || grant._id}
+                                    grant={grant}
+                                    isSelected={selectedGrant?.id === (grant.id || grant._id)}
+                                    onClick={() => setSelectedGrant(grant)}
+                                    title={grant.title || 'N/A'}
+                                    subtext={grant.agency}
+                                />
+                            ))}
+                        </>
+                    ) : (
+                        <p className="px-3 py-2 text-xs text-center text-night/50 dark:text-dark-textMuted/70">No saved opportunities yet.</p>
                     )}
+
                 </div>
             </motion.aside>
 

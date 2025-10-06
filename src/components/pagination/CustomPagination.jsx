@@ -38,7 +38,7 @@ const CustomPagination = ({ currentPage, totalPages = 4, onPageChange }) => {
             </Button>
 
             {/* Page Numbers */}
-            <Segmented
+            {/* <Segmented
                 className="rounded-[1.2rem] bg-white border border-mainColor py-1 px-1 flex gap-5 custom-pagination"
                 options={[...Array(pageCount).keys()].map((page) => ({
                     label: <span>{page + 1}</span>,
@@ -46,14 +46,33 @@ const CustomPagination = ({ currentPage, totalPages = 4, onPageChange }) => {
                 }))}
                 value={safeCurrentPage}
                 onChange={onPageChange}
-            />
+            /> */}
+            {/* <Segmented
+                className="rounded-[1.2rem] bg-white border border-mainColor py-1 px-1 flex gap-5 custom-pagination"
+                options={[
+                    // { label: <span>1</span>, value: 1 }, // first page
 
+                    // dots (conditionally show agar pages zyada hain)
+                    ...(safeCurrentPage > 3 ? [{ label: <span>...</span>, value: "dots-start", disabled: true }] : []),
+
+                    // current page
+                    { label: <span>{safeCurrentPage}</span>, value: safeCurrentPage },
+
+                    // dots before last page
+                    ...(safeCurrentPage < pageCount - 2 ? [{ label: <span>...</span>, value: "dots-end", disabled: true }] : []),
+
+                    // last page
+                    { label: <span>{pageCount}</span>, value: pageCount },
+                ]}
+                value={safeCurrentPage}
+                onChange={onPageChange}
+            /> */}
 
             <Button
                 type="primary"
                 className={`${currentPage === safeTotalPages
-                        ? "bg-gray-400 hover:!bg-gray-400"
-                        : "bg-mainColor hover:!bg-mainColor"
+                    ? "bg-gray-400 hover:!bg-gray-400"
+                    : "bg-mainColor hover:!bg-mainColor"
                     } text-white font-custom border-none text-sm py-5 px-7 rounded-[1.2rem]`}
                 onClick={handleNext}
                 disabled={currentPage === totalPages}

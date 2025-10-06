@@ -31,15 +31,49 @@ const VerifyOtp = () => {
     }
   };
 
+  // const onFinish = () => {
+  //   setLoading(true);
+  //   if (otp.some((d) => d === "")) {
+  //     message.error("Please enter all 6 digits of the OTP");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+
+
+  //   const fullOtp = otp.join("");
+  //   const data = {
+  //     email: email,
+  //     otp: fullOtp,
+  //   };
+
+  //   verifyOtp(data, {
+  //     onSuccess: (response) => {
+  //       message.success(response?.data?.message || "OTP verified successfully");
+  //       navigate("/reset-password");
+  //     },
+  //     onError: (error) => {
+  //       message.error(error?.response?.data?.message || "Error verifying OTP");
+  //     },
+  //     onSettled: () => setLoading(false),
+  //   });
+  // };
+
+
   const onFinish = () => {
     setLoading(true);
+
     if (otp.some((d) => d === "")) {
       message.error("Please enter all 6 digits of the OTP");
       setLoading(false);
       return;
     }
 
-    const fullOtp = otp.join("");
+    const fullOtp = otp.join(""); // ✅ OTP from input field
+
+    // 👇 Save OTP to localStorage
+    localStorage.setItem("otp", fullOtp);
+
     const data = {
       email: email,
       otp: fullOtp,
