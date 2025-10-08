@@ -44,34 +44,6 @@ const Login = () => {
     handleLogin({ email, password });
   };
 
-  // const onFinish = async (values) => {
-  //   const { email, password } = values;
-  //   setLoading(true);
-
-  //   try {
-  //     // Call your backend login API
-  //     const response = await userLogin({ email, password });
-
-  //     if (response?.token) {
-  //       // ✅ Save token in localStorage
-  //       localStorage.setItem("token", response.token);
-  //       localStorage.setItem("role", response.role || "user");
-
-  //       message.success(response.message || "Login successful");
-  //       navigate("/"); // Redirect to homepage or dashboard
-  //     } else {
-  //       message.error(response.message || "Invalid email or password");
-  //     }
-  //   } catch (error) {
-  //     // Handle error from backend or network
-  //     const errorMessage =
-  //       error.response?.data?.message || "Login failed. Please try again.";
-  //     message.error(errorMessage);
-  //     console.error("Login Error:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const preventCopyPaste = (e) => {
     e.preventDefault();
@@ -188,10 +160,6 @@ const Login = () => {
             className="w-[100%] h-[60px] flex justify-center rounded-custom !bg-mainColor text-whiteColor font-b7 text-h2 border-none  !font-custom"
           >
             Login
-          </Button>
-
-          <Button onClick={() => message.info("This is a toast message!")}>
-            Toast
           </Button>
 
           {/* Signup Link */}

@@ -16,7 +16,7 @@ export const getGrants = async (page = 1, limit = 10, search = '') => {
   return response.data;
 };
 
-// Single Grant detail modal
+// Single Grant for detail modal
 export const getGrantDetail = async (id) => {
   console.log("getGrant called with id:", id);
 
@@ -41,6 +41,8 @@ export const handleFavoriteGrants = async (grantId) => {
   console.log("Favorite grants:", response.data);
   return response.data;
 };
+
+
 
 
 //Get Favorite Grants

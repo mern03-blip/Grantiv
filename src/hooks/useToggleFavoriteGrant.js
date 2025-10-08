@@ -9,11 +9,12 @@ export const useToggleFavoriteGrant = () => {
         mutationFn: (grantId) => handleFavoriteGrants(grantId),
 
         onSuccess: (data, grantId) => {
-            message.success("Favorites updated!");
+            // message.success("Successfully added to your Favorites collection!");
 
             // ✅ Optional: update local cache instantly
             queryClient.invalidateQueries(["savedGrants"]);
             queryClient.invalidateQueries(["grant", grantId]);
+            // refetchSavedGrants();
         },
 
         onError: (error) => {
@@ -22,3 +23,10 @@ export const useToggleFavoriteGrant = () => {
         },
     });
 };
+
+
+
+
+
+
+

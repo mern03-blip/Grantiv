@@ -233,6 +233,7 @@ export const Sidebar = ({
           handleOk={() => {
             // localStorage.clear(); // commented out as it was in original
             localStorage.removeItem('token');
+            localStorage.removeItem('userId');
             setShowLogoutModal(false);
             navigate('auth/login');
           }}

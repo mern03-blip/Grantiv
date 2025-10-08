@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Button, Form, Input, Typography, message } from "antd";
 import { FiMail, FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { forgotPassword } from "../../api/endpoints/auth";
 import { useMutation } from "@tanstack/react-query";
 
@@ -32,33 +31,6 @@ const ForgetPassword = () => {
   const onFinish = ({ email }) => {
     handleForgotPassword(email);
   };
-
-  // const onFinish = async ({ email }) => {
-  //   try {
-  //     setLoading(true);
-
-  //     // Save email in localStorage for verify-otp screen
-  //     localStorage.setItem("email", email);
-
-  //     // 🔥 Call your forgot-password API
-  //     const response = await forgotPassword({ email });
-
-  //     const userId = response?.userId;
-  //     if (userId) {
-  //       localStorage.setItem("userId", userId);
-  //     }
-
-  //     message.success(response?.message || "OTP sent successfully");
-  //     navigate("/auth/verify-otp");
-  //   } catch (error) {
-  //     console.error("API Error:", error);
-  //     const errorMessage =
-  //       error?.response?.data?.message || "An error occurred while sending OTP";
-  //     message.error(errorMessage);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   return (
     <div className="relative flex-1 flex items-center justify-center h-screen w-full">

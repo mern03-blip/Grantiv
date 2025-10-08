@@ -1,13 +1,77 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState, useRef } from "react";
 import { Button, Form, Typography, message, Input } from "antd";
 import { useNavigate } from "react-router-dom";
 import { FiArrowLeft } from "react-icons/fi";
+import { useMutation } from "@tanstack/react-query";
+import { forgotPassword } from "../../api/endpoints/auth";
 
 const { Title, Text } = Typography;
 
+// --- DEDICATED TIMER COMPONENT ---
+// This component now holds the 'timer' state and its 'useEffect' hook.
+// It will be the ONLY thing that re-renders every second, solving the performance issue.
+const TimerAndResend = ({ initialTime = 59, email, onResendSuccess }) => {
+  const [timer, setTimer] = useState(initialTime);
+  // 1. Timer logic is isolated here
+  useEffect(() => {
+    if (timer === 0) return; // Stop at zero
+
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval); // Cleanup
+  }, [timer]);
+
+  // 🔁 Resend OTP Mutation
+  const resendMutation = useMutation({
+    mutationFn: forgotPassword,
+    onSuccess: (response) => {
+      if (response?.success) {
+        message.success("OTP resent successfully");
+
+      } else {
+        message.success("OTP resent successfully");
+        setTimer(initialTime);
+        onResendSuccess?.();
+      }
+    },
+    onError: (error) => {
+      message.error(error?.response?.data?.message || "Error resending OTP");
+    },
+  });
+
+  const handleResendOtp = () => {
+    resendMutation.mutate({ email });
+  };
+
+  return (
+    <div className="flex w-[90%] ml-8 font-b5 text-blackColor gap-20 items-center text-text1 mb-6">
+      <span>
+        Didn’t you receive the OTP?{" "}
+        <button
+          type="button"
+          onClick={handleResendOtp}
+          disabled={timer > 0}
+          className={`font-b7 ${timer > 0
+            ? "text-gray-400 cursor-not-allowed"
+            : "text-mainColor hover:underline"
+            }`}
+        >
+          Resend OTP
+        </button>
+      </span>
+      {/* Timer Display */}
+      <span className="text-blackColor font-b5">
+        00:{timer.toString().padStart(2, "0")}
+      </span>
+    </div>
+  );
+};
+
+
 const VerifyOtp = () => {
-  // const { mutate: verifyOtp } = useVerifyOtp();
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef([]);
@@ -30,35 +94,6 @@ const VerifyOtp = () => {
       inputRefs.current[index - 1].focus();
     }
   };
-
-  // const onFinish = () => {
-  //   setLoading(true);
-  //   if (otp.some((d) => d === "")) {
-  //     message.error("Please enter all 6 digits of the OTP");
-  //     setLoading(false);
-  //     return;
-  //   }
-
-
-
-  //   const fullOtp = otp.join("");
-  //   const data = {
-  //     email: email,
-  //     otp: fullOtp,
-  //   };
-
-  //   verifyOtp(data, {
-  //     onSuccess: (response) => {
-  //       message.success(response?.data?.message || "OTP verified successfully");
-  //       navigate("/reset-password");
-  //     },
-  //     onError: (error) => {
-  //       message.error(error?.response?.data?.message || "Error verifying OTP");
-  //     },
-  //     onSettled: () => setLoading(false),
-  //   });
-  // };
-
 
   const onFinish = () => {
     setLoading(true);
@@ -140,7 +175,7 @@ const VerifyOtp = () => {
             </Form.Item>
 
             {/* Resend + Timer */}
-            <div className="flex w-[98%]  font-b5 text-blackColor gap-20 justify-between !text-[16px] mb-6"
+            {/* <div className="flex w-[98%]  font-b5 text-blackColor gap-20 justify-between !text-[16px] mb-6"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               <span className="text-blackColor font-b7">
@@ -153,7 +188,10 @@ const VerifyOtp = () => {
                 </button>
               </span>
               <span className="text-blackColor font-b6">00:59</span>
-            </div>
+            </div> */}
+
+            {/* Resend + Timer (Now the isolated component) */}
+            <TimerAndResend initialTime={59} email={email} />
 
             {/* Verify Button */}
             <Button

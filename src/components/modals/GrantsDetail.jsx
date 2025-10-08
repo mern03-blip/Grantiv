@@ -9,9 +9,10 @@ import {
 import useFocusTrap from '../../hooks/useFocusTrap';
 import useKeydown from '../../hooks/useKeydown';
 import { ReminderModal } from './ReminderModal';
-import { getGrantDetail } from '../../api/endpoints/grants'; // The grant fetching function
+import { getGrantDetail, handleGetFavoriteGrants } from '../../api/endpoints/grants';
 import Loader from '../loading/Loader';
 import { useToggleFavoriteGrant } from "../../hooks/useToggleFavoriteGrant";
+import { message } from 'antd';
 
 
 // Utility function for TanStack Query
@@ -21,33 +22,12 @@ const fetchGrant = async (id) => {
     return response.data; // Assuming getGrant returns { data: grantObject }
 };
 
-const GrantDetail = ({ myGrants, matchPercentage, onApplyNow, onClose, savedGrants, onSetReminder }) => {
-    // 1. GET ID FROM URL
-    const { id } = useParams();
-    // console.log("grantId from URL:", id); // Use 'id' now
-
-    // 2. TANSTACK QUERY FOR FETCHING GRANT DATA
-    const {
-        data: grant,
-        isLoading,
-        error
-    } = useQuery({
-        // Query key: ['grant', id] ensures refetching when the URL ID changes
-        queryKey: ['grant', id],
-        // The query function is an anonymous arrow function that calls our fetcher
-        queryFn: () => fetchGrant(id),
-        // Only run the query if 'id' is present
-        enabled: !!id,
-        staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
-    });
-
-    // Existing states and refs
+const GrantDetail = ({ myGrants, matchPercentage, onApplyNow, onClose, onSetReminder }) => {
     const [activeTab, setActiveTab] = useState('Overview');
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
     const [isReviewLoading, setIsReviewLoading] = useState(false);
     const [reviewContent, setReviewContent] = useState(null);
-
     const reviewModalRef = useRef(null);
     const reminderModalRef = useRef(null);
     const returnFocusRef = useRef(null);
@@ -57,14 +37,74 @@ const GrantDetail = ({ myGrants, matchPercentage, onApplyNow, onClose, savedGran
     useFocusTrap(isReminderModalOpen ? reminderModalRef : { current: null });
     useKeydown('Escape', () => setIsReminderModalOpen(false));
 
-    // console.log("Fetched grant data:", grant); // Log the data returned by TanStack Query
+    //#########Get detail of current open single grant detail modal############
 
-    // **********************************************
-    // REMAINDER OF YOUR COMPONENT LOGIC (UNCHANGED)
-    // **********************************************
+    // 1. GET ID FROM URL
+    const { id } = useParams();
+    // console.log("grantId from URL:", id); 
+
+    // 2. TANSTACK QUERY FOR FETCHING GRANT DATA
+    const {
+        data: grant,
+        isLoading,
+        error
+    } = useQuery({
+        queryKey: ['grant', id],
+        queryFn: () => fetchGrant(id),
+        enabled: !!id,
+        staleTime: 5 * 60 * 1000,
+    });
+
+    // console.log("Fetched grant data:", grant); 
 
 
 
+    // ##########Favorite (Saved) Grant Logic###############
+    const {
+        data: { data: savedGrants = [] } = {},
+    } = useQuery({
+        queryKey: ['favoriteGrants'],
+        queryFn: handleGetFavoriteGrants,
+        staleTime: 1000 * 60, // 1 min
+        retry: 1,
+    });
+
+    console.log("Saved Grants in Grant Detail edtrgyhuytrewqer:", savedGrants);
+
+    const { mutate: toggleFavorite, isPending: isToggling } = useToggleFavoriteGrant();
+
+    // 1. Initialize isSaved state to false/null
+    const [isSaved, setIsSaved] = useState(false);
+
+    // 2. Add a useEffect to check the favorite status when data loads
+    useEffect(() => {
+        // Only run if both grant data and savedGrants data are available
+        if (grant?._id && savedGrants) {
+            const isFavorite = savedGrants.some((g) => g._id === grant._id);
+            setIsSaved(isFavorite);
+        }
+    }, [grant, savedGrants]); // Dependency array ensures this runs when grant or savedGrants changes
+
+
+    // The rest of the onToggleSave function remains correct for optimistic updates:
+    const onToggleSave = (grant) => {
+        if (!grant?._id) return;
+
+        // 🔄 Optimistic update
+        setIsSaved((prev) => !prev); // The previous value (which is what we set in the useEffect) is used
+
+        toggleFavorite(grant._id, {
+            onSuccess: () => {
+                message.success(!isSaved ? "Added to your Favorites collection!" : "Removed from your Favorites collection.");
+            },
+            onError: () => {
+                // Revert UI if request fails
+                setIsSaved((prev) => !prev);
+            },
+        });
+    };
+
+    //Other Logic
     useEffect(() => {
         if (isReviewModalOpen || isReminderModalOpen) {
             returnFocusRef.current = document.activeElement;
@@ -161,32 +201,6 @@ const GrantDetail = ({ myGrants, matchPercentage, onApplyNow, onClose, savedGran
         }
     };
 
-    // const isSaved = savedGrants?.some(g => g._id === grant?._id);
-
-    const { mutate: toggleFavorite, isPending: isToggling } = useToggleFavoriteGrant();
-    const [isSaved, setIsSaved] = useState(
-        savedGrants?.some((g) => g._id === grant?._id)
-    );
-
-    const onToggleSave = (grant) => {
-        if (!grant?._id) return;
-
-        // 🔄 Optimistic update
-        setIsSaved((prev) => !prev);
-
-        toggleFavorite(grant._id, {
-
-            onSuccess: () => {
-                refetchSavedGrants(); // Refresh saved grants after toggle
-            },
-            onError: () => {
-                // Revert UI if request fails
-                setIsSaved((prev) => !prev);
-            },
-        });
-    };
-
-
     const variants = {
         hidden: { opacity: 0, y: 50, scale: 0.95 },
         visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: 'easeOut' } },
@@ -196,10 +210,6 @@ const GrantDetail = ({ myGrants, matchPercentage, onApplyNow, onClose, savedGran
     // RENDER LOADING STATE (Managed by TanStack Query)
     if (isLoading) {
         return (
-            // <div className="flex justify-center items-center h-64">
-            //     <SpinnerIcon className="w-10 h-10 text-primary animate-spin" />
-            //     <p className="ml-3 text-night dark:text-dark-text">Loading Grant Details...</p>
-            // </div>
             <Loader />
         );
     }
@@ -262,9 +272,11 @@ const GrantDetail = ({ myGrants, matchPercentage, onApplyNow, onClose, savedGran
                         <button
                             onClick={() => onToggleSave(grant)}
                             disabled={isToggling}
-                            className={`transition-colors p-1 ${isSaved ? "text-primary" : "text-night/50 dark:text-dark-textMuted hover:text-primary"
+                            className={`transition-colors p-1 ${isSaved
+                                ? "text-primary"
+                                : "text-night/50 dark:text-dark-textMuted hover:text-primary"
                                 }`}
-                            aria-label={isSaved ? "Remove this grant from favorites" : "Add to favorites"}
+                            aria-label={isSaved ? "Remove from favorites" : "Add to favorites"}
                         >
                             <HeartIcon className="w-6 h-6" isFilled={isSaved} />
                         </button>
@@ -322,9 +334,10 @@ const GrantDetail = ({ myGrants, matchPercentage, onApplyNow, onClose, savedGran
                 <div>
                     <div className="border-b border-mercury/30 dark:border-dark-border/50">
                         <nav className="-mb-px flex space-x-6" aria-label="Tabs">
-                            {tabs.map(tab => (
+                            {tabs.map((tab) => (
                                 <button
                                     key={tab}
+                                    // key={`${tab}-${index}`} 
                                     onClick={() => setActiveTab(tab)}
                                     className={`whitespace-nowrap pb-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab
                                         ? 'border-primary text-secondary dark:text-dark-secondary'
@@ -367,44 +380,44 @@ const GrantDetail = ({ myGrants, matchPercentage, onApplyNow, onClose, savedGran
             </motion.div>
 
             {/* AI Review Modal */}
-            <AnimatePresence>
-                {isReviewModalOpen && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setIsReviewModalOpen(false)}>
-                        <motion.div
-                            ref={reviewModalRef}
-                            className="bg-white dark:bg-dark-surface rounded-lg shadow-xl p-6 md:p-8 max-w-2xl w-full border border-mercury dark:border-dark-border"
-                            onClick={(e) => e.stopPropagation()}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                        >
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-xl font-bold font-heading flex items-center gap-2 text-night dark:text-dark-text">
-                                    <SparklesIcon className="w-6 h-6" />
-                                    AI Grant Review
-                                </h3>
-                                <button onClick={() => setIsReviewModalOpen(false)} className="text-night/50 dark:text-dark-textMuted hover:text-night dark:hover:text-dark-text" aria-label="Close AI review modal">
-                                    <XIcon className="w-6 h-6" />
-                                </button>
+            {/* <AnimatePresence> */}
+            {isReviewModalOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setIsReviewModalOpen(false)}>
+                    <motion.div
+                        ref={reviewModalRef}
+                        className="bg-white dark:bg-dark-surface rounded-lg shadow-xl p-6 md:p-8 max-w-2xl w-full border border-mercury dark:border-dark-border"
+                        onClick={(e) => e.stopPropagation()}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                    >
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-bold font-heading flex items-center gap-2 text-night dark:text-dark-text">
+                                <SparklesIcon className="w-6 h-6" />
+                                AI Grant Review
+                            </h3>
+                            <button onClick={() => setIsReviewModalOpen(false)} className="text-night/50 dark:text-dark-textMuted hover:text-night dark:hover:text-dark-text" aria-label="Close AI review modal">
+                                <XIcon className="w-6 h-6" />
+                            </button>
+                        </div>
+                        {isReviewLoading ? (
+                            <div className="flex justify-center items-center h-48">
+                                <SpinnerIcon className="w-10 h-10 text-primary animate-spin" />
                             </div>
-                            {isReviewLoading ? (
-                                <div className="flex justify-center items-center h-48">
-                                    <SpinnerIcon className="w-10 h-10 text-primary animate-spin" />
-                                </div>
-                            ) : (
-                                <div className="mt-4 text-night/80 dark:text-dark-text/90 whitespace-pre-wrap font-sans text-sm leading-relaxed max-h-[60vh] overflow-y-auto">
-                                    {reviewContent}
-                                </div>
-                            )}
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                        ) : (
+                            <div className="mt-4 text-night/80 dark:text-dark-text/90 whitespace-pre-wrap font-sans text-sm leading-relaxed max-h-[60vh] overflow-y-auto">
+                                {reviewContent}
+                            </div>
+                        )}
+                    </motion.div>
+                </div>
+            )}
+            {/* </AnimatePresence> */}
 
             {/* Reminder Modal */}
-            <AnimatePresence>
-                {isReminderModalOpen && <ReminderModal modalRef={reminderModalRef} grant={grant} existingReminder={currentGrantData?.reminderDate} onClose={() => setIsReminderModalOpen(false)} onSetReminder={onSetReminder} />}
-            </AnimatePresence>
+            {/* <AnimatePresence> */}
+            {isReminderModalOpen && <ReminderModal modalRef={reminderModalRef} grant={grant} existingReminder={currentGrantData?.reminderDate} onClose={() => setIsReminderModalOpen(false)} onSetReminder={onSetReminder} />}
+            {/* </AnimatePresence> */}
 
         </AnimatePresence>
     );

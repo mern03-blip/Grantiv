@@ -14,33 +14,6 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // const onFinish = async (values) => {
-  //   console.log("Form values:", values);
-  //   try {
-  //     setLoading(true);
-
-  //     // const email = localStorage.getItem("email") || "admin@gmail.com";
-  //     const resetToken = localStorage.getItem("otp");
-
-  //     const payload = {
-  //       // email,
-  //       resetToken,
-  //       newPassword: values.newPassword, // ✅ use values.newPassword
-  //     };
-
-  //     const res = await resetPassword(payload); // ✅ now defined
-
-  //     // Success case
-  //     setLoading(false);
-  //     setIsModalVisible(true); // show popup
-  //     console.log("Password reset success", res);
-  //   } catch (error) {
-  //     // Error case
-  //     setLoading(false);
-  //     console.error("Password reset failed", error);
-  //   }
-  // };
-
   // ✅ React Query Mutation for Reset Password
 
   const { mutate: handleResetPassword, isPending: loading } = useMutation({

@@ -91,20 +91,10 @@ const AIAssistant = () => {
     const messages = chatHistories[currentGrantKey] || [];
     const showIntro = messages.length <= 1;
 
-    // const { data: savedGrants = [], isLoading: isSavedLoading, refetch: refetchSavedGrants } = useQuery(
-    //     ['favoriteGrants'],
-    //     handleGetFavoriteGrants,
-    //     {
-    //         staleTime: 1000 * 60, // 1 min cache
-    //         retry: 1,
-    //     }
-    // );
-
-
     const {
-        data: { data: savedGrants = [] } = {}, // Double destructuring happens here
+        data: { data: savedGrants = [] } = {},
         isLoading: isSavedLoading,
-        refetch: refetchSavedGrants
+        // refetch: refetchSavedGrants
     } = useQuery({
         queryKey: ['favoriteGrants'],
         queryFn: handleGetFavoriteGrants,

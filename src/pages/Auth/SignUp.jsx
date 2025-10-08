@@ -16,44 +16,6 @@ const SignUp = () => {
 
   const navigate = useNavigate();
 
-  // const onFinish = async (values) => {
-  //   try {
-  //     setLoading(true);
-
-  //     // Extract only email and password
-  //     const { email, password } = values;
-  //     console.log(email, password);
-
-
-  //     const response = await userSignUp({ email, password });
-
-  //     if (response?.token) {
-  //       message.success(response.message || "Signup successful! Please verify your email.");
-
-  //       localStorage.setItem("email", email);
-
-  //       navigate("/auth");
-  //     } else {
-  //       message.error(response.message || "Signup failed. Please try again.");
-  //     }
-  //   } catch (error) {
-  //     setLoading(false);
-
-  //     const errorMessage =
-  //       error.response?.data?.message ||
-  //       error.message ||
-  //       "An unknown error occurred during signup.";
-
-  //     if (errorMessage.toLowerCase().includes("email already exists")) {
-  //       message.error("An account with this email already exists. Please log in.");
-  //     } else {
-  //       message.error(errorMessage);
-  //     }
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   // ✅ TanStack Mutation Hook
 
   const { mutate: handleSignUp, isPending: loading } = useMutation({

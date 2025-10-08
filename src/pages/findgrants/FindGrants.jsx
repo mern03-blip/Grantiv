@@ -6,6 +6,7 @@ import { SpinnerIcon, BookmarkIcon, XIcon } from '../../components/icons/Icons';
 import { motion } from 'framer-motion';
 import { getGrants } from '../../api/endpoints/grants';
 import CustomPagination from '../../components/pagination/CustomPagination';
+import Loader from '../../components/loading/Loader';
 
 // Use the API's default/desired page size
 const GRANTS_PER_PAGE = 10;
@@ -142,9 +143,7 @@ const FindGrants = () => {
     // Conditional render for loading/error
     if (isLoading && !isFetching) { // Only show full loading on initial fetch
         return (
-            <div className="flex justify-center items-center h-64">
-                <SpinnerIcon className="w-10 h-10 animate-spin text-primary" />
-            </div>
+            <Loader />
         );
     }
 
