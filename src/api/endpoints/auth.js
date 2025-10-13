@@ -19,7 +19,7 @@ export const userLogin = async (formData) => {
     ...formData,
   });
 
-   console.log("Login", response.data);
+  //  console.log("Login", response.data);
   return response.data;
 };
 

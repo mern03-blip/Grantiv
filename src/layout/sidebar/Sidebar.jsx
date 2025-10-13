@@ -57,8 +57,8 @@ export const Sidebar = ({
         <button
           onClick={() => setShowLogoutModal(true)} // Set state to show modal
           className={`flex items-center w-full px-4 py-3 rounded-lg text-left transition-colors ${isActive
-              ? 'bg-primary text-night font-semibold'
-              : 'text-night/60 dark:text-dark-textMuted hover:bg-mercury/50 dark:hover:bg-dark-surface/50'
+            ? 'bg-primary text-night font-semibold'
+            : 'text-night/60 dark:text-dark-textMuted hover:bg-mercury/50 dark:hover:bg-dark-surface/50'
             } ${isCollapsed ? 'justify-center' : ''}`}
         // aria-label={ariaLabel} // commented out as it was in original
         >
@@ -231,9 +231,10 @@ export const Sidebar = ({
         <Logout
           open={showLogoutModal}
           handleOk={() => {
-            // localStorage.clear(); // commented out as it was in original
+            // localStorage.clear(); 
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
+            localStorage.removeItem('organizationId');
             setShowLogoutModal(false);
             navigate('auth/login');
           }}

@@ -19,13 +19,21 @@ const Login = () => {
       const response = await userLogin({ email, password });
       return response;
     },
-    onSuccess: (response, variables) => {
+    onSuccess: (response) => {
+      console.log("Login", response);
 
       if (response?.token) {
+        
+        const organizations= response.organizations
+        
         localStorage.setItem("token", response.token);
         localStorage.setItem("userId", response.id);
         message.success(response.message || "Login successful");
-        navigate("/");
+         navigate('/organization-page', { 
+                state: { 
+                    organizations: organizations 
+                } 
+            })
       } else {
         message.error(response.message || "Invalid email or password");
       }
@@ -37,6 +45,8 @@ const Login = () => {
       console.error("Login Error:", error);
     },
   });
+
+
 
   // ✅ Form Submit Handler
   const onFinish = (values) => {

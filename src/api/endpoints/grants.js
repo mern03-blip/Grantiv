@@ -12,13 +12,12 @@ export const getGrants = async (page = 1, limit = 10, search = '') => {
     }
   });
 
-  // console.log("All grants", response.data);
+  console.log("All grants", response.data);
   return response.data;
 };
 
 // Single Grant for detail modal
 export const getGrantDetail = async (id) => {
-  console.log("getGrant called with id:", id);
 
   const response = await axiosInstance.get(`/grants/get-grants/${id}`, {
     // params: { 
@@ -31,11 +30,13 @@ export const getGrantDetail = async (id) => {
 
 //Favorite Grant
 const userId = localStorage.getItem("userId");
+const organizationId = localStorage.getItem("orgId");
 
 export const handleFavoriteGrants = async (grantId) => {
   const response = await axiosInstance.put("/grants/Togglefavorites", {
     userId,
     grantId,
+    organizationId,
   });
 
   console.log("Favorite grants:", response.data);
@@ -44,10 +45,12 @@ export const handleFavoriteGrants = async (grantId) => {
 
 
 
-
 //Get Favorite Grants
 export const handleGetFavoriteGrants = async () => {
-  const response = await axiosInstance.get(`/grants/favorites/${userId}`);
+  const response = await axiosInstance.post(`/grants/favorites`, {
+    organizationId,
+    userId,
+  });
 
   console.log("Get Favorite grants:", response.data);
   return response.data;

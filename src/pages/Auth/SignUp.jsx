@@ -19,8 +19,8 @@ const SignUp = () => {
   // ✅ TanStack Mutation Hook
 
   const { mutate: handleSignUp, isPending: loading } = useMutation({
-    mutationFn: async ({ email, password }) => {
-      const response = await userSignUp({ email, password });
+    mutationFn: async ({ email, password, name, organizationName }) => {
+      const response = await userSignUp({ email, password, name, organizationName });
       return response;
     },
     onSuccess: (response, variables) => {
@@ -47,8 +47,10 @@ const SignUp = () => {
 
   // ✅ Form Submit Handler
   const onFinish = (values) => {
-    const { email, password } = values;
-    handleSignUp({ email, password });
+    console.log(values);
+
+    const { email, password, fullName, organizationName } = values;
+    handleSignUp({ email, password, name: fullName, organizationName });
   };
 
   return (
@@ -83,14 +85,14 @@ const SignUp = () => {
             name="fullName"
             required={false}
             label={<span className="font-b5 text-h4 text-blackColor !font-custom">Full Name</span>}
-            rules={[
-              { required: true, message: "Please enter your full name!" },
-              {
-                pattern: /^[A-Za-z'-]{1,50}$/,
-                message:
-                  "Full name must only contain letters, optional hyphens or apostrophes, and be 1–50 characters long",
-              },
-            ]}
+          // rules={[
+          //   { required: true, message: "Please enter your full name!" },
+          //   {
+          //     pattern: /^[A-Za-z'-]{1,50}$/,
+          //     message:
+          //       "Full name must only contain letters, optional hyphens or apostrophes, and be 1–50 characters long",
+          //   },
+          // ]}
           >
             <Input
               prefix={<img src={User} alt="User Icon" className="mr-2 text-mainColor" />}
@@ -184,6 +186,33 @@ const SignUp = () => {
               }
             />
           </Form.Item>
+
+          <Form.Item
+            name="organizationName"
+            required={false}
+            label={
+              <span className="font-b5 text-h4 text-blackColor !font-custom">
+                Organization Name
+              </span>
+            }
+          // rules={[
+          //   { required: true, message: "Please enter your organization name!" },
+          //   {
+          //     pattern: /^[A-Za-z0-9&'-. ]{2,100}$/,
+          //     message:
+          //       "Organization name can include letters, numbers, spaces, and & ' - . characters (2–100 chars)",
+          //   },
+          // ]}
+          >
+            <Input
+              // prefix={<img src={BuildingIcon} alt="Building Icon" className="mr-2 text-mainColor" />}
+              style={{ border: "1px solid #DBDBDB" }}
+              placeholder="Enter organization name"
+              size="large"
+              className="h-12 rounded-custom border-custom text-h4 hover:border-custom placeholder-primaryTextColor focus:border-mainColor focus:ring-1 focus:ring-mainColor"
+            />
+          </Form.Item>
+
 
           {/* Submit Button */}
           <Form.Item className="!mt-6">

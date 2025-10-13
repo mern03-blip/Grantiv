@@ -6,6 +6,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { handleGetFavoriteGrants } from '../../api/endpoints/grants';
+import Loader from '../../components/loading/Loader';
 
 // --- MOCK DATA AND MOCKED FUNCTIONS ---
 // These replace the props and external service calls
@@ -91,6 +92,8 @@ const AIAssistant = () => {
     const messages = chatHistories[currentGrantKey] || [];
     const showIntro = messages.length <= 1;
 
+    // Fetch Favorited Grants
+
     const {
         data: { data: savedGrants = [] } = {},
         isLoading: isSavedLoading,
@@ -102,10 +105,9 @@ const AIAssistant = () => {
         retry: 1,
     });
 
-
     console.log("Saved Grants in AI Assistant:", savedGrants);
 
-
+    //Others Logics
 
     const onUpdateChatHistory = (key, action) => {
         setChatHistories(prev => {
@@ -324,17 +326,9 @@ const AIAssistant = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+            {/* Back Button */}
             <motion.aside className="w-80 flex-shrink-0 border-r flex flex-col transition-colors bg-white dark:bg-dark-surface border-mercury dark:border-dark-border">
                 <motion.div className="p-4 border-b transition-colors border-mercury dark:border-dark-border">
-                    {/* <button
-                        onClick={() => navigate('Exiting AI Assistant...')} // Mocking navigation
-                        className="flex items-center gap-2 text-sm font-semibold w-full text-left p-2 rounded-lg transition-colors text-night/70 dark:text-dark-textMuted hover:text-secondary dark:hover:text-dark-secondary hover:bg-mercury/50 dark:hover:bg-dark-border/20"
-                        aria-label="Exit AI Assistant and return to Dashboard"
-                    >
-                        <ChevronLeftIcon className="w-5 h-5" />
-                        Exit Assistant
-                    </button> */}
-
                     <button
                         onClick={() => navigate(-1)}
                         className="flex items-center gap-2 text-sm font-semibold w-full text-left p-2 rounded-lg transition-colors text-night/70 dark:text-dark-textMuted hover:text-secondary dark:hover:text-dark-secondary hover:bg-mercury/50 dark:hover:bg-dark-border/20"
@@ -345,6 +339,8 @@ const AIAssistant = () => {
                     </button>
 
                 </motion.div>
+
+                {/*Work on a Grant */}
                 <div className="flex-1 overflow-y-auto p-2 space-y-1">
                     <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors text-night/50 dark:text-dark-textMuted/70">Work on a Grant</p>
                     <GrantSelectionButton
@@ -353,6 +349,8 @@ const AIAssistant = () => {
                         title="General Chat"
                         subtext="Ask any grant question"
                     />
+
+                    {/* In-Progress Applications */}
                     {myGrants.length > 0 && (
                         <>
                             <p className="px-3 pt-4 pb-2 text-xs font-semibold uppercase tracking-wider transition-colors text-night/50 dark:text-dark-textMuted/70">In-Progress Applications</p>
@@ -368,23 +366,9 @@ const AIAssistant = () => {
                             ))}
                         </>
                     )}
-                    {/* {savedGrants.length > 0 && (
-                        <>
-                            <p className="px-3 pt-4 pb-2 text-xs font-semibold uppercase tracking-wider transition-colors text-night/50 dark:text-dark-textMuted/70">Saved Opportunities</p>
-                            {savedGrants.map(grant => (
-                                <GrantSelectionButton
-                                    key={grant.id}
-                                    grant={grant}
-                                    isSelected={selectedGrant?.id === grant.id}
-                                    onClick={() => setSelectedGrant(grant)}
-                                    title={grant.title}
-                                    subtext={grant.funder}
-                                />
-                            ))}
-                        </>
-                    )} */}
+                    {/* Favorited Saved Opportunities */}
                     {isSavedLoading ? (
-                        <p className="px-3 py-2 text-xs text-center text-night/50 dark:text-dark-textMuted/70">Loading saved opportunities...</p>
+                        <Loader />
                     ) : savedGrants.length > 0 ? (
                         <>
                             <p className="px-3 pt-4 pb-2 text-xs font-semibold uppercase tracking-wider transition-colors text-night/50 dark:text-dark-textMuted/70">Saved Opportunities</p>
@@ -402,9 +386,10 @@ const AIAssistant = () => {
                     ) : (
                         <p className="px-3 py-2 text-xs text-center text-night/50 dark:text-dark-textMuted/70">No saved opportunities yet.</p>
                     )}
-
                 </div>
             </motion.aside>
+
+            {/* Mock Chats etc About current open grants */}
 
             <motion.main className="flex-1 flex flex-col min-h-0 relative">
                 <div className="absolute inset-0 z-0 bg-[#F7F7F7] dark:bg-dark-background"
@@ -583,6 +568,7 @@ const AIAssistant = () => {
                     </div>
                 </div>
             </motion.main>
+
         </div>
     );
 };

@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { handleFavoriteGrants } from "../api/endpoints/grants";
-import { message } from "antd";
 
 export const useToggleFavoriteGrant = () => {
     const queryClient = useQueryClient();
@@ -8,18 +7,14 @@ export const useToggleFavoriteGrant = () => {
     return useMutation({
         mutationFn: (grantId) => handleFavoriteGrants(grantId),
 
-        onSuccess: (data, grantId) => {
-            // message.success("Successfully added to your Favorites collection!");
+        onSuccess: (grantId) => {
 
-            // ✅ Optional: update local cache instantly
             queryClient.invalidateQueries(["savedGrants"]);
-            queryClient.invalidateQueries(["grant", grantId]);
-            // refetchSavedGrants();
+            // queryClient.invalidateQueries(["grant", grantId]);
         },
 
         onError: (error) => {
             console.error("Error toggling favorite:", error);
-            message.error("Failed to update favorites.");
         },
     });
 };
