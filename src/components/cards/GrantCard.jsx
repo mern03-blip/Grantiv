@@ -64,8 +64,8 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
             transition={{ type: 'spring', stiffness: 300 }}
         >
             <div className="relative">
-                {grant.imageUrl ? (
-                    <img src={grant.imageUrl} alt={grant.title} className="w-full h-36 object-cover" />
+                {grant.grantImg ? (
+                    <img src={grant.grantImg} alt={grant.title} className="w-full h-36 object-cover" />
                 ) : (
                     <div className="w-full h-36 bg-mercury/30 dark:bg-dark-background flex items-center justify-center">
                         <DocumentTextIcon className="w-12 h-12 text-mercury dark:text-dark-border" />

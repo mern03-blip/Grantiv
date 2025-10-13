@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MOCK_TEAM, MOCK_TEAM_CHAT_MESSAGES } from '../../../constants';
 import { UsersIcon, XIcon, PaperAirplaneIcon } from '../../components/icons/Icons';
-import { TeamChat } from '../../components/collaborationtools/CollaborationTools';
+// import { TeamChat } from '../../components/collaborationtools/CollaborationTools';
 import { inviteMember } from '../../api/endpoints/invitation';
 import { useQuery } from '@tanstack/react-query';
 import { deleteMember, getOrganizationMembers, updateMemberRole } from '../../api/endpoints/teams';
 import Loader from '../../components/loading/Loader';
 import { Placeholder } from '../../assets/image';
+import { jwtDecode } from 'jwt-decode';
+import { TeamChat } from '../../components/TeamChat/TeamChat';
 
 const UpgradeNotice = ({ featureName, onUpgrade }) => (
     <div className="text-center p-8 bg-mercury/30 dark:bg-dark-surface/50 rounded-lg border-2 border-dashed border-mercury/80 dark:border-dark-border max-w-2xl mx-auto">
@@ -26,7 +28,23 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
+
+     const [currentUser, setCurrentUser] = useState(null);
+     const userId = localStorage.getItem("userId")
     const organizationId = localStorage.getItem('orgId');
+    useEffect(() => {
+
+const token = localStorage.getItem('token')
+        if (token) {
+            const decodedToken = jwtDecode(token);
+            // The user ID is often stored in 'id' or 'sub' field of the token
+            setCurrentUser({ _id: decodedToken.id, name: decodedToken.name /* add other user fields */ });
+        }
+    }, []);
+
+
+
+
 
     // ✅ React Query to fetch members
     const {
@@ -56,7 +74,7 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
                 setLoading(false);
                 return;
             }
-            const userId = localStorage.getItem("userId")
+           
             // 2️⃣ Call imported inviteMember function
             const response = await inviteMember(organizationId, {
                 email: inviteEmail,
@@ -147,13 +165,15 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 {/* Left Column: Team Chat */}
                 <div className="lg:col-span-1 h-full">
-                    <TeamChat
+                    {/* <TeamChat
                         plan={plan}
                         isDemoMode={isDemoMode}
                         messages={chatMessages}
                         onSendMessage={handleSendMessage}
                         navigateToSettings={() => navigateTo('settings')}
-                    />
+                    /> */}
+
+                    <TeamChat currentUser={currentUser} selectedOrgId={organizationId} />
                 </div>
 
                 {/* Right Column: Management */}

@@ -1,11 +1,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
 // Ensure the API key is available from environment variables
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
-}
+// if (!process.env.API_KEY) {
+//     throw new Error("API_KEY environment variable not set");
+// }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: "test" });
 
 const getOrgStage = (establishedDate) => {
     if (!establishedDate) return 'Not specified';
