@@ -4,7 +4,7 @@ import { UsersIcon, XIcon, PaperAirplaneIcon } from '../../components/icons/Icon
 import { TeamChat } from '../../components/collaborationtools/CollaborationTools';
 import { inviteMember } from '../../api/endpoints/invitation';
 import { useQuery } from '@tanstack/react-query';
-import { getOrganizationMembers, updateMemberRole } from '../../api/endpoints/teams';
+import { deleteMember, getOrganizationMembers, updateMemberRole } from '../../api/endpoints/teams';
 import Loader from '../../components/loading/Loader';
 import { Placeholder } from '../../assets/image';
 
@@ -94,8 +94,19 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
         }
     };
 
-    const handleRemoveMember = (memberId) => {
-        setTeam(team.filter(m => m.id !== memberId));
+    const handleRemoveMember = async (memberId) => {
+        try {
+            console.log("Removing member:", memberId);
+
+            await deleteMember(memberId);
+
+            // Refetch updated list
+            refetch();
+
+            console.log("✅ Member removed successfully");
+        } catch (error) {
+            console.error("❌ Failed to remove member:", error);
+        }
     };
 
     const handleSendMessage = (text) => {
@@ -107,6 +118,7 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
         };
         setChatMessages(prev => [...prev, newMessage]);
     };
+
 
     if (plan === 'Starter' && !isDemoMode) {
         return (
@@ -166,13 +178,13 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
                                             className="text-sm border-mercury/80 dark:border-dark-border rounded-md focus:ring-primary focus:border-primary text-night bg-white dark:bg-dark-surface dark:text-dark-text py-1.5 pl-2 pr-7"
                                         >
                                             <option>admin</option>
-                                            <option>lead-Writer</option>
+                                            <option>lead-writer</option>
                                             <option>financials</option>
                                             <option>reviewer</option>
                                             <option>member</option>
                                         </select>
 
-                                        <button onClick={() => handleRemoveMember(member.id)} className="p-2 text-night/50 dark:text-dark-textMuted/70 hover:text-red-500 dark:hover:text-red-400" aria-label={`Remove ${member.name}`}>
+                                        <button onClick={() => handleRemoveMember(member.user._id)} className="p-2 text-night/50 dark:text-dark-textMuted/70 hover:text-red-500 dark:hover:text-red-400" aria-label={`Remove ${member.name}`}>
                                             <XIcon className="w-5 h-5" />
                                         </button>
                                     </div>
