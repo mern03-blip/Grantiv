@@ -1,5 +1,6 @@
 //images
 export { default as Logo } from "./images/Logo.png"
+export { default as Placeholder } from "./images/Placeholder.png"
 
 
 //Icons
