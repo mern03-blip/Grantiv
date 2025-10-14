@@ -7,6 +7,7 @@ import GrantCard from '../../components/cards/GrantCard';
 import CustomPagination from '../../components/pagination/CustomPagination';
 import Loader from '../../components/loading/Loader';
 import { SpinnerIcon, BookmarkIcon } from '../../components/icons/Icons';
+import { Select } from 'antd';
 // import { Select } from 'antd';
 
 const GRANTS_PER_PAGE = 10;
@@ -175,7 +176,7 @@ const FindGrants = () => {
             <span className="text-sm text-gray-600 dark:text-gray-300">Show:</span>
             <Select
               // value={pageSize}
-              onChange={(value) => onPageSizeChange(value)}
+              // onChange={(value) => onPageSizeChange(value)}
               options={[
                 { value: 10, label: "10 grants" },
                 { value: 25, label: "25 grants" },

@@ -68,11 +68,11 @@ const OrganizationPage = () => {
                     <div
                         key={org.id}
                         onClick={() => handleSelectOrg(org.id, org.name)}
-                        className="group bg-white rounded-xl shadow-md p-6 cursor-pointer transform hover:-translate-y-2 transition-all duration-300 hover:shadow-xl border border-transparent hover:border-indigo-500"
+                        className="group bg-white rounded-xl shadow-md p-6 cursor-pointer transform hover:-translate-y-2 transition-all duration-300 hover:shadow-xl border border-transparent hover:border-mainColor"
                     >
                         <div className="flex flex-col items-center text-center">
-                            <div className="bg-indigo-100 p-4 rounded-full mb-4">
-                                <BriefcaseIcon className="w-10 h-10 text-indigo-600" />
+                            <div className="bg-green-100 p-4 rounded-full mb-4">
+                                <BriefcaseIcon className="w-10 h-10 text-mainColor" />
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 mb-1">{org.name}</h3>
                             <p className="text-sm text-gray-500 capitalize bg-gray-100 px-3 py-1 rounded-full">
