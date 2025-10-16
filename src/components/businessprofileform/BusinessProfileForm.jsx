@@ -1,5 +1,10 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, memo, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useMutation } from "@tanstack/react-query";
+import { handleOnboardingForm } from "../../api/endpoints/businessform";
+import { message } from "antd";
+
+
 
 // Define OrganizationType as a simple object for JSX
 const OrganizationType = {
@@ -34,21 +39,58 @@ const FormSection = memo(({ title, children }) => (
     </div>
 ));
 
-const BusinessProfileForm = ({ initialProfile, onSave, buttonText }) => {
+const BusinessProfileForm = ({ initialProfile, onSave, buttonText, Data }) => {
     const [formData, setFormData] = useState(initialProfile || {
-        organizationName: '',
+        organizationName: "",
         organizationType: OrganizationType.SMALL_BUSINESS,
         city: '',
         state: '',
         industry: '',
-        description: '',
+        briefDescription: '',
         abn: '',
-        establishedDate: '',
+        dateEstablished: '',
         targetAudience: '',
         projectFocusAreas: '',
-        fundingHistory: '',
-        currentProjectGoals: '',
+        previousFundingHistory: '',
+        specificProjectGoals: '',
     });
+
+
+
+    useEffect(() => {
+        if (Data && Data != null) {
+            setFormData(prev => ({
+                ...prev,
+                ...Data,
+                organizationName: Data?.organizationName
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                organizationName: localStorage.getItem("orgName"),
+            }));
+        }
+    }, [Data]);
+
+    // console.log("inBussinesForm", Data);
+
+
+
+    const { mutate: saveBusinessProfile } = useMutation({
+        mutationFn: handleOnboardingForm,
+
+        onSuccess: () => {
+            message.success("Business profile saved successfully!");
+            // console.log("Saved:", data);
+            onSave && onSave();
+            localStorage.setItem('grantiv_onboarding_skipped', 'true');
+        },
+        onError: (error) => {
+            console.error("Error saving profile:", error);
+            message.error("Failed to save business profile. Please try again.");
+        },
+    });
+
 
     const slugify = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
@@ -77,14 +119,40 @@ const BusinessProfileForm = ({ initialProfile, onSave, buttonText }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!formData.organizationName || !formData.city || !formData.state || !formData.industry || !formData.description) {
+
+        if (
+            !formData.organizationName ||
+            !formData.city ||
+            !formData.state ||
+            !formData.industry ||
+            !formData.briefDescription
+        ) {
             alert("Please fill out all required fields in the Core Details and Organization Focus sections.");
             return;
         }
-        onSave(formData);
+
+
+        const payload = {
+            organizationName: formData.organizationName,
+            abn: formData.abn,
+            organizationType: formData.organizationType,
+            city: formData.city,
+            state: formData.state,
+            industry: formData.industry,
+            dateEstablished: formData.dateEstablished,
+            targetAudience: formData.targetAudience,
+            projectFocusAreas: formData.projectFocusAreas,
+            briefDescription: formData.briefDescription,
+            previousFundingHistory: formData.previousFundingHistory,
+            specificProjectGoals: formData.specificProjectGoals,
+        };
+
+        // console.log("Final Payload:", payload);
+
+        saveBusinessProfile(payload);
     };
 
-    // console.log("Business Render");
+
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -99,11 +167,12 @@ const BusinessProfileForm = ({ initialProfile, onSave, buttonText }) => {
                                 name="organizationName"
                                 value={formData.organizationName}
                                 onChange={handleChange}
-                                className={commonInputClasses}
+                                className={`${commonInputClasses} bg-gray-100 dark:bg-dark-border`}
                                 placeholder="e.g., Acme Innovations Pty Ltd"
                                 required
                             />
                         </FormRow>
+
                         <FormRow label="ABN (Australian Business Number)" htmlFor="abn">
                             <input
                                 type="text"
@@ -181,16 +250,18 @@ const BusinessProfileForm = ({ initialProfile, onSave, buttonText }) => {
                                 {INDUSTRY_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                             </select>
                         </FormRow>
-                        <FormRow label="Date Established" htmlFor="establishedDate">
+                        <FormRow label="Date Established" htmlFor="dateEstablished">
                             <input
                                 type="date"
-                                id="establishedDate"
-                                name="establishedDate"
-                                value={formData.establishedDate}
+                                id="dateEstablished"
+                                name="dateEstablished"
+                                value={formData.dateEstablished ? formData.dateEstablished.split('T')[0] : ''}
                                 onChange={handleChange}
                                 className={`${commonInputClasses} dark:[color-scheme:dark]`}
                             />
                         </FormRow>
+
+
                     </div>
                 </div>
             </div>
@@ -219,11 +290,11 @@ const BusinessProfileForm = ({ initialProfile, onSave, buttonText }) => {
                             placeholder="List your main activities, separated by commas. e.g., Youth engagement, Environmental sustainability, Digital literacy"
                         />
                     </FormRow>
-                    <FormRow label="Brief Description of Your Work" htmlFor="description">
+                    <FormRow label="Brief Description of Your Work" htmlFor="briefdescription">
                         <textarea
-                            id="description"
-                            name="description"
-                            value={formData.description}
+                            id="briefDescription"
+                            name="briefDescription"
+                            value={formData.briefDescription}
                             onChange={handleChange}
                             rows={4}
                             className={commonInputClasses}
@@ -236,22 +307,22 @@ const BusinessProfileForm = ({ initialProfile, onSave, buttonText }) => {
 
             <FormSection title="Advanced AI Matching Details (Optional)">
                 <div className="grid grid-cols-1 gap-6">
-                    <FormRow label="Previous Funding History" htmlFor="fundingHistory">
+                    <FormRow label="Previous Funding History" htmlFor="previousFundingHistory">
                         <textarea
-                            id="fundingHistory"
-                            name="fundingHistory"
-                            value={formData.fundingHistory}
+                            id="previousFundingHistory"
+                            name="previousFundingHistory"
+                            value={formData.previousFundingHistory}
                             onChange={handleChange}
                             rows={3}
                             className={commonInputClasses}
                             placeholder="Describe any grants or significant funding your organization has received in the past. e.g., 'Received a $20,000 local council grant in 2022 for a community arts project.'"
                         />
                     </FormRow>
-                    <FormRow label="Specific Project Goals for Funding" htmlFor="currentProjectGoals">
+                    <FormRow label="Specific Project Goals for Funding" htmlFor="specificProjectGoals">
                         <textarea
-                            id="currentProjectGoals"
-                            name="currentProjectGoals"
-                            value={formData.currentProjectGoals}
+                            id="specificProjectGoals"
+                            name="specificProjectGoals"
+                            value={formData.specificProjectGoals}
                             onChange={handleChange}
                             rows={3}
                             className={commonInputClasses}

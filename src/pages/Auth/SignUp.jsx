@@ -209,7 +209,7 @@ const SignUp = () => {
               style={{ border: "1px solid #DBDBDB" }}
               placeholder="Enter organization name"
               size="large"
-              className="h-12 rounded-custom border-custom text-h4 hover:border-custom placeholder-primaryTextColor focus:border-mainColor focus:ring-1 focus:ring-mainColor"
+              className="h-12 rounded-custom border-custom text-h4 hover:border-custom placeholder-primaryTextColor"
             />
           </Form.Item>
 

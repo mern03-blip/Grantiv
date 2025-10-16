@@ -635,7 +635,8 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button
+
+              {/* <button
                 onClick={onToggleSave}
                 disabled={isToggling}
                 className={`transition-colors p-1 ${isSaved
@@ -644,7 +645,24 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
                   }`}
               >
                 <HeartIcon className="w-6 h-6" isFilled={isSaved} />
+              </button> */}
+              <button
+                onClick={onToggleSave}
+                disabled={isToggling}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full 
+                            font-semibold text-sm transition-all duration-200 ease-in-out 
+                            ${isSaved
+                    ? "bg-primary text-white shadow-md hover:bg-primary/90"
+                    : "bg-gray-100 dark:bg-gray-700 text-night/70 dark:text-dark-textMuted hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-primary"}`}>
+                {/* The Icon */}
+                <HeartIcon className="w-5 h-5" isFilled={isSaved} />
+
+                {/* The Text changes based on state */}
+                <span className="hidden sm:inline">
+                  {isSaved ? "Favorite" : "Add Fav"}
+                </span>
               </button>
+
               <button
                 onClick={onClose}
                 className="text-night/50 dark:text-dark-textMuted hover:text-night dark:hover:text-dark-text"

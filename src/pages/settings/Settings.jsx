@@ -3,6 +3,8 @@ import {
     CheckCircleIcon, SunIcon, MoonIcon, BellIcon, CheckIcon, UserCircleIcon, CreditCardIcon, SwatchIcon, ReceiptIcon,
 } from '../../components/icons/Icons';
 import BusinessProfileForm from '../../components/businessprofileform/BusinessProfileForm';
+import { handleBusinessForm } from '../../api/endpoints/businessform';
+import { useQuery } from '@tanstack/react-query';
 
 // Mock types for a self-contained component
 /**
@@ -76,6 +78,8 @@ const Settings = () => {
     /** @type {[Theme, React.Dispatch<React.SetStateAction<Theme>>]} */
     const [theme, setTheme] = useState(getThemeFromLocalStorage());
 
+   
+
     // Effect to load initial state from local storage on mount
     useEffect(() => {
         setProfile(getProfileFromLocalStorage() || MOCK_BUSINESS_PROFILE);
@@ -131,6 +135,14 @@ const Settings = () => {
         });
     }, []);
 
+     const  {data } = useQuery({
+            queryKey: ["businessProfile"],
+            queryFn: handleBusinessForm,
+        });
+
+        console.log(data);
+        
+
     const renderContent = () => {
         switch (activeTab) {
             case 'Profile':
@@ -138,7 +150,7 @@ const Settings = () => {
                     <div>
                         <h3 className="text-xl font-bold font-heading text-night dark:text-dark-text mb-1">Business Profile</h3>
                         <p className="text-night/60 dark:text-dark-textMuted mb-6">This information helps our AI match you with the right grants.</p>
-                        <BusinessProfileForm initialProfile={profile || undefined} onSave={handleSaveProfile} buttonText={profile ? "Save Changes" : "Save Profile"} />
+                        <BusinessProfileForm initialProfile={profile || undefined} onSave={handleSaveProfile} buttonText={profile ? "Save Changes" : "Save Profile"} Data={data}/>
                     </div>
                 );
             case 'Appearance':

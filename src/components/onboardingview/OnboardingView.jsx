@@ -9,7 +9,7 @@ const OnboardingView = ({ onSave, onSkip }) => (
             <GrantivLogo className="h-10 mx-auto mb-4" />
             <h1 className="text-3xl font-bold text-center font-heading text-night dark:text-dark-text">Welcome to Grantiv!</h1>
             <p className="text-center text-night/70 dark:text-dark-textMuted mt-2 mb-8">Let's get started by setting up your profile. This helps our AI find the perfect grants for you.</p>
-            <BusinessProfileForm buttonText="Save & Get Started" />
+            <BusinessProfileForm buttonText="Save & Get Started" onSave={onSave} Data={null} />
             <div className="text-center mt-6">
                 <button
                     onClick={onSkip}

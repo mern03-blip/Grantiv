@@ -234,7 +234,9 @@ export const Sidebar = ({
             // localStorage.clear(); 
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
-            localStorage.removeItem('organizationId');
+            // localStorage.removeItem('organizationId');
+            localStorage.removeItem("orgId");
+            localStorage.removeItem("orgName");
             setShowLogoutModal(false);
             navigate('auth/login');
           }}

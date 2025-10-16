@@ -23,17 +23,17 @@ const Login = () => {
       console.log("Login", response);
 
       if (response?.token) {
-        
-        const organizations= response.organizations
-        
+
+        const organizations = response.organizations
+
         localStorage.setItem("token", response.token);
         localStorage.setItem("userId", response.id);
         message.success(response.message || "Login successful");
-         navigate('/organization-page', { 
-                state: { 
-                    organizations: organizations 
-                } 
-            })
+        navigate('/organization-page', {
+          state: {
+            organizations: organizations
+          }
+        })
       } else {
         message.error(response.message || "Invalid email or password");
       }
