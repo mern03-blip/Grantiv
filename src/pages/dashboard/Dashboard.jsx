@@ -9,6 +9,7 @@ import {
 } from '../../components/icons/Icons';
 import useFocusTrap from '../../hooks/useFocusTrap';
 import useKeydown from '../../hooks/useKeydown';
+import AiRecommendedGrants from '../../components/AiRecommendedGrants/AiRecommendedGrants';
 
 
 const Dashboard = () => {
@@ -157,7 +158,7 @@ const Dashboard = () => {
             </div>
 
             <div>
-                <h3 className="text-2xl font-bold text-night dark:text-dark-text mb-4 font-heading">AI-Recommended Grants</h3>
+                {/* <h3 className="text-2xl font-bold text-night dark:text-dark-text mb-4 font-heading">AI-Recommended Grantsabc</h3>
                 {isLoadingSuggestions ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[...Array(3)].map((_, i) => (
@@ -179,7 +180,9 @@ const Dashboard = () => {
                             <GrantCard key={grant.id} grant={grant} onSelect={(g, p) => onSelectGrant(g, p)} matchPercentage={grant.matchPercentage} />
                         ))}
                     </div>
-                )}
+                )} */}
+
+                <AiRecommendedGrants/>
             </div>
 
             <div>
