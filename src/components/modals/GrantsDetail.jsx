@@ -451,7 +451,7 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
     mutationFn: (grantId) => handleFavoriteGrants(grantId),
     onSuccess: () => {
       // ✅ Only invalidate savedGrants, NOT the main grants list
-      // queryClient.invalidateQueries(["savedGrants"]);
+      queryClient.invalidateQueries(["savedGrants"]);
       // ✅ Don't invalidate ["grants"] to prevent parent re-render
     },
     onError: (error) => {
@@ -635,8 +635,8 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-
-              {/* <button
+              {/* 
+              <button
                 onClick={onToggleSave}
                 disabled={isToggling}
                 className={`transition-colors p-1 ${isSaved

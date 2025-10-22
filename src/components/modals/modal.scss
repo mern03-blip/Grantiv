@@ -1,0 +1,15 @@
+/* 🔥 Apply dark background to modal content */
+.dark .ant-modal-content {
+  background-color: #1f1f1f !important;
+  color: #e5e7eb !important; /* text-gray-200 */
+}
+
+/* Optional: Header & footer */
+.dark .ant-modal-header {
+  background-color: #1f1f1f !important;
+//   border-bottom: 1px solid #333 !important;
+}
+.dark .ant-modal-footer {
+  background-color: #1f1f1f !important;
+//   border-top: 1px solid #333 !important;
+}

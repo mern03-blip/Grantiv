@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { handleGetFavoriteGrants } from '../../api/endpoints/grants';
 import Loader from '../../components/loading/Loader';
+import "./aiassistant.scss"
 
 // --- MOCK DATA AND MOCKED FUNCTIONS ---
 // These replace the props and external service calls
@@ -92,6 +93,18 @@ const AIAssistant = () => {
     const messages = chatHistories[currentGrantKey] || [];
     const showIntro = messages.length <= 1;
 
+
+    useEffect(() => {
+        const storedTheme = localStorage.getItem("grantiv_theme");
+
+        if (storedTheme === "dark") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, []);
+
+
     // Fetch Favorited Grants
 
     const {
@@ -99,7 +112,7 @@ const AIAssistant = () => {
         isLoading: isSavedLoading,
         // refetch: refetchSavedGrants
     } = useQuery({
-        queryKey: ['favoriteGrants'],
+        queryKey: ["savedGrants"],
         queryFn: handleGetFavoriteGrants,
         staleTime: 1000 * 60, // 1 min
         retry: 1,
@@ -300,7 +313,7 @@ const AIAssistant = () => {
 
 
     return (
-        <div className="relative flex h-[100vh] border transition-colors bg-alabaster dark:bg-dark-background text-night dark:text-dark-text">
+        <div className="relative flex h-[100vh]  transition-colors bg-alabaster dark:bg-dark-background text-night dark:text-dark-text">
             <AnimatePresence mode='wait'>
                 {showGrantDetail && selectedGrant && (
                     <motion.div
@@ -341,7 +354,7 @@ const AIAssistant = () => {
                 </motion.div>
 
                 {/*Work on a Grant */}
-                <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                <div className="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
                     <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors text-night/50 dark:text-dark-textMuted/70">Work on a Grant</p>
                     <GrantSelectionButton
                         isSelected={!selectedGrant}

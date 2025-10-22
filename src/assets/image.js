@@ -13,3 +13,6 @@ export { default as User } from "./icons/user.png"
 export { default as Google } from "./icons/google.png"
 export { default as Apple } from "./icons/apple.png";
 
+export { default as Delete } from "./icons/deleteUser.png";
+
+

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import GrantCard from '../cards/GrantCard';
 import axiosInstance from '../../api/axios/axiosInstance';
 
@@ -26,7 +25,7 @@ const AiRecommendedGrants = ({ onSelectGrant }) => {
                 if (!token || !organizationId) {
                     throw new Error("Authentication details are missing. Please log in again.");
                 }
-                
+
                 // Configure the request headers
                 const config = {
                     headers: {
@@ -43,9 +42,9 @@ const AiRecommendedGrants = ({ onSelectGrant }) => {
                     ...grant, // Keep all original grant data
                     id: grant._id, // Map _id to id for the component's key
                     // Convert the AI score (e.g., 0.91) to a percentage
-                    matchPercentage: Math.round(grant.score * 100), 
+                    matchPercentage: Math.round(grant.score * 100),
                 }));
-                
+
                 setSuggestions(formattedSuggestions);
 
             } catch (err) {
@@ -86,10 +85,10 @@ const AiRecommendedGrants = ({ onSelectGrant }) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {suggestions.map(grant => (
                         <GrantCard
-                            key={grant.id} 
-                            grant={grant} 
+                            key={grant.id}
+                            grant={grant}
                             // onSelect={(g, p) => onSelectGrant(g, p)} 
-                            matchPercentage={grant.matchPercentage} 
+                            matchPercentage={grant.matchPercentage}
                         />
                     ))}
                 </div>

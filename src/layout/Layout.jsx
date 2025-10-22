@@ -74,7 +74,7 @@ const AdminLayout = () => {
 
     const handleSaveProfile = useCallback((profile) => {
         try {
-            localStorage.setItem('grantiv_business_profile',"false");
+            localStorage.setItem('grantiv_business_profile', "false");
             localStorage.removeItem('grantiv_onboarding_skipped');
             if (isOnboarding) {
                 setIsOnboarding(false);
@@ -108,7 +108,7 @@ const AdminLayout = () => {
     }, []);
 
     if (isOnboarding) {
-        return <OnboardingView onSave={()=>setIsOnboarding(false)} onSkip={handleSkipOnboarding} />;
+        return <OnboardingView onSave={() => setIsOnboarding(false)} onSkip={handleSkipOnboarding} />;
     }
 
     return (
@@ -134,7 +134,7 @@ const AdminLayout = () => {
                             transition={{ duration: 0.25 }} >
 
                             <MainContent />
-                            
+
                         </motion.div>
                     </AnimatePresence>
                     {/* <MainContent /> */}

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MOCK_TEAM, MOCK_TEAM_CHAT_MESSAGES } from '../../../constants';
 import { UsersIcon, XIcon, PaperAirplaneIcon } from '../../components/icons/Icons';
-// import { TeamChat } from '../../components/collaborationtools/CollaborationTools';
 import { inviteMember } from '../../api/endpoints/invitation';
 import { useQuery } from '@tanstack/react-query';
 import { deleteMember, getOrganizationMembers, updateMemberRole } from '../../api/endpoints/teams';
@@ -9,6 +8,8 @@ import Loader from '../../components/loading/Loader';
 import { Placeholder } from '../../assets/image';
 import { jwtDecode } from 'jwt-decode';
 import { TeamChat } from '../../components/TeamChat/TeamChat';
+import DeleteUserModal from "../../components/modals/DeleteUserModal";
+
 
 const UpgradeNotice = ({ featureName, onUpgrade }) => (
     <div className="text-center p-8 bg-mercury/30 dark:bg-dark-surface/50 rounded-lg border-2 border-dashed border-mercury/80 dark:border-dark-border max-w-2xl mx-auto">
@@ -27,22 +28,23 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
     const [inviteRole, setInviteRole] = useState("Member");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedMember, setSelectedMember] = useState(null);
 
 
-     const [currentUser, setCurrentUser] = useState(null);
-     const userId = localStorage.getItem("userId")
+
+    const [currentUser, setCurrentUser] = useState(null);
+    const userId = localStorage.getItem("userId")
     const organizationId = localStorage.getItem('orgId');
     useEffect(() => {
 
-const token = localStorage.getItem('token')
+        const token = localStorage.getItem('token')
         if (token) {
             const decodedToken = jwtDecode(token);
             // The user ID is often stored in 'id' or 'sub' field of the token
             setCurrentUser({ _id: decodedToken.id, name: decodedToken.name /* add other user fields */ });
         }
     }, []);
-
-
 
 
 
@@ -74,7 +76,7 @@ const token = localStorage.getItem('token')
                 setLoading(false);
                 return;
             }
-           
+
             // 2️⃣ Call imported inviteMember function
             const response = await inviteMember(organizationId, {
                 email: inviteEmail,
@@ -126,6 +128,7 @@ const token = localStorage.getItem('token')
             console.error("❌ Failed to remove member:", error);
         }
     };
+
 
     const handleSendMessage = (text) => {
         const newMessage = {
@@ -190,7 +193,7 @@ const token = localStorage.getItem('token')
                                             <p className="text-sm text-night/60 dark:text-dark-textMuted">{member.role}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    {/* <div className="flex items-center gap-2">
                                         <select
                                             value={member.role}
                                             // onChange={(e) => handleRoleChange(member.id, e.target.value)}
@@ -207,6 +210,56 @@ const token = localStorage.getItem('token')
                                         <button onClick={() => handleRemoveMember(member.user._id)} className="p-2 text-night/50 dark:text-dark-textMuted/70 hover:text-red-500 dark:hover:text-red-400" aria-label={`Remove ${member.name}`}>
                                             <XIcon className="w-5 h-5" />
                                         </button>
+                                    </div> */}
+                                    <div className="flex items-center gap-2">
+                                        <select
+                                            value={member.role}
+                                            onChange={(e) => handleRoleChange(member.user._id, e.target.value)}
+                                            disabled={member.role === "admin"} // ✅ disable if admin
+                                            className={`text-sm border-mercury/80 dark:border-dark-border rounded-md focus:ring-primary focus:border-primary text-night bg-white dark:bg-dark-surface dark:text-dark-text py-1.5 pl-2 pr-7 
+                                             ${member.role === "admin" ? "cursor-not-allowed opacity-60" : ""}`}
+                                        >
+                                            <option>admin</option>
+                                            <option>lead-writer</option>
+                                            <option>financials</option>
+                                            <option>reviewer</option>
+                                            <option>member</option>
+                                        </select>
+
+                                        {/* <button
+                                            onClick={() => handleRemoveMember(member.user._id)}
+                                            disabled={member.role === "admin"} // ✅ disable button if admin
+                                            className={`p-2 text-night/50 dark:text-dark-textMuted/70 hover:text-red-500 dark:hover:text-red-400 
+                                            ${member.role === "admin" ? "cursor-not-allowed opacity-60 hover:text-night/50 dark:hover:text-dark-textMuted/70" : ""}`}
+                                            aria-label={`Remove ${member.name}`}
+                                        >
+                                            <XIcon className="w-5 h-5" />
+                                        </button> */}
+                                        <button
+                                            onClick={() => {
+                                                setSelectedMember(member); // store member data
+                                                setIsDeleteModalOpen(true); // open modal
+                                            }}
+                                            disabled={member.role === "admin"}
+                                            className={`p-2 text-night/50 dark:text-dark-textMuted/70 hover:text-red-500 dark:hover:text-red-400 
+                                            ${member.role === "admin" ? "cursor-not-allowed opacity-60 hover:text-night/50 dark:hover:text-dark-textMuted/70" : ""}`}
+                                            aria-label={`Remove ${member.name}`}
+                                        >
+                                            <XIcon className="w-5 h-5" />
+                                        </button>
+
+                                        <DeleteUserModal
+                                            open={isDeleteModalOpen}
+                                            memberName={selectedMember?.user?.name}
+                                            handleCancel={() => setIsDeleteModalOpen(false)}
+                                            handleOk={() => {
+                                                if (selectedMember) {
+                                                    handleRemoveMember(selectedMember.user._id);
+                                                    setIsDeleteModalOpen(false);
+                                                }
+                                            }}
+                                        />
+
                                     </div>
                                 </div>
                             ))}

@@ -103,11 +103,10 @@ const Login = () => {
             required={false}
             rules={[
               { required: true, message: "Please enter your password" },
-              {
-                pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])(?!.*\s).{6,128}$/,
-                message:
-                  "Password must include uppercase, lowercase, number,",
-              },
+              // {
+              //   pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])(?!.*\s).{6,128}$/,
+              //   // message: "Password must include uppercase, lowercase, number,",
+              // },
             ]}
           >
             <Input.Password

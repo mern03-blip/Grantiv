@@ -182,7 +182,7 @@ const Dashboard = () => {
                     </div>
                 )} */}
 
-                <AiRecommendedGrants/>
+                <AiRecommendedGrants />
             </div>
 
             <div>

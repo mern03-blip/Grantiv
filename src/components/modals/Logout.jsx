@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Button, Modal, message } from "antd";
 import { LogoutModal } from "@/src/assets/image";
+import "./modal.scss"
+
 
 const Logout = ({ open, handleOk, handleCancel }) => {
   const [loading, setLoading] = useState(false);
@@ -29,7 +31,7 @@ const Logout = ({ open, handleOk, handleCancel }) => {
             key="cancel"
             type="primary"
             onClick={handleCancel}
-            className="!bg-mainColor text-whiteColor font-custom border-custom font-b6"
+            className="!bg-red-500 hover:!bg-red-600 text-whiteColor font-custom border-custom font-b6"
           >
             Cancel
           </Button>
@@ -42,7 +44,7 @@ const Logout = ({ open, handleOk, handleCancel }) => {
           >
             Logout
           </Button>
-        </div>,
+        </div>
       ]}
     >
       <div className="flex flex-col justify-center items-center gap-5">
