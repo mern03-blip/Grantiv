@@ -26,9 +26,13 @@ const Login = () => {
 
         const organizations = response.organizations
 
+        message.success(response.message || "Login successful");
         localStorage.setItem("token", response.token);
         localStorage.setItem("userId", response.id);
-        message.success(response.message || "Login successful");
+        // const role = response?.organizations?.[0]?.role || null;
+        // if (role) {
+        //   localStorage.setItem("Role", role);
+        // }
         navigate('/organization-page', {
           state: {
             organizations: organizations

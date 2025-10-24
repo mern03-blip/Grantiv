@@ -15,6 +15,7 @@ import {
   SunIcon,
 } from '../../components/icons/Icons';
 import Logout from '../../components/modals/Logout'; // Assuming LogoutModal is in this path
+import { DarkLogo, SidebarLogo } from '../../assets/image';
 
 export const Sidebar = ({
   currentView,
@@ -107,7 +108,7 @@ export const Sidebar = ({
         }`}
     >
       {/* Logo */}
-      <div
+      {/* <div
         className={`flex items-center py-4 mb-6 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'px-2'
           }`}
       >
@@ -117,6 +118,40 @@ export const Sidebar = ({
           </div>
         ) : (
           <GrantivLogo className="h-8 w-auto" />
+        )}
+      </div> */}
+      <div
+        className={`flex items-center py-4 mb-6 transition-all duration-300 ${isCollapsed ? "justify-center px-0" : "px-2"
+          }`}
+      >
+        {isCollapsed ? (
+          <div className="w-8 h-8 flex items-center justify-center">
+            {/* Light mode logo */}
+            <img
+              src={SidebarLogo}
+              alt="Grantiv Logo"
+              className="h-8 w-8 object-contain block dark:hidden"
+            />
+            {/* Dark mode logo */}
+            <img
+              src={DarkLogo}
+              alt="Grantiv Dark Logo"
+              className="h-8 w-8 object-contain hidden dark:block"
+            />
+          </div>
+        ) : (
+          <div className="flex items-center justify-cente">
+            <img
+              src={SidebarLogo}
+              alt="Grantiv Logo"
+              className="w-[320px] px-3 my-[18px] h-auto block dark:hidden"
+            />
+            <img
+              src={DarkLogo}
+              alt="Grantiv Dark Logo"
+              className="w-[320px] h-auto hidden dark:block"
+            />
+          </div>
         )}
       </div>
 
@@ -231,12 +266,12 @@ export const Sidebar = ({
         <Logout
           open={showLogoutModal}
           handleOk={() => {
-            // localStorage.clear(); 
-            localStorage.removeItem('token');
-            localStorage.removeItem('userId');
-            // localStorage.removeItem('organizationId');
-            localStorage.removeItem("orgId");
-            localStorage.removeItem("orgName");
+            localStorage.clear();
+            // localStorage.removeItem('token');
+            // localStorage.removeItem('userId');
+            // localStorage.removeItem('grantiv_onboarding_skipped');
+            // localStorage.removeItem("orgId");
+            // localStorage.removeItem("orgName");
             setShowLogoutModal(false);
             navigate('auth/login');
           }}

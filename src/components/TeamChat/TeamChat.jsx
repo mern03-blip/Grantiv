@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import axios from 'axios'; // For fetching initial data
 import { PaperAirplaneIcon, ChatBubbleOvalLeftEllipsisIcon } from '../icons/Icons';
 import "./chat.scss"
 import Loader from '../loading/Loader';
+import axiosInstance from '../../api/axios/axiosInstance';
 
 // This is a custom hook to create a memoized map of members by ID for quick lookups
 const useMembersMap = (members) => {
@@ -49,8 +49,8 @@ export const TeamChat = ({ currentUser, selectedOrgId }) => {
 
                 // Fetch chat history and member list in parallel
                 const [historyRes, membersRes] = await Promise.all([
-                    axios.get('https://grantiv.uc.r.appspot.com/api/chat/messages', config),
-                    axios.get('https://grantiv.uc.r.appspot.com/api/organizations/members', config)
+                    axiosInstance.get('/chat/messages', config),
+                    axiosInstance.get('/organizations/members', config)
                 ]);
 
                 setMessages(historyRes.data);
@@ -169,7 +169,9 @@ export const TeamChat = ({ currentUser, selectedOrgId }) => {
                             {/* Avatar for other users */}
                             {!isCurrentUser && member && (
                                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-500">
+
                                     {member?.name?.charAt(0) || "?"}
+                                    {/* {member?.name?.charAt(0) || "?"} */}
                                 </div>
                             )}
 
@@ -214,7 +216,8 @@ export const TeamChat = ({ currentUser, selectedOrgId }) => {
                             {/* Avatar for current user */}
                             {isCurrentUser && (
                                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-500">
-                                    {currentUser?.name?.charAt(0) || "U"}
+
+                                    {member?.name?.charAt(0)}
                                 </div>
                             )}
                         </div>
@@ -243,6 +246,5 @@ export const TeamChat = ({ currentUser, selectedOrgId }) => {
                 </div>
             </div>
         </div>
-
     );
 };

@@ -112,7 +112,7 @@ const AIAssistant = () => {
         isLoading: isSavedLoading,
         // refetch: refetchSavedGrants
     } = useQuery({
-        queryKey: ["savedGrants"],
+        queryKey: ["FavGrants"],
         queryFn: handleGetFavoriteGrants,
         staleTime: 1000 * 60, // 1 min
         retry: 1,

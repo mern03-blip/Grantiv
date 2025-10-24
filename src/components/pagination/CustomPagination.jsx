@@ -225,8 +225,8 @@ const CustomPagination = ({ currentPage, totalPages = 4, onPageChange }) => {
             <Button
                 type="primary"
                 className={`${safeCurrentPage === 1
-                        ? "bg-gray-400 hover:!bg-gray-400"
-                        : "bg-mainColor hover:!bg-mainColor"
+                    ? "bg-mercury  dark:bg-mercury"
+                    : "bg-mainColor hover:!bg-mainColor"
                     } text-white font-custom border-none text-sm py-5 px-4 rounded-[1.2rem] flex items-center gap-2`}
                 icon={<SlArrowLeft />}
                 onClick={handlePrev}
@@ -250,8 +250,8 @@ const CustomPagination = ({ currentPage, totalPages = 4, onPageChange }) => {
             <Button
                 type="primary"
                 className={`${safeCurrentPage === pageCount
-                        ? "bg-gray-400 hover:!bg-gray-400"
-                        : "bg-mainColor hover:!bg-mainColor"
+                    ? "bg-mercury  dark:bg-mercury"
+                    : "bg-mainColor hover:!bg-mainColor"
                     } text-white font-custom border-none text-sm py-5 px-7 rounded-[1.2rem] flex items-center gap-2`}
                 onClick={handleNext}
                 disabled={safeCurrentPage === pageCount}

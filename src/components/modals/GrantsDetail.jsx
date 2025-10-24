@@ -451,7 +451,7 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
     mutationFn: (grantId) => handleFavoriteGrants(grantId),
     onSuccess: () => {
       // ✅ Only invalidate savedGrants, NOT the main grants list
-      queryClient.invalidateQueries(["savedGrants"]);
+      queryClient.invalidateQueries({queryKey:["FavGrants"]});
       // ✅ Don't invalidate ["grants"] to prevent parent re-render
     },
     onError: (error) => {
@@ -460,7 +460,7 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
     },
   });
 
-  // ✅ Fetch user's favorite grants initially
+  // ✅ chk is grant is favorite or not
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
@@ -482,6 +482,7 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
       setIsSaved(isFavorite);
     }
   }, [grant, savedGrants]);
+
 
   // ✅ Optimistic update - update local state immediately
   const onToggleSave = () => {
@@ -825,4 +826,67 @@ export default GrantDetailModal;
 
 
 
+// import React, { useEffect } from "react";
+// import { Modal, Spin } from "antd";
+// import { useSearchParams } from "react-router-dom";
+// import { useQuery } from "@tanstack/react-query";
+// import { getGrantDetail, } from "../../api/endpoints/grants"; // 👈 your API call
+
+// const GrantDetailModal = ({ open, onClose }) => {
+//     const [searchParams] = useSearchParams();
+//     const grantId = searchParams.get("Id"); // ✅ Get ID from URL
+
+//     console.log("Id",grantId);
+    
+//     // ✅ Fetch Grant Details based on grantId
+//     const { data: grant, isLoading, isError } = useQuery({
+//         queryKey: ["grant-detail", grantId],
+//         queryFn: () => getGrantDetail(grantId),
+//         enabled: !!grantId, // only run if grantId exists
+//     });
+
+//     console.log(grant);
+    
+//     useEffect(() => {
+//         if (!open && grantId) {
+//             // optional: clear data or log something when modal closes
+//         }
+//     }, [open]);
+
+//     return (
+//         <Modal
+//             open={open}
+//             onCancel={onClose}
+//             footer={null}
+//             width={800}
+//             centered
+//             className="rounded-xl overflow-hidden"
+//         >
+//             {isLoading ? (
+//                 <div className="flex justify-center items-center py-10">
+//                     <Spin size="large" />
+//                 </div>
+//             ) : isError ? (
+//                 <p className="text-center text-red-500 py-10">Failed to load grant details.</p>
+//             ) : grant ? (
+//                 <div className="space-y-4 p-4">
+//                     <h2 className="text-xl font-bold text-night dark:text-dark-text">{grant.title}</h2>
+//                     <p className="text-sm text-night/70 dark:text-dark-textMuted">
+//                         <strong>Agency:</strong> {grant.agency || "N/A"}
+//                     </p>
+//                     <p className="text-sm text-night/70 dark:text-dark-textMuted">
+//                         <strong>Amount:</strong> {grant.totalAmountAvailable || "N/A"}
+//                     </p>
+//                     <p className="text-sm text-night/80 dark:text-dark-text/80 leading-relaxed">
+//                         {grant.description || "No description available."}
+//                     </p>
+//                 </div>
+//             ) : (
+//                 <p className="text-center text-gray-500 py-10">No grant found.</p>
+//             )}
+//         </Modal>
+//     );
+// };
+
+// export default GrantDetailModal;
 

@@ -25,7 +25,7 @@ export const getGrantDetail = async (id) => {
     // }
   });
   console.log("Single grant", response.data);
-  return response.data;
+  return response.data.data;
 };
 
 //Favorite Grant
@@ -54,4 +54,33 @@ export const handleGetFavoriteGrants = async () => {
 
   console.log("Get Favorite grants:", response.data);
   return response.data;
+};
+
+
+
+//Get Ai Recomanded Grants
+// ✅ API function to get AI recommended grants
+export const getAIRecommendedGrants = async () => {
+    const token = localStorage.getItem('token');
+    const organizationId = localStorage.getItem('orgId');
+
+    if (!token || !organizationId) {
+        throw new Error("Authentication details are missing. Please log in again.");
+    }
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'X-Organization-ID': organizationId,
+        },
+    };
+
+    const response = await axiosInstance.get('/organizations/recommendations', config);
+
+    // Format response for frontend use
+    return response.data.map((grant) => ({
+        ...grant,
+        id: grant._id,
+        matchPercentage: Math.round(grant.score * 100),
+    }));
 };

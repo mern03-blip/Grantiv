@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import OnboardingView from '../components/onboardingview/OnboardingView';
 import { Sidebar } from './sidebar/Sidebar';
 import { Outlet } from 'react-router-dom';
+import "./layout.scss"
 
 // Function to get the initial theme from localStorage
 const getInitialTheme = () => {
@@ -123,7 +124,7 @@ const AdminLayout = () => {
                     setTheme={setTheme}
                 />
             )}
-            <main className={`flex-1 transition-all duration-300 overflow-y-auto ${currentView === 'ai_assistant' ? 'w-screen h-screen p-0' : 'p-8 bg-[#F7F7F7] dark:bg-dark-background'}`}>
+            <main className={`flex-1 transition-all duration-300 overflow-y-auto no-scrollbar ${currentView === 'ai_assistant' ? 'w-screen h-screen p-0' : 'p-8 bg-[#F7F7F7] dark:bg-dark-background'}`}>
                 <div className={currentView === 'ai_assistant' ? 'h-full' : 'max-w-7xl mx-auto'}>
                     <AnimatePresence mode="wait">
                         <motion.div

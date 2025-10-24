@@ -193,25 +193,8 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
                                             <p className="text-sm text-night/60 dark:text-dark-textMuted">{member.role}</p>
                                         </div>
                                     </div>
-                                    {/* <div className="flex items-center gap-2">
-                                        <select
-                                            value={member.role}
-                                            // onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                                            onChange={(e) => handleRoleChange(member.user._id, e.target.value)}
-                                            className="text-sm border-mercury/80 dark:border-dark-border rounded-md focus:ring-primary focus:border-primary text-night bg-white dark:bg-dark-surface dark:text-dark-text py-1.5 pl-2 pr-7"
-                                        >
-                                            <option>admin</option>
-                                            <option>lead-writer</option>
-                                            <option>financials</option>
-                                            <option>reviewer</option>
-                                            <option>member</option>
-                                        </select>
 
-                                        <button onClick={() => handleRemoveMember(member.user._id)} className="p-2 text-night/50 dark:text-dark-textMuted/70 hover:text-red-500 dark:hover:text-red-400" aria-label={`Remove ${member.name}`}>
-                                            <XIcon className="w-5 h-5" />
-                                        </button>
-                                    </div> */}
-                                    <div className="flex items-center gap-2">
+                                    {/* <div className="flex items-center gap-2">
                                         <select
                                             value={member.role}
                                             onChange={(e) => handleRoleChange(member.user._id, e.target.value)}
@@ -226,15 +209,6 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
                                             <option>member</option>
                                         </select>
 
-                                        {/* <button
-                                            onClick={() => handleRemoveMember(member.user._id)}
-                                            disabled={member.role === "admin"} // ✅ disable button if admin
-                                            className={`p-2 text-night/50 dark:text-dark-textMuted/70 hover:text-red-500 dark:hover:text-red-400 
-                                            ${member.role === "admin" ? "cursor-not-allowed opacity-60 hover:text-night/50 dark:hover:text-dark-textMuted/70" : ""}`}
-                                            aria-label={`Remove ${member.name}`}
-                                        >
-                                            <XIcon className="w-5 h-5" />
-                                        </button> */}
                                         <button
                                             onClick={() => {
                                                 setSelectedMember(member); // store member data
@@ -259,8 +233,62 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
                                                 }
                                             }}
                                         />
+                                    </div> */}
+                                    {(() => {
+                                        // ✅ Get logged-in user role from localStorage
+                                        const currentUserRole = localStorage.getItem("Role");
 
-                                    </div>
+                                        // ✅ Show only if logged-in user is admin
+                                        if (currentUserRole === "admin") {
+                                            return (
+                                                <div className="flex items-center gap-2">
+                                                    <select
+                                                        value={member.role}
+                                                        onChange={(e) => handleRoleChange(member.user._id, e.target.value)}
+                                                        disabled={member.role === "admin"} // disable dropdown for admin members
+                                                        className={`text-sm border-mercury/80 dark:border-dark-border rounded-md focus:ring-primary focus:border-primary text-night bg-white dark:bg-dark-surface dark:text-dark-text py-1.5 pl-2 pr-7 
+                                                        ${member.role === "admin" ? "cursor-not-allowed opacity-60" : ""}`}
+                                                    >
+                                                        <option>admin</option>
+                                                        <option>lead-writer</option>
+                                                        <option>financials</option>
+                                                        <option>reviewer</option>
+                                                        <option>member</option>
+                                                    </select>
+
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedMember(member);
+                                                            setIsDeleteModalOpen(true);
+                                                        }}
+                                                        disabled={member.role === "admin"}
+                                                        className={`p-2 text-night/50 dark:text-dark-textMuted/70 hover:text-red-500 dark:hover:text-red-400 
+                                                        ${member.role === "admin" ? "cursor-not-allowed opacity-60 hover:text-night/50 dark:hover:text-dark-textMuted/70" : ""}`}
+                                                        aria-label={`Remove ${member.name}`}
+                                                    >
+                                                        <XIcon className="w-5 h-5" />
+                                                    </button>
+
+                                                    <DeleteUserModal
+                                                        open={isDeleteModalOpen}
+                                                        memberName={selectedMember?.user?.name}
+                                                        handleCancel={() => setIsDeleteModalOpen(false)}
+                                                        handleOk={() => {
+                                                            if (selectedMember) {
+                                                                handleRemoveMember(selectedMember.user._id);
+                                                                setIsDeleteModalOpen(false);
+                                                            }
+                                                        }}
+                                                    />
+                                                </div>
+                                            );
+                                        }
+
+                                        // ✅ If user is not admin → return nothing (hide completely)
+                                        return null;
+                                    })()}
+
+
                                 </div>
                             ))}
                         </div>
