@@ -1,0 +1,11 @@
+/* Remove all Ant Design default borders and background */
+// .custom-select .ant-select-selector {
+//     height: 40px;
+// }
+
+/* Keep same border color on hover and focus */
+.custom-select.ant-select-focused .ant-select-selector,
+.custom-select:hover .ant-select-selector {
+    border-color: #DBDBDB !important;
+    box-shadow: none !important;
+}

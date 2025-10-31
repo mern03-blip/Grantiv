@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-
 import {
   GrantivLogo,
   DashboardIcon,
@@ -104,7 +103,7 @@ export const Sidebar = ({
 
   return (
     <aside
-      className={`bg-white dark:bg-dark-surface border-r border-mercury dark:border-dark-border p-4 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
+      className={`bg-white overflow-y-auto no-scrollbar  dark:bg-dark-surface border-r border-mercury dark:border-dark-border p-4 flex flex-col transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'
         }`}
     >
       {/* Logo */}

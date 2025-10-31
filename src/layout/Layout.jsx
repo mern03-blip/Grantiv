@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import OnboardingView from '../components/onboardingview/OnboardingView';
 import { Sidebar } from './sidebar/Sidebar';
 import { Outlet } from 'react-router-dom';
-import "./layout.scss"
 
 // Function to get the initial theme from localStorage
 const getInitialTheme = () => {

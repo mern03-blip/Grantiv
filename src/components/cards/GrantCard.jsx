@@ -16,8 +16,7 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const amountValue = grant.totalAmountAvailable ?
-        parseFloat(String(grant.totalAmountAvailable).replace(/[^0-9.]/g, '')) :
-        0; // Use 0 or null if not available
+        parseFloat(String(grant.totalAmountAvailable).replace(/[^0-9.]/g, '')) : 0; // Use 0 or null if not available
 
     // 3. Deadline: Use 'closeDateTime' from the API
     const deadlineDateString = grant.closeDateTime;
@@ -81,7 +80,7 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
             <div className="p-4 flex flex-col flex-grow">
                 <h3 className="text-md font-bold text-night dark:text-dark-text mb-1 font-heading
                  group-hover:text-secondary dark:group-hover:text-dark-secondary transition-colors cursor-pointer"
-                onClick={() => setIsModalOpen(true)}
+                    onClick={() => setIsModalOpen(true)}
                 >{grant.title}</h3>
                 {/* UPDATED: Use the 'funder' (agency) variable */}
                 <p className="text-xs text-night/60 dark:text-dark-textMuted mb-3 flex-grow font-medium">{funder || 'N/A Agency'}</p>
@@ -91,7 +90,8 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
                 <div className="text-sm text-night dark:text-dark-text space-y-2 mt-auto">
                     <div>
                         {/* UPDATED: Use the 'amountValue' variable */}
-                        <span className="font-bold text-secondary dark:text-dark-secondary text-base">{currencyFormatter.format(amountValue)}</span>
+                        {/* <span className="font-bold text-secondary dark:text-dark-secondary text-base">{currencyFormatter.format(amountValue)}</span> */}
+                        <span className="font-bold text-secondary dark:text-dark-secondary text-base">{grant.totalAmountAvailable}</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-night/70 dark:text-dark-textMuted/80">
                         <CalendarDaysIcon className="w-4 h-4" />

@@ -1,18 +1,49 @@
 import axiosInstance from "../axios/axiosInstance";
 
 
-//All Grants
-export const getGrants = async (page = 1, limit = 10, search = '') => {
+//Get All Grants
+// export const getGrants = async (page = 1, limit = 10, search = '') => {
 
-  const response = await axiosInstance.get("/grants/get-grants", {
-    params: {
-      page,
-      limit,
-      search
-    }
-  });
+//   const response = await axiosInstance.get("/grants/get-grants", {
+//     params: {
+//       page,
+//       limit,
+//       search
+//     }
+//   });
 
-  console.log("All grants", response.data);
+//   console.log("All grants", response.data);
+//   return response.data;
+// };
+
+export const getGrants = async ({
+  page = 1,
+  limit = 10,
+  search = "",
+  sortBy = "_id",
+  sortOrder = "asc",
+  filterLocation = "",
+  filterAgency = "",
+  minAmount = "",
+  maxAmount = "",
+} = {}) => {
+  // Dynamically build params object (only include filled fields)
+  const params = {
+    page,
+    limit,
+    search,
+    sortBy,
+    sortOrder,
+  };
+
+  if (filterLocation) params.filterLocation = filterLocation;
+  if (filterAgency) params.filterAgency = filterAgency;
+  if (minAmount) params.minAmount = minAmount;
+  if (maxAmount) params.maxAmount = maxAmount;
+
+  const response = await axiosInstance.get("/grants/get-grants", { params });
+
+  console.log("All grants:", response.data);
   return response.data;
 };
 
@@ -44,7 +75,6 @@ export const handleFavoriteGrants = async (grantId) => {
 };
 
 
-
 //Get Favorite Grants
 export const handleGetFavoriteGrants = async () => {
   const response = await axiosInstance.post(`/grants/favorites`, {
@@ -61,26 +91,26 @@ export const handleGetFavoriteGrants = async () => {
 //Get Ai Recomanded Grants
 // ✅ API function to get AI recommended grants
 export const getAIRecommendedGrants = async () => {
-    const token = localStorage.getItem('token');
-    const organizationId = localStorage.getItem('orgId');
+  const token = localStorage.getItem('token');
+  const organizationId = localStorage.getItem('orgId');
 
-    if (!token || !organizationId) {
-        throw new Error("Authentication details are missing. Please log in again.");
-    }
+  if (!token || !organizationId) {
+    throw new Error("Authentication details are missing. Please log in again.");
+  }
 
-    const config = {
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'X-Organization-ID': organizationId,
-        },
-    };
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'X-Organization-ID': organizationId,
+    },
+  };
 
-    const response = await axiosInstance.get('/organizations/recommendations', config);
+  const response = await axiosInstance.get('/organizations/recommendations', config);
 
-    // Format response for frontend use
-    return response.data.map((grant) => ({
-        ...grant,
-        id: grant._id,
-        matchPercentage: Math.round(grant.score * 100),
-    }));
+  // Format response for frontend use
+  return response.data.map((grant) => ({
+    ...grant,
+    id: grant._id,
+    matchPercentage: Math.round(grant.score * 100),
+  }));
 };

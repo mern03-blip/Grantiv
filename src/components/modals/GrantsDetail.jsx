@@ -418,8 +418,415 @@
 
 
 //Modal
+// import React, { useState, useEffect } from "react";
+// import { Modal, message } from "antd";
+// import { motion, AnimatePresence } from "framer-motion";
+// import {
+//   SparklesIcon,
+//   HeartIcon,
+//   BuildingOfficeIcon,
+//   BellIcon,
+//   SpinnerIcon,
+//   XIcon,
+// } from "../icons/Icons";
+// import { getGrantQuickReview } from "../../services/geminiService";
+// import { handleFavoriteGrants, handleGetFavoriteGrants } from "../../api/endpoints/grants";
+// import { ReminderModal } from "./ReminderModal";
+// import "./grantdetail.scss"
+// import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+// const GrantDetailModal = ({ open, onClose, grant }) => {
+//   const [activeTab, setActiveTab] = useState("Overview");
+//   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+//   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+//   const [isReviewLoading, setIsReviewLoading] = useState(false);
+//   const [reviewContent, setReviewContent] = useState(null);
+//   const [savedGrants, setSavedGrants] = useState([]);
+//   const [isSaved, setIsSaved] = useState(false);
+
+//   const queryClient = useQueryClient();
+
+//   // ✅ Modified mutation - DON'T invalidate 'grants' query, only 'savedGrants'
+//   const { mutate: toggleFavorite, isPending: isToggling } = useMutation({
+//     mutationFn: (grantId) => handleFavoriteGrants(grantId),
+//     onSuccess: () => {
+//       // ✅ Only invalidate savedGrants, NOT the main grants list
+//       queryClient.invalidateQueries({queryKey:["FavGrants"]});
+//       // ✅ Don't invalidate ["grants"] to prevent parent re-render
+//     },
+//     onError: (error) => {
+//       console.error("Error toggling favorite:", error);
+//       message.error("Failed to update favorites.");
+//     },
+//   });
+
+//   // ✅ chk is grant is favorite or not
+//   useEffect(() => {
+//     const fetchFavorites = async () => {
+//       try {
+//         const { data } = await handleGetFavoriteGrants();
+//         setSavedGrants(data || []);
+//       } catch (err) {
+//         console.error("Error fetching favorite grants:", err);
+//       }
+//     };
+//     if (open) {
+//       fetchFavorites();
+//     }
+//   }, [open]);
+
+//   // ✅ Check if current grant is already saved
+//   useEffect(() => {
+//     if (grant?._id && savedGrants.length > 0) {
+//       const isFavorite = savedGrants.some((g) => g._id === grant._id);
+//       setIsSaved(isFavorite);
+//     }
+//   }, [grant, savedGrants]);
+
+
+//   // ✅ Optimistic update - update local state immediately
+//   const onToggleSave = () => {
+//     if (!grant?._id || isToggling) return;
+
+//     const nextState = !isSaved;
+
+//     // Update local state immediately
+//     setIsSaved(nextState);
+
+//     // Update savedGrants array optimistically
+//     if (nextState) {
+//       setSavedGrants(prev => [...prev, grant]);
+//     } else {
+//       setSavedGrants(prev => prev.filter(g => g._id !== grant._id));
+//     }
+
+//     toggleFavorite(grant._id, {
+//       onSuccess: () => {
+//         message.success(
+//           nextState
+//             ? "Added to your Favorites collection!"
+//             : "Removed from your Favorites collection."
+//         );
+//       },
+//       onError: () => {
+//         // Revert optimistic update on error
+//         setIsSaved((prev) => !prev);
+//         if (nextState) {
+//           setSavedGrants(prev => prev.filter(g => g._id !== grant._id));
+//         } else {
+//           setSavedGrants(prev => [...prev, grant]);
+//         }
+//         message.error("Something went wrong while updating favorites.");
+//       },
+//     });
+//   };
+
+//   const currencyFormatter = new Intl.NumberFormat("en-AU", {
+//     style: "currency",
+//     currency: "AUD",
+//     minimumFractionDigits: 0,
+//     maximumFractionDigits: 0,
+//   });
+
+//   const getDaysRemaining = () => {
+//     if (!grant?.closeDateTime) return -1;
+//     const date = new Date(grant.closeDateTime);
+//     const today = new Date();
+//     today.setHours(0, 0, 0, 0);
+//     date.setHours(0, 0, 0, 0);
+//     const diffTime = date.getTime() - today.getTime();
+//     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+//   };
+
+//   const daysRemaining = getDaysRemaining();
+//   const tabs = ["Overview", "Eligibility", "Documents", "Contacts"];
+
+//   const handleQuickReview = async () => {
+//     if (!grant) return;
+//     setIsReviewModalOpen(true);
+//     if (reviewContent) return;
+//     setIsReviewLoading(true);
+//     const review = await getGrantQuickReview(grant);
+//     setReviewContent(review);
+//     setIsReviewLoading(false);
+//   };
+
+//   const TabContent = () => {
+//     if (!grant) return null;
+//     switch (activeTab) {
+//       case "Eligibility":
+//         return (
+//           <div>
+//             <h4 className="text-lg font-bold mb-2 text-night dark:text-dark-text">
+//               Eligibility Requirements
+//             </h4>
+//             <p className="text-night/80 dark:text-dark-text/80 whitespace-pre-line">
+//               {grant.eligibility}
+//             </p>
+//           </div>
+//         );
+//       case "Documents":
+//         return (
+//           <div>
+//             <h4 className="text-lg font-bold mb-2 text-night dark:text-dark-text">
+//               Application Instructions
+//             </h4>
+//             <p className="text-night/80 dark:text-dark-text/80 whitespace-pre-line">
+//               {grant.applicationInstructions}
+//             </p>
+//           </div>
+//         );
+//       case "Contacts":
+//         return (
+//           <div>
+//             <h4 className="text-lg font-bold mb-2 text-night dark:text-dark-text">
+//               Funder Contact
+//             </h4>
+//             <p className="text-night/80 dark:text-dark-text/80 mb-2">
+//               Email: {grant.contactEmail}
+//             </p>
+//             <p className="text-night/80 dark:text-dark-text/80">
+//               Agency: {grant.agency}
+//             </p>
+//           </div>
+//         );
+//       default:
+//         return (
+//           <div>
+//             <h4 className="text-lg font-bold mb-2 text-night dark:text-dark-text">
+//               Description
+//             </h4>
+//             <p className="text-night/80 dark:text-dark-text/80 mb-4 whitespace-pre-line">
+//               {grant.description}
+//             </p>
+//           </div>
+//         );
+//     }
+//   };
+
+//   if (!grant) return null;
+
+//   return (
+//     <Modal
+//       open={open}
+//       onCancel={onClose}
+//       footer={null}
+//       centered
+//       width={1000}
+//       className="grant-detail-modal"
+//       closable={false}
+//       destroyOnHidden={false}
+//     >
+//       <AnimatePresence mode="wait">
+//         <motion.div
+//           key={grant._id}
+//           className="bg-white dark:bg-dark-surface text-night dark:text-dark-text rounded-xl p-6 border border-mercury/30 dark:border-dark-border shadow-lg"
+//           initial={{ opacity: 0, y: 20, scale: 0.98 }}
+//           animate={{ opacity: 1, y: 0, scale: 1 }}
+//           exit={{ opacity: 0, y: 20, scale: 0.98 }}
+//           transition={{ duration: 0.25 }}
+//         >
+//           {/* Header */}
+//           <div className="flex justify-between items-start mb-4">
+//             <div>
+//               <h2 className="text-2xl font-bold">{grant?.title ?? "N/A"}</h2>
+//               <div className="flex items-center gap-3 mt-2 text-sm text-night/70 dark:text-dark-text/70">
+//                 <BuildingOfficeIcon className="w-5 h-5" />
+//                 <span>{grant?.agency ?? "N/A"}</span>
+//               </div>
+//             </div>
+//             <div className="flex items-center gap-3">
+//               {/* 
+//               <button
+//                 onClick={onToggleSave}
+//                 disabled={isToggling}
+//                 className={`transition-colors p-1 ${isSaved
+//                   ? "text-primary"
+//                   : "text-night/50 dark:text-dark-textMuted hover:text-primary"
+//                   }`}
+//               >
+//                 <HeartIcon className="w-6 h-6" isFilled={isSaved} />
+//               </button> */}
+//               <button
+//                 onClick={onToggleSave}
+//                 disabled={isToggling}
+//                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full 
+//                             font-semibold text-sm transition-all duration-200 ease-in-out 
+//                             ${isSaved
+//                     ? "bg-primary text-white shadow-md hover:bg-primary/90"
+//                     : "bg-gray-100 dark:bg-gray-700 text-night/70 dark:text-dark-textMuted hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-primary"}`}>
+//                 {/* The Icon */}
+//                 <HeartIcon className="w-5 h-5" isFilled={isSaved} />
+
+//                 {/* The Text changes based on state */}
+//                 <span className="hidden sm:inline">
+//                   {isSaved ? "Favorite" : "Add Fav"}
+//                 </span>
+//               </button>
+
+//               <button
+//                 onClick={onClose}
+//                 className="text-night/50 dark:text-dark-textMuted hover:text-night dark:hover:text-dark-text"
+//               >
+//                 <XIcon className="w-6 h-6" />
+//               </button>
+//             </div>
+//           </div>
+
+//           {/* Info Grid */}
+//           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+//             <div>
+//               <p className="text-sm text-night/60 dark:text-dark-textMuted">
+//                 Deadline
+//               </p>
+//               <p className="font-semibold">
+//                 {new Date(grant?.closeDateTime).toLocaleDateString("en-AU")}
+//               </p>
+//               {daysRemaining >= 0 ? (
+//                 <p
+//                   className={`text-sm ${daysRemaining < 14
+//                     ? "text-red-600 dark:text-red-400"
+//                     : "text-orange-500 dark:text-orange-400"
+//                     }`}
+//                 >
+//                   Closing in {daysRemaining} day
+//                   {daysRemaining !== 1 && "s"}
+//                 </p>
+//               ) : (
+//                 <p className="text-sm text-night/50 dark:text-dark-textMuted">
+//                   Closed
+//                 </p>
+//               )}
+//             </div>
+//             <div>
+//               <p className="text-sm text-night/60 dark:text-dark-textMuted">
+//                 Amount
+//               </p>
+//               <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">
+//                 {grant?.totalAmountAvailable
+//                   ? currencyFormatter.format(
+//                     Number(grant.totalAmountAvailable.replace(/[^0-9.]/g, ""))
+//                   )
+//                   : "Not Specified"}
+//               </p>
+//             </div>
+//             <div>
+//               <p className="text-sm text-night/60 dark:text-dark-textMuted">
+//                 Location
+//               </p>
+//               <p className="font-semibold">{grant?.location ?? "N/A"}</p>
+//             </div>
+//             <div>
+//               <button
+//                 onClick={() => setIsReminderModalOpen(true)}
+//                 className="w-full h-full flex items-center justify-center gap-2 px-4 py-2 bg-mercury/40 dark:bg-dark-border/60 rounded-lg hover:bg-mercury/60 dark:hover:bg-dark-border/80"
+//               >
+//                 <BellIcon className="w-5 h-5" />
+//                 Set Reminder
+//               </button>
+//             </div>
+//           </div>
+
+//           {/* Tabs */}
+//           <div className="border-b border-mercury/30 dark:border-dark-border mb-4">
+//             <div className="flex space-x-6">
+//               {tabs.map((tab) => (
+//                 <button
+//                   key={tab}
+//                   onClick={() => setActiveTab(tab)}
+//                   className={`pb-3 border-b-2 font-medium text-sm ${activeTab === tab
+//                     ? "border-primary text-secondary dark:text-dark-secondary"
+//                     : "border-transparent text-night/50 dark:text-dark-textMuted hover:text-night dark:hover:text-dark-text"
+//                     }`}
+//                 >
+//                   {tab}
+//                 </button>
+//               ))}
+//             </div>
+//           </div>
+
+//           {/* Content */}
+//           <div className="py-4">
+//             <TabContent />
+//           </div>
+
+//           {/* Footer Buttons */}
+//           <div className="mt-6 pt-4 border-t border-mercury/30 dark:border-dark-border flex justify-end gap-3">
+//             <motion.button
+//               onClick={() => window.open(grant?.url, "_blank")}
+//               className="px-6 py-3 bg-primary font-semibold text-night rounded-lg hover:bg-secondary transition-colors duration-300"
+//               whileHover={{ scale: 1.05 }}
+//               whileTap={{ scale: 0.95 }}
+//             >
+//               Apply Now
+//             </motion.button>
+//             <motion.button
+//               onClick={handleQuickReview}
+//               className="px-6 py-3 bg-night dark:bg-dark-border text-white dark:text-dark-text rounded-lg flex items-center gap-2 border border-mercury/50 dark:border-dark-border hover:bg-gray-800 dark:hover:bg-dark-border/50 transition-colors duration-300"
+//               whileHover={{ scale: 1.05 }}
+//               whileTap={{ scale: 0.95 }}
+//             >
+//               <SparklesIcon className="w-5 h-5" />
+//               Quick AI Review
+//             </motion.button>
+//           </div>
+
+//           {/* Review Modal */}
+//           {isReviewModalOpen && (
+//             <div
+//               className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[1000] p-4"
+//               onClick={() => setIsReviewModalOpen(false)}
+//             >
+//               <motion.div
+//                 onClick={(e) => e.stopPropagation()}
+//                 className="bg-white dark:bg-dark-surface rounded-lg shadow-xl p-6 max-w-2xl w-full border border-mercury dark:border-dark-border"
+//                 initial={{ scale: 0.9, opacity: 0 }}
+//                 animate={{ scale: 1, opacity: 1 }}
+//                 exit={{ scale: 0.9, opacity: 0 }}
+//               >
+//                 <div className="flex justify-between items-center mb-4">
+//                   <h3 className="text-xl font-bold flex items-center gap-2 text-night dark:text-dark-text">
+//                     <SparklesIcon className="w-5 h-5" /> AI Grant Review
+//                   </h3>
+//                   <button
+//                     onClick={() => setIsReviewModalOpen(false)}
+//                     className="text-night/60 dark:text-dark-textMuted hover:text-night dark:hover:text-dark-text"
+//                   >
+//                     <XIcon className="w-6 h-6" />
+//                   </button>
+//                 </div>
+//                 {isReviewLoading ? (
+//                   <div className="flex justify-center items-center h-48">
+//                     <SpinnerIcon className="w-10 h-10 text-primary animate-spin" />
+//                   </div>
+//                 ) : (
+//                   <div className="text-night/80 dark:text-dark-text/80 whitespace-pre-wrap text-sm leading-relaxed max-h-[60vh] overflow-y-auto">
+//                     {reviewContent}
+//                   </div>
+//                 )}
+//               </motion.div>
+//             </div>
+//           )}
+
+//           {/* Reminder Modal */}
+//           {isReminderModalOpen && (
+//             <ReminderModal
+//               grant={grant}
+//               onClose={() => setIsReminderModalOpen(false)}
+//             />
+//           )}
+//         </motion.div>
+//       </AnimatePresence>
+//     </Modal>
+//   );
+// };
+
+// export default GrantDetailModal;
+
+
+//RTK
 import React, { useState, useEffect } from "react";
-import { Modal, message } from "antd";
+import { Button, Modal, message } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   SparklesIcon,
@@ -430,10 +837,14 @@ import {
   XIcon,
 } from "../icons/Icons";
 import { getGrantQuickReview } from "../../services/geminiService";
-import { handleFavoriteGrants, handleGetFavoriteGrants } from "../../api/endpoints/grants";
 import { ReminderModal } from "./ReminderModal";
-import "./grantdetail.scss"
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import "./grantdetail.scss";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchFavoriteGrants,
+  toggleFavoriteGrant,
+  selectIsGrantFavorite,
+} from "../../redux/slices/favoriteGrantSlice";
 
 const GrantDetailModal = ({ open, onClose, grant }) => {
   const [activeTab, setActiveTab] = useState("Overview");
@@ -441,86 +852,46 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   const [isReviewLoading, setIsReviewLoading] = useState(false);
   const [reviewContent, setReviewContent] = useState(null);
-  const [savedGrants, setSavedGrants] = useState([]);
-  const [isSaved, setIsSaved] = useState(false);
 
-  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
 
-  // ✅ Modified mutation - DON'T invalidate 'grants' query, only 'savedGrants'
-  const { mutate: toggleFavorite, isPending: isToggling } = useMutation({
-    mutationFn: (grantId) => handleFavoriteGrants(grantId),
-    onSuccess: () => {
-      // ✅ Only invalidate savedGrants, NOT the main grants list
-      queryClient.invalidateQueries({queryKey:["FavGrants"]});
-      // ✅ Don't invalidate ["grants"] to prevent parent re-render
-    },
-    onError: (error) => {
-      console.error("Error toggling favorite:", error);
-      message.error("Failed to update favorites.");
-    },
-  });
+  // ✅ Access Redux state
+  const { grants: favoriteGrants, loading } = useSelector(
+    (state) => state.favoriteGrants
+  );
 
-  // ✅ chk is grant is favorite or not
+  // ✅ Check if this grant is favorite
+  const isSaved = useSelector((state) =>
+    selectIsGrantFavorite(state, grant?._id)
+  );
+
+  // ✅ Fetch favorite grants when modal opens
   useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        const { data } = await handleGetFavoriteGrants();
-        setSavedGrants(data || []);
-      } catch (err) {
-        console.error("Error fetching favorite grants:", err);
-      }
-    };
     if (open) {
-      fetchFavorites();
+      dispatch(fetchFavoriteGrants());
     }
-  }, [open]);
+  }, [open, dispatch]);
 
-  // ✅ Check if current grant is already saved
-  useEffect(() => {
-    if (grant?._id && savedGrants.length > 0) {
-      const isFavorite = savedGrants.some((g) => g._id === grant._id);
-      setIsSaved(isFavorite);
-    }
-  }, [grant, savedGrants]);
+  // ✅ Toggle favorite (Redux)
+  const onToggleSave = async () => {
+    if (!grant?._id) return;
 
-
-  // ✅ Optimistic update - update local state immediately
-  const onToggleSave = () => {
-    if (!grant?._id || isToggling) return;
-
-    const nextState = !isSaved;
-
-    // Update local state immediately
-    setIsSaved(nextState);
-
-    // Update savedGrants array optimistically
-    if (nextState) {
-      setSavedGrants(prev => [...prev, grant]);
-    } else {
-      setSavedGrants(prev => prev.filter(g => g._id !== grant._id));
-    }
-
-    toggleFavorite(grant._id, {
-      onSuccess: () => {
+    dispatch(toggleFavoriteGrant(grant._id))
+      .unwrap()
+      .then(() => {
         message.success(
-          nextState
+          !isSaved
             ? "Added to your Favorites collection!"
             : "Removed from your Favorites collection."
         );
-      },
-      onError: () => {
-        // Revert optimistic update on error
-        setIsSaved((prev) => !prev);
-        if (nextState) {
-          setSavedGrants(prev => prev.filter(g => g._id !== grant._id));
-        } else {
-          setSavedGrants(prev => [...prev, grant]);
-        }
+        dispatch(fetchFavoriteGrants());
+      })
+      .catch(() => {
         message.error("Something went wrong while updating favorites.");
-      },
-    });
+      });
   };
 
+  // ✅ Utility formatters
   const currencyFormatter = new Intl.NumberFormat("en-AU", {
     style: "currency",
     currency: "AUD",
@@ -636,32 +1007,31 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {/* 
+
+              {/* ✅ Redux-based Favorite Button */}
               <button
                 onClick={onToggleSave}
-                disabled={isToggling}
-                className={`transition-colors p-1 ${isSaved
-                  ? "text-primary"
-                  : "text-night/50 dark:text-dark-textMuted hover:text-primary"
-                  }`}
-              >
-                <HeartIcon className="w-6 h-6" isFilled={isSaved} />
-              </button> */}
-              <button
-                onClick={onToggleSave}
-                disabled={isToggling}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full 
                             font-semibold text-sm transition-all duration-200 ease-in-out 
                             ${isSaved
-                    ? "bg-primary text-white shadow-md hover:bg-primary/90"
-                    : "bg-gray-100 dark:bg-gray-700 text-night/70 dark:text-dark-textMuted hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-primary"}`}>
-                {/* The Icon */}
-                <HeartIcon className="w-5 h-5" isFilled={isSaved} />
-
-                {/* The Text changes based on state */}
-                <span className="hidden sm:inline">
-                  {isSaved ? "Favorite" : "Add Fav"}
-                </span>
+                    ? "bg-mainColor text-white shadow-md"
+                    : "bg-gray-100 dark:bg-gray-700 text-night/70 dark:text-dark-textMuted hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-primary"
+                  }`}
+              >
+                {loading ? (
+                  <span className="loader  w-5 h-5 border-4 border-gray-600 border-t-transparent rounded-full animate-spin"></span>
+                ) : (
+                  <div className="flex items-center justify-center">
+                    <HeartIcon className="w-5 h-5" isFilled={isSaved} />
+                    <span className="hidden sm:inline">
+                      {isSaved ? "Favorite" : "Add Fav"}
+                    </span>
+                  </div>
+                )}
+                {/* <HeartIcon className="w-5 h-5" isFilled={isSaved} />
+                    <span className="hidden sm:inline">
+                      {isSaved ? "Favorite" : "Add Fav"}
+                    </span> */}
               </button>
 
               <button
@@ -702,12 +1072,15 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
               <p className="text-sm text-night/60 dark:text-dark-textMuted">
                 Amount
               </p>
-              <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">
+              {/* <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">
                 {grant?.totalAmountAvailable
                   ? currencyFormatter.format(
                     Number(grant.totalAmountAvailable.replace(/[^0-9.]/g, ""))
                   )
                   : "Not Specified"}
+              </p> */}
+              <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">
+                {grant?.totalAmountAvailable}
               </p>
             </div>
             <div>
@@ -750,7 +1123,7 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
             <TabContent />
           </div>
 
-          {/* Footer Buttons */}
+          {/* Footer */}
           <div className="mt-6 pt-4 border-t border-mercury/30 dark:border-dark-border flex justify-end gap-3">
             <motion.button
               onClick={() => window.open(grant?.url, "_blank")}
@@ -823,70 +1196,4 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
 
 export default GrantDetailModal;
 
-
-
-
-// import React, { useEffect } from "react";
-// import { Modal, Spin } from "antd";
-// import { useSearchParams } from "react-router-dom";
-// import { useQuery } from "@tanstack/react-query";
-// import { getGrantDetail, } from "../../api/endpoints/grants"; // 👈 your API call
-
-// const GrantDetailModal = ({ open, onClose }) => {
-//     const [searchParams] = useSearchParams();
-//     const grantId = searchParams.get("Id"); // ✅ Get ID from URL
-
-//     console.log("Id",grantId);
-    
-//     // ✅ Fetch Grant Details based on grantId
-//     const { data: grant, isLoading, isError } = useQuery({
-//         queryKey: ["grant-detail", grantId],
-//         queryFn: () => getGrantDetail(grantId),
-//         enabled: !!grantId, // only run if grantId exists
-//     });
-
-//     console.log(grant);
-    
-//     useEffect(() => {
-//         if (!open && grantId) {
-//             // optional: clear data or log something when modal closes
-//         }
-//     }, [open]);
-
-//     return (
-//         <Modal
-//             open={open}
-//             onCancel={onClose}
-//             footer={null}
-//             width={800}
-//             centered
-//             className="rounded-xl overflow-hidden"
-//         >
-//             {isLoading ? (
-//                 <div className="flex justify-center items-center py-10">
-//                     <Spin size="large" />
-//                 </div>
-//             ) : isError ? (
-//                 <p className="text-center text-red-500 py-10">Failed to load grant details.</p>
-//             ) : grant ? (
-//                 <div className="space-y-4 p-4">
-//                     <h2 className="text-xl font-bold text-night dark:text-dark-text">{grant.title}</h2>
-//                     <p className="text-sm text-night/70 dark:text-dark-textMuted">
-//                         <strong>Agency:</strong> {grant.agency || "N/A"}
-//                     </p>
-//                     <p className="text-sm text-night/70 dark:text-dark-textMuted">
-//                         <strong>Amount:</strong> {grant.totalAmountAvailable || "N/A"}
-//                     </p>
-//                     <p className="text-sm text-night/80 dark:text-dark-text/80 leading-relaxed">
-//                         {grant.description || "No description available."}
-//                     </p>
-//                 </div>
-//             ) : (
-//                 <p className="text-center text-gray-500 py-10">No grant found.</p>
-//             )}
-//         </Modal>
-//     );
-// };
-
-// export default GrantDetailModal;
 

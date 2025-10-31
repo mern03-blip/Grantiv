@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import { PaperAirplaneIcon, ChatBubbleOvalLeftEllipsisIcon } from '../icons/Icons';
-import "./chat.scss"
-import Loader from '../loading/Loader';
-import axiosInstance from '../../api/axios/axiosInstance';
+import { PaperAirplaneIcon, ChatBubbleOvalLeftEllipsisIcon } from '../../../components/icons/Icons';
+import Loader from '../../../components/loading/Loader';
+import axiosInstance from '../../../api/axios/axiosInstance';
 
 // This is a custom hook to create a memoized map of members by ID for quick lookups
 const useMembersMap = (members) => {
@@ -155,7 +154,7 @@ export const TeamChat = ({ currentUser, selectedOrgId }) => {
             <div
                 ref={messagesContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col hide-scrollbar"
+                className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col no-scrollbar"
             >
                 {messages.map((msg) => {
                     const member = membersById[msg.sender._id];

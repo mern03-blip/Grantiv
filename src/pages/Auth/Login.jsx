@@ -6,12 +6,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { Apple, Google } from "../../assets/image";
 import { EyeTwoTone, EyeInvisibleOutlined } from "@ant-design/icons";
 import { userLogin } from "../../api/endpoints/auth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const { Title } = Typography;
 
 const Login = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // ✅ TanStack Mutation for Login API
   const { mutate: handleLogin, isPending: loading } = useMutation({
@@ -27,6 +28,7 @@ const Login = () => {
         const organizations = response.organizations
 
         message.success(response.message || "Login successful");
+        queryClient.removeQueries(['ai-recommended-grants']);
         localStorage.setItem("token", response.token);
         localStorage.setItem("userId", response.id);
         // const role = response?.organizations?.[0]?.role || null;

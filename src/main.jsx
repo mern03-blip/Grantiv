@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-// import { App as AntdApp } from "antd";
-// import "antd/dist/reset.css";
+import { store } from './redux/store'
+import { Provider } from 'react-redux'
 import "./index.css";
 
 
@@ -14,9 +14,9 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      {/* <AntdApp> */}
+      <Provider store={store}>
         <App />
-      {/* </AntdApp> */}
+      </Provider>
     </QueryClientProvider>
   </React.StrictMode>
 );

@@ -9,7 +9,7 @@ import {
 } from '../../components/icons/Icons';
 import useFocusTrap from '../../hooks/useFocusTrap';
 import useKeydown from '../../hooks/useKeydown';
-import AiRecommendedGrants from '../../components/AiRecommendedGrants/AiRecommendedGrants';
+import AiRecommendedGrants from './components/AiRecommendedGrants';
 
 
 const Dashboard = () => {
@@ -25,12 +25,19 @@ const Dashboard = () => {
     const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
     const [isSummaryLoading, setIsSummaryLoading] = useState(false);
     const [summaryContent, setSummaryContent] = useState('');
+    const [totalGrantAmount, setTotalGrantAmount] = useState(0);
 
     const summaryModalRef = useRef(null);
     const returnFocusRef = useRef(null);
 
     useFocusTrap(isSummaryModalOpen ? summaryModalRef : { current: null });
     useKeydown('Escape', () => setIsSummaryModalOpen(false));
+
+
+    const handleTotalAmount = (amount) => {
+        console.log("Total amount received from child:", amount);
+        setTotalGrantAmount(amount);
+    };
 
     //  console.log(myGrants);
 
@@ -128,7 +135,9 @@ const Dashboard = () => {
 
                     <div className="mt-6 flex justify-between items-end">
                         <div>
-                            <p className="text-5xl font-bold font-heading">{currencyFormatter.format(potentialFunding)}</p>
+                            {/* <p className="text-5xl font-bold font-heading">{currencyFormatter.format(potentialFunding)}</p> */}
+                            <p className="text-4xl font-bold font-heading">${totalGrantAmount.toLocaleString()}
+                            </p>
                             <p className="opacity-80">Potential Funding</p>
                         </div>
                         <div className="text-right">
@@ -182,7 +191,7 @@ const Dashboard = () => {
                     </div>
                 )} */}
 
-                <AiRecommendedGrants />
+                <AiRecommendedGrants onTotalAmountCalculated={handleTotalAmount} />
             </div>
 
             <div>

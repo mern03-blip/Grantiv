@@ -7,7 +7,7 @@ import { deleteMember, getOrganizationMembers, updateMemberRole } from '../../ap
 import Loader from '../../components/loading/Loader';
 import { Placeholder } from '../../assets/image';
 import { jwtDecode } from 'jwt-decode';
-import { TeamChat } from '../../components/TeamChat/TeamChat';
+import { TeamChat } from './components/TeamChat';
 import DeleteUserModal from "../../components/modals/DeleteUserModal";
 
 

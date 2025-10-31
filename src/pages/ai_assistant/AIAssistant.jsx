@@ -7,7 +7,9 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { handleGetFavoriteGrants } from '../../api/endpoints/grants';
 import Loader from '../../components/loading/Loader';
-import "./aiassistant.scss"
+import { useDispatch, useSelector } from "react-redux";
+import { fetchFavoriteGrants } from "../../redux/slices/favoriteGrantSlice";
+
 
 // --- MOCK DATA AND MOCKED FUNCTIONS ---
 // These replace the props and external service calls
@@ -107,18 +109,30 @@ const AIAssistant = () => {
 
     // Fetch Favorited Grants
 
-    const {
-        data: { data: savedGrants = [] } = {},
-        isLoading: isSavedLoading,
-        // refetch: refetchSavedGrants
-    } = useQuery({
-        queryKey: ["FavGrants"],
-        queryFn: handleGetFavoriteGrants,
-        staleTime: 1000 * 60, // 1 min
-        retry: 1,
-    });
+    // const {
+    //     data: { data: savedGrants = [] } = {},
+    //     isLoading: isSavedLoading,
+    //     // refetch: refetchSavedGrants
+    // } = useQuery({
+    //     queryKey: ["FavGrants"],
+    //     queryFn: handleGetFavoriteGrants,
+    //     staleTime: 1000 * 60, // 1 min
+    //     retry: 1,
+    // });
 
-    console.log("Saved Grants in AI Assistant:", savedGrants);
+    // console.log("Saved Grants in AI Assistant:", savedGrants);
+
+
+    // RTK
+    const dispatch = useDispatch();
+    const { grants: savedGrants, loading: isSavedLoading } = useSelector(
+        (state) => state.favoriteGrants
+    );
+
+    useEffect(() => {
+        dispatch(fetchFavoriteGrants());
+    }, [dispatch]);
+
 
     //Others Logics
 

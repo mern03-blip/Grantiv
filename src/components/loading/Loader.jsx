@@ -15,7 +15,6 @@ const Loader = () => {
       >
         <Spin size="large" />
       </ConfigProvider>
-      {/* <p className="mt-4 text-mainColor font-semibold text-lg">Loading...</p> */}
     </div>
   );
 };
