@@ -47,6 +47,30 @@ export const getGrants = async ({
   return response.data;
 };
 
+// export const getGrants = async ({
+//   page = 1,
+//   limit = 10,
+//   search = "",
+//   sortBy = "_id",
+//   sortOrder = "asc",
+//   filterLocation = "",
+//   filterAgency = "",
+//   minAmount = "",
+//   maxAmount = "",
+// } = {}) => {
+//   const params = { page, limit, search, sortBy, sortOrder };
+
+//   if (filterLocation) params.filterLocation = filterLocation;
+//   if (filterAgency) params.filterAgency = filterAgency;
+//   if (minAmount !== "" && minAmount != null) params.minAmount = Number(minAmount);
+//   if (maxAmount !== "" && maxAmount != null) params.maxAmount = Number(maxAmount);
+
+//   const response = await axiosInstance.get("/grants/get-grants", { params });
+
+//   console.log("All grants:", response.data);
+//   return response.data;
+// };
+
 // Single Grant for detail modal
 export const getGrantDetail = async (id) => {
 

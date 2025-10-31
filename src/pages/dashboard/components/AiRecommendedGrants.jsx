@@ -89,8 +89,8 @@ const AiRecommendedGrants = ({ onSelectGrant, onTotalAmountCalculated }) => {
 
     // ✅ Calculate total amount of these 3 grants
     const totalAmount = topGrants.reduce((sum, grant) => {
-        const rawValue =
-            grant.totalAmountAvailable || "0"; // fallback
+       const rawValue = String(grant.totalAmountAvailable || "0");
+
 
         // Extract **all numbers** from the string, even in ranges
         const numbers = (rawValue.match(/\d[\d,\.]*/g) || []).map((num) =>
