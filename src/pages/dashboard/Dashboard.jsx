@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ALL_GRANTS, MOCK_TASKS, MOCK_TEAM } from '../../../constants';
 import { getDashboardSuggestions, getDashboardSummary } from '../../services/geminiService';
-import GrantCard from '../../components/cards/GrantCard';
 import ProgressBar from '../../components/progressbar/ProgressBar';
 import {
     SparklesIcon, XIcon, CheckCircleIcon, ClockIcon, SpinnerIcon
@@ -10,6 +9,9 @@ import {
 import useFocusTrap from '../../hooks/useFocusTrap';
 import useKeydown from '../../hooks/useKeydown';
 import AiRecommendedGrants from './components/AiRecommendedGrants';
+import { useDispatch, useSelector } from 'react-redux';
+import { handleGetFavoriteGrants } from '../../api/endpoints/grants';
+import { setSavedGrants } from '../../redux/slices/favoriteGrantSlice';
 
 
 const Dashboard = () => {
@@ -25,21 +27,15 @@ const Dashboard = () => {
     const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
     const [isSummaryLoading, setIsSummaryLoading] = useState(false);
     const [summaryContent, setSummaryContent] = useState('');
-    const [totalGrantAmount, setTotalGrantAmount] = useState(0);
 
     const summaryModalRef = useRef(null);
     const returnFocusRef = useRef(null);
+    const aiTotalAmount = useSelector((state) => state.grants.aiTotalAmount);
+    const dispatch = useDispatch();
 
     useFocusTrap(isSummaryModalOpen ? summaryModalRef : { current: null });
     useKeydown('Escape', () => setIsSummaryModalOpen(false));
 
-
-    const handleTotalAmount = (amount) => {
-        console.log("Total amount received from child:", amount);
-        setTotalGrantAmount(amount);
-    };
-
-    //  console.log(myGrants);
 
     // Dummy data and local handlers for the component to be independent
     useEffect(() => {
@@ -66,6 +62,19 @@ const Dashboard = () => {
         // This function now just logs the selection, as there is no router to navigate with
         console.log(`Selected grant: ${grant.title}`);
     };
+
+    //Fetch all fav grant to for fav toggle btn  
+    useEffect(() => {
+        const loadFavorites = async () => {
+            try {
+                const { data } = await handleGetFavoriteGrants();
+                dispatch(setSavedGrants(data || []));
+            } catch (err) {
+                console.error("Error loading favorite grants:", err);
+            }
+        };
+        loadFavorites();
+    }, [dispatch]);
 
     useEffect(() => {
         if (isSummaryModalOpen) {
@@ -135,8 +144,8 @@ const Dashboard = () => {
 
                     <div className="mt-6 flex justify-between items-end">
                         <div>
-                            {/* <p className="text-5xl font-bold font-heading">{currencyFormatter.format(potentialFunding)}</p> */}
-                            <p className="text-4xl font-bold font-heading">${totalGrantAmount.toLocaleString()}
+                            {/* <p className="text-5xl font-bold font-heading">{currencyFormatter.format(totalGrantAmount)}</p> */}
+                            <p className="text-4xl font-semibold font-heading">${aiTotalAmount.toLocaleString()}
                             </p>
                             <p className="opacity-80">Potential Funding</p>
                         </div>
@@ -167,31 +176,7 @@ const Dashboard = () => {
             </div>
 
             <div>
-                {/* <h3 className="text-2xl font-bold text-night dark:text-dark-text mb-4 font-heading">AI-Recommended Grantsabc</h3>
-                {isLoadingSuggestions ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {[...Array(3)].map((_, i) => (
-                            <div key={i} className="bg-white dark:bg-dark-surface p-4 rounded-lg border border-mercury dark:border-dark-border animate-pulse">
-                                <div className="h-32 bg-mercury/80 dark:bg-dark-border rounded mb-4"></div>
-                                <div className="h-5 bg-mercury/80 dark:bg-dark-border rounded w-3/4 mb-2"></div>
-                                <div className="h-4 bg-mercury/80 dark:bg-dark-border rounded w-1/2 mb-4"></div>
-                                <div className="h-8 bg-mercury/80 dark:bg-dark-border rounded w-full"></div>
-                            </div>
-                        ))}
-                    </div>
-                ) : error ? (
-                    <div className="text-center p-8 bg-red-50 dark:bg-red-900/30 rounded-lg border border-red-300 dark:border-red-700/50 text-red-700 dark:text-red-300">
-                        <p>{error}</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {suggestions.map(grant => (
-                            <GrantCard key={grant.id} grant={grant} onSelect={(g, p) => onSelectGrant(g, p)} matchPercentage={grant.matchPercentage} />
-                        ))}
-                    </div>
-                )} */}
-
-                <AiRecommendedGrants onTotalAmountCalculated={handleTotalAmount} />
+                <AiRecommendedGrants />
             </div>
 
             <div>

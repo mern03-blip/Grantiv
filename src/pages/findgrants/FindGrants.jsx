@@ -35,9 +35,6 @@
 //   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
 
-//   const { data: cities = [] } = useCitiesQuery();
- 
-
 //   // --- Fetch Grants with TanStack Query ---
 //   const {
 //     data: Grants,
@@ -151,27 +148,14 @@
 //         </motion.button>
 
 //         <button
-//           // onClick={() => handleRunSavedSearch(query)}
-//           onClick={() => setIsPopupOpen(true)}
+//           onClick={() => handleRunSavedSearch(query)}
+//           disabled={true}
 //           className="px-4 py-1 bg-white dark:bg-dark-surface border border-mercury dark:border-dark-border text-night dark:text-dark-text font-semibold rounded-lg hover:bg-mercury/50 dark:hover:bg-dark-border/50 transition-all duration-300 disabled:bg-mercury/50 dark:disabled:bg-dark-border disabled:text-night/50 dark:disabled:text-dark-textMuted disabled:cursor-not-allowed flex items-center gap-2"
 //         >
-//           {/* <BookmarkIcon className="w-5 h-5" /> */}
-//           <CiFilter size={24} />
-//           Filter
+//           <BookmarkIcon className="w-5 h-5" />
+//           Save
 //         </button>
-//         {/* THE POP-UP COMPONENT */}
-//         <SearchFilterPopup
-//           isOpen={isPopupOpen}
-//           onClose={() => setIsPopupOpen(false)}
-//           cities={cities}
-//         // onSave={handleSaveSearch}
-//         />
 //       </div>
-
-//       {/* Loading State */}
-//       {/* {isFetching && !isLoading && (
-//         <p className="text-center text-primary mb-4">Updating results...</p>
-//       )} */}
 
 //       {/* Display Grants */}
 //       {!isGlobalLoading && paginatedGrantsForDisplay.length > 0 && (
@@ -186,23 +170,6 @@
 //             ))}
 //           </div>
 
-//           {/* Left side: page size dropdown */}
-//           {/* <div className="flex items-center gap-3">
-//             <span className="text-sm text-gray-600 dark:text-gray-300">Show:</span>
-//             <Select
-//               // value={pageSize}
-//               // onChange={(value) => onPageSizeChange(value)}
-//               options={[
-//                 { value: 10, label: "10 grants" },
-//                 { value: 25, label: "25 grants" },
-//                 { value: 50, label: "50 grants" },
-//                 { value: 100, label: "100 grants" },
-//               ]}
-//               className="min-w-[120px]"
-//               dropdownStyle={{ borderRadius: "8px" }}
-//             />
-//           </div> */}
-
 //           {/* Pagination */}
 //           {paginationTotalPages > 1 && (
 //             <div className="mt-8">
@@ -215,13 +182,6 @@
 //           )}
 //         </>
 //       )}
-
-//       {/* No Results */}
-//       {!isGlobalLoading && paginatedGrantsForDisplay.length === 0 && (
-//         <p className="text-center text-night/60 dark:text-dark-textMuted mt-8">
-//           No grants found matching your search.
-//         </p>
-//       )}
 //     </div>
 //   );
 // };
@@ -229,26 +189,29 @@
 // export default FindGrants;
 
 
+
+//Filter Functionlity
 import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getGrants } from '../../api/endpoints/grants';
+import { getGrants, handleGetFavoriteGrants } from '../../api/endpoints/grants';
 import GrantCard from '../../components/cards/GrantCard';
 import CustomPagination from '../../components/pagination/CustomPagination';
 import Loader from '../../components/loading/Loader';
 import { SpinnerIcon, BookmarkIcon } from '../../components/icons/Icons';
-import { Select } from 'antd';
 import { CiFilter } from 'react-icons/ci';
 import SearchFilterPopup from './components/SearchFilterPopup';
 import { useCitiesQuery } from '../../hooks/useGetCities';
+import { useDispatch } from 'react-redux';
+import { setSavedGrants } from '../../redux/slices/favoriteGrantSlice';
 
 const GRANTS_PER_PAGE = 10;
 
 // Updated fetch function to accept filters
 const fetchGrants = async ({ queryKey }) => {
   const [, page, searchQuery, filters] = queryKey;
-  
+
   const response = await getGrants({
     page,
     limit: GRANTS_PER_PAGE,
@@ -258,12 +221,13 @@ const fetchGrants = async ({ queryKey }) => {
     minAmount: filters.minAmount || '',
     maxAmount: filters.maxAmount || '',
   });
-  
+
   return response;
 };
 
 const FindGrants = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // --- Local states ---
   const [currentPage, setCurrentPage] = useState(1);
@@ -273,7 +237,7 @@ const FindGrants = () => {
   const [isAIPagination, setIsAIPagination] = useState(false);
   const [savedSearches, setSavedSearches] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  
+
   // ✅ NEW: State for filters
   const [filters, setFilters] = useState({
     city: '',
@@ -360,6 +324,19 @@ const FindGrants = () => {
     setCurrentPage(1);
   };
 
+  //Fetch all fav grant to for fav toggle btn  
+  useEffect(() => {
+    const loadFavorites = async () => {
+      try {
+        const { data } = await handleGetFavoriteGrants();
+        dispatch(setSavedGrants(data || []));
+      } catch (err) {
+        console.error("Error loading favorite grants:", err);
+      }
+    };
+    loadFavorites();
+  }, [dispatch]);
+
   // --- Derived values for rendering ---
   const paginatedGrantsForDisplay = useMemo(() => {
     if (isAIPagination && matchedGrants.length > 0) {
@@ -427,18 +404,13 @@ const FindGrants = () => {
         >
           <CiFilter size={24} />
           Filter
-          {hasActiveFilters && (
-            <span className="ml-1 px-2 py-0.5 bg-primary text-night text-xs rounded-full">
-              Active
-            </span>
-          )}
         </button>
 
         {/* Clear Filters Button (only show when filters are active) */}
         {hasActiveFilters && (
           <button
             onClick={handleClearFilters}
-            className="px-4 py-1 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-all duration-300"
+            className="px-4  bg-mainColor text-white font-semibold rounded-lg  transition-all duration-300"
           >
             Clear Filters
           </button>
@@ -455,7 +427,7 @@ const FindGrants = () => {
       </div>
 
       {/* Display active filters */}
-      {hasActiveFilters && (
+      {/* {hasActiveFilters && (
         <div className="mb-4 p-3 bg-primary/10 dark:bg-primary/20 rounded-lg">
           <p className="text-sm font-semibold text-night dark:text-dark-text mb-2">Active Filters:</p>
           <div className="flex flex-wrap gap-2">
@@ -481,7 +453,7 @@ const FindGrants = () => {
             )}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Display Grants */}
       {!isGlobalLoading && paginatedGrantsForDisplay.length > 0 && (
