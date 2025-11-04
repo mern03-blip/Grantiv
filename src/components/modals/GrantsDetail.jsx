@@ -678,13 +678,13 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
                 Amount
               </p>
               <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">
-                {grant?.totalAmountAvailable !== undefined && grant?.totalAmountAvailable !== null
+                {grant?.totalAmountAvailable !== undefined && grant?.totalAmountAvailable !== null && grant?.totalAmountAvailable !== "0"
                   ? currencyFormatter.format(
                     typeof grant.totalAmountAvailable === "string"
-                      ? Number(grant.totalAmountAvailable.replace(/[^0-9.]/g, "")) || 0
+                      ? Number(grant.totalAmountAvailable.replace(/[^0-9.]/g, "")) || "Unspecified"
                       : Number(grant.totalAmountAvailable)
                   )
-                  : "Not Specified"}
+                  : "Unspecified"}
               </p>
 
             </div>
@@ -731,7 +731,7 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
           {/* Footer Buttons */}
           <div className="mt-6 pt-4 border-t border-mercury/30 dark:border-dark-border flex justify-end gap-3">
             <motion.button
-              onClick={() => window.open(grant?.url, "_blank")}
+              onClick={() => window.open(grant?.applyUrl, "_blank")}
               className="px-6 py-3 bg-primary font-semibold text-night rounded-lg hover:bg-secondary transition-colors duration-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

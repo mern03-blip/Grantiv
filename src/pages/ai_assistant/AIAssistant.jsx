@@ -355,9 +355,9 @@ const AIAssistant = () => {
             </AnimatePresence>
             {/* Back Button */}
             <motion.aside className="w-80 flex-shrink-0 border-r flex flex-col transition-colors bg-white dark:bg-dark-surface border-mercury dark:border-dark-border">
-                <motion.div className="p-4 border-b transition-colors border-mercury dark:border-dark-border">
+                {/* <motion.div className="p-4 border-b transition-colors border-mercury dark:border-dark-border">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate('/')}
                         className="flex items-center gap-2 text-sm font-semibold w-full text-left p-2 rounded-lg transition-colors text-night/70 dark:text-dark-textMuted hover:text-secondary dark:hover:text-dark-secondary hover:bg-mercury/50 dark:hover:bg-dark-border/20"
                         aria-label="Exit AI Assistant and return to Dashboard"
                     >
@@ -365,11 +365,11 @@ const AIAssistant = () => {
                         Exit Assistant
                     </button>
 
-                </motion.div>
+                </motion.div> */}
 
                 {/*Work on a Grant */}
                 <div className="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
-                    <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors text-night/50 dark:text-dark-textMuted/70">Work on a Grant</p>
+                    <p className="px-3 py-3 text-xs font-semibold uppercase tracking-wider transition-colors text-night/50 dark:text-dark-textMuted/70">Work on a Grant</p>
                     <GrantSelectionButton
                         isSelected={!selectedGrant}
                         onClick={() => setSelectedGrant(null)}

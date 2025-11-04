@@ -111,33 +111,66 @@ const AdminLayout = () => {
         return <OnboardingView onSave={() => setIsOnboarding(false)} onSkip={handleSkipOnboarding} />;
     }
 
+    // return (
+    //     <div className="flex h-screen bg-alabaster dark:bg-dark-background font-sans">
+    //         {currentView !== 'ai_assistant' && (
+    //             <Sidebar
+    //                 currentView={currentView}
+    //                 onNavigate={navigateTo}
+    //                 isCollapsed={isSidebarCollapsed}
+    //                 onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
+    //                 theme={theme}
+    //                 setTheme={setTheme}
+    //             />
+    //         )}
+    //         <main className={`flex-1 transition-all duration-300 overflow-y-auto no-scrollbar ${currentView === 'ai_assistant' ? 'w-screen h-screen p-0' : 'p-8 bg-[#F7F7F7] dark:bg-dark-background'}`}>
+    //             <div className={currentView === 'ai_assistant' ? 'h-full' : 'max-w-7xl mx-auto'}>
+    //                 <AnimatePresence mode="wait">
+    //                     <motion.div
+    //                         key={currentView}
+    //                         initial={{ opacity: 0, y: 15 }}
+    //                         animate={{ opacity: 1, y: 0 }}
+    //                         exit={{ opacity: 0, y: -15 }}
+    //                         transition={{ duration: 0.25 }} >
+
+    //                         <MainContent />
+
+    //                     </motion.div>
+    //                 </AnimatePresence>
+    //                 {/* <MainContent /> */}
+    //             </div>
+    //         </main>
+    //     </div>
+    // );
     return (
         <div className="flex h-screen bg-alabaster dark:bg-dark-background font-sans">
-            {currentView !== 'ai_assistant' && (
-                <Sidebar
-                    currentView={currentView}
-                    onNavigate={navigateTo}
-                    isCollapsed={isSidebarCollapsed}
-                    onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
-                    theme={theme}
-                    setTheme={setTheme}
-                />
-            )}
-            <main className={`flex-1 transition-all duration-300 overflow-y-auto no-scrollbar ${currentView === 'ai_assistant' ? 'w-screen h-screen p-0' : 'p-8 bg-[#F7F7F7] dark:bg-dark-background'}`}>
-                <div className={currentView === 'ai_assistant' ? 'h-full' : 'max-w-7xl mx-auto'}>
+            <Sidebar
+                currentView={currentView}
+                onNavigate={navigateTo}
+                isCollapsed={isSidebarCollapsed}
+                onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
+                theme={theme}
+                setTheme={setTheme}
+            />
+            <main
+                className={`flex-1 transition-all duration-300 overflow-y-auto no-scrollbar 
+                    ${currentView === 'ai_assistant'
+                        ? '!p-0'
+                        : 'p-8 bg-[#F7F7F7] dark:bg-dark-background'
+                    }`}
+            >
+                <div className="max-w-7xl mx-auto">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={currentView}
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -15 }}
-                            transition={{ duration: 0.25 }} >
-
+                            transition={{ duration: 0.25 }}
+                        >
                             <MainContent />
-
                         </motion.div>
                     </AnimatePresence>
-                    {/* <MainContent /> */}
                 </div>
             </main>
         </div>

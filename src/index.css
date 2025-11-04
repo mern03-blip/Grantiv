@@ -3,11 +3,6 @@
 @tailwind utilities;
 
 
-/* .ant-message {
-  z-index: 99999 !important;
-  background-color: red !important;
-} */
-
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -16,3 +11,4 @@
   -ms-overflow-style: none;  /* for Internet Explorer, Edge */
   scrollbar-width: none;     /* for Firefox */
 }
+

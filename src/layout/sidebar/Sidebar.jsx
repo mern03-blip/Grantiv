@@ -13,7 +13,7 @@ import {
   UsersIcon,
   SunIcon,
 } from '../../components/icons/Icons';
-import Logout from '../../components/modals/Logout'; // Assuming LogoutModal is in this path
+import Logout from '../../components/modals/Logout'; 
 import { DarkLogo, SidebarLogo } from '../../assets/image';
 
 export const Sidebar = ({
@@ -166,15 +166,14 @@ export const Sidebar = ({
         <NavItem
           icon={
             <SparklesIcon
-              className={`w-5 h-5 ${currentView === 'ai_assistant' ? 'animate-pulse-glow' : ''
-                }`}
+              className={"w-5 h-5 "}
             />
           }
           label={
             <span>
               <span
                 className="font-semibold"
-                style={{ color: '#A8DD6B', filter: 'drop-shadow(0 0 5px #A8DD6B)' }}
+                style={{ color: '#8CC84B', filter: 'drop-shadow(0 0 5px #8CC84B)' }}
               >
                 AI
               </span>{' '}

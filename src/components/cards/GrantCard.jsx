@@ -34,7 +34,7 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
 
     // ✅ Function to format single or range amounts
     const formatAmount = (amount) => {
-        if (!amount) return 'N/A';
+        if (!amount) return 'Unspecified';
 
         const amountStr = String(amount);
 
@@ -115,7 +115,6 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
                     <div>
                         {/* UPDATED: Use the 'amountValue' variable */}
                         {/* <span className="font-bold text-secondary dark:text-dark-secondary text-base">{currencyFormatter.format(amountValue)}</span> */}
-                        {/* <span className="font-bold text-secondary dark:text-dark-secondary text-base">{grant.totalAmountAvailable}</span> */}
                         <span className="font-semibold text-secondary dark:text-dark-secondary text-base">{formatAmount(grant.totalAmountAvailable)}</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-night/70 dark:text-dark-textMuted/80">
