@@ -2,20 +2,6 @@ import axiosInstance from "../axios/axiosInstance";
 
 
 //Get All Grants
-// export const getGrants = async (page = 1, limit = 10, search = '') => {
-
-//   const response = await axiosInstance.get("/grants/get-grants", {
-//     params: {
-//       page,
-//       limit,
-//       search
-//     }
-//   });
-
-//   console.log("All grants", response.data);
-//   return response.data;
-// };
-
 export const getGrants = async ({
   page = 1,
   limit = 10,
@@ -46,30 +32,6 @@ export const getGrants = async ({
   console.log("All grants:", response.data);
   return response.data;
 };
-
-// export const getGrants = async ({
-//   page = 1,
-//   limit = 10,
-//   search = "",
-//   sortBy = "_id",
-//   sortOrder = "asc",
-//   filterLocation = "",
-//   filterAgency = "",
-//   minAmount = "",
-//   maxAmount = "",
-// } = {}) => {
-//   const params = { page, limit, search, sortBy, sortOrder };
-
-//   if (filterLocation) params.filterLocation = filterLocation;
-//   if (filterAgency) params.filterAgency = filterAgency;
-//   if (minAmount !== "" && minAmount != null) params.minAmount = Number(minAmount);
-//   if (maxAmount !== "" && maxAmount != null) params.maxAmount = Number(maxAmount);
-
-//   const response = await axiosInstance.get("/grants/get-grants", { params });
-
-//   console.log("All grants:", response.data);
-//   return response.data;
-// };
 
 // Single Grant for detail modal
 export const getGrantDetail = async (id) => {
@@ -113,7 +75,6 @@ export const handleGetFavoriteGrants = async () => {
 
 
 //Get Ai Recomanded Grants
-// ✅ API function to get AI recommended grants
 export const getAIRecommendedGrants = async () => {
   const token = localStorage.getItem('token');
   const organizationId = localStorage.getItem('orgId');

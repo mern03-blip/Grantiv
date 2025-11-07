@@ -436,6 +436,8 @@ import "./grantdetail.scss"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { addFavoriteGrant, removeFavoriteGrant, setSavedGrants } from "../../redux/slices/favoriteGrantSlice";
+import { formatAmount } from "../../utils/formatAmount";
+import { getDaysRemaining } from "../../utils/deadlineDate";
 
 const GrantDetailModal = ({ open, onClose, grant }) => {
   const [activeTab, setActiveTab] = useState("Overview");
@@ -448,7 +450,17 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const savedGrants = useSelector((state) => state.favoriteGrants.savedGrants);
+  const deadlineDateString = grant.closeDateTime;
+  const daysRemaining = getDaysRemaining(deadlineDateString);
+  const tabs = ["Overview", "Eligibility", "Documents", "Contacts"];
 
+  // ✅ Check if current grant is already favorite
+  useEffect(() => {
+    if (grant?._id && savedGrants.length > 0) {
+      const isFavorite = savedGrants.some((g) => g._id === grant._id);
+      setIsSaved(isFavorite);
+    }
+  }, [grant, savedGrants]);
 
   // ✅ Mutation for toggle (add/remove favorite)
   const { mutate: toggleFavorite, isPending: isToggling } = useMutation({
@@ -460,14 +472,6 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
       message.error("Failed to update favorites.");
     },
   });
-
-  // ✅ Check if current grant is already favorite
-  useEffect(() => {
-    if (grant?._id && savedGrants.length > 0) {
-      const isFavorite = savedGrants.some((g) => g._id === grant._id);
-      setIsSaved(isFavorite);
-    }
-  }, [grant, savedGrants]);
 
   // ✅ Toggle favorite (local + Redux + server)
   const onToggleSave = () => {
@@ -496,60 +500,6 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
     });
   };
 
-  const currencyFormatter = new Intl.NumberFormat("en-AU", {
-    style: "currency",
-    currency: "AUD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-
-  // ✅ Format grant amount based on conditions
-  const formatGrantAmount = (grant) => {
-    const { minAmountAvailable, maxAmountAvailable, totalAmountAvailable } = grant || {};
-
-    // 🟢 If all are missing
-    if (!minAmountAvailable && !maxAmountAvailable && !totalAmountAvailable)
-      return "Unspecified";
-
-    // 🟢 If min = max → show total amount
-    if (
-      minAmountAvailable &&
-      maxAmountAvailable &&
-      Number(minAmountAvailable) === Number(maxAmountAvailable)
-    ) {
-      const value = totalAmountAvailable || minAmountAvailable;
-      return currencyFormatter.format(Number(value));
-    }
-
-    // 🟢 If min and max are both present and not equal → show range
-    if (minAmountAvailable && maxAmountAvailable) {
-      return `${currencyFormatter.format(Number(minAmountAvailable))} - ${currencyFormatter.format(Number(maxAmountAvailable))}`;
-    }
-
-    // 🟢 If only one value is present → show it
-    if (maxAmountAvailable) return currencyFormatter.format(Number(maxAmountAvailable));
-    if (minAmountAvailable) return currencyFormatter.format(Number(minAmountAvailable));
-
-    // 🟢 Fallback → show total amount
-    if (totalAmountAvailable) return currencyFormatter.format(Number(totalAmountAvailable));
-
-    return "Unspecified";
-  };
-
-
-  const getDaysRemaining = () => {
-    if (!grant?.closeDateTime) return -1;
-    const date = new Date(grant.closeDateTime);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    date.setHours(0, 0, 0, 0);
-    const diffTime = date.getTime() - today.getTime();
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  };
-
-  const daysRemaining = getDaysRemaining();
-  const tabs = ["Overview", "Eligibility", "Documents", "Contacts"];
-
   const handleQuickReview = async () => {
     if (!grant) return;
     setIsReviewModalOpen(true);
@@ -570,7 +520,7 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
               Eligibility Requirements
             </h4>
             <p className="text-night/80 dark:text-dark-text/80 whitespace-pre-line">
-              {grant.eligibility}
+              {grant.eligibility || "N/A"}
             </p>
           </div>
         );
@@ -581,7 +531,7 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
               Application Instructions
             </h4>
             <p className="text-night/80 dark:text-dark-text/80 whitespace-pre-line">
-              {grant.applicationInstructions}
+              {grant.applicationInstructions || "N/A"}
             </p>
           </div>
         );
@@ -592,10 +542,10 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
               Funder Contact
             </h4>
             <p className="text-night/80 dark:text-dark-text/80 mb-2">
-              Email: {grant.contactEmail}
+              Email: {grant.contactEmail || "N/A"}
             </p>
             <p className="text-night/80 dark:text-dark-text/80">
-              Agency: {grant.agency}
+              Agency: {grant.agency || "N/A"}
             </p>
           </div>
         );
@@ -606,7 +556,7 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
               Description
             </h4>
             <p className="text-night/80 dark:text-dark-text/80 mb-4 whitespace-pre-line">
-              {grant.description}
+              {grant.description || "N/A"}
             </p>
           </div>
         );
@@ -711,17 +661,8 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
               <p className="text-sm text-night/60 dark:text-dark-textMuted">
                 Amount
               </p>
-              {/* <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">
-                {grant?.totalAmountAvailable !== undefined && grant?.totalAmountAvailable !== null && grant?.totalAmountAvailable !== "0"
-                  ? currencyFormatter.format(
-                    typeof grant.totalAmountAvailable === "string"
-                      ? Number(grant.totalAmountAvailable.replace(/[^0-9.]/g, "")) || "Unspecified"
-                      : Number(grant.totalAmountAvailable)
-                  )
-                  : "Unspecified"}
-              </p> */}
               <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">
-                {formatGrantAmount(grant)}
+                {formatAmount(grant)}
               </p>
 
 

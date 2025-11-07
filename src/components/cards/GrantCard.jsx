@@ -1,111 +1,17 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarDaysIcon, DocumentTextIcon } from '../icons/Icons';
-import { useNavigate } from 'react-router-dom';
 import GrantDetailModal from "../modals/GrantsDetail";
+import { formatAmount } from '../../utils/formatAmount';
+import { getDaysRemaining, parseAustralianDate } from '../../utils/deadlineDate';
 
-const parseAustralianDate = (dateString) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return isNaN(date.getTime()) ? null : date;
-};
 
-const GrantCard = ({ grant, onSelect, matchPercentage }) => {
-    const funder = grant.agency;
-
+const GrantCard = ({ grant, matchPercentage }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // const amountValue = grant.totalAmountAvailable ?
-    //     parseFloat(String(grant.totalAmountAvailable).replace(/[^0-9.]/g, '')) : 0; // Use 0 or null if not available
-
-
-
-    // 4. ID: Use '_id' from the API for the key and navigation
-    const grantId = grant._id;
-
-
-    const currencyFormatter = new Intl.NumberFormat('en-AU', {
-        style: 'currency',
-        currency: 'AUD',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    });
-    // ✅ Function to format single or range amounts
-    const formatAmount = (grant) => {
-        const { minAmountAvailable, maxAmountAvailable, totalAmountAvailable } = grant;
-
-        // If no data, return fallback
-        if (!minAmountAvailable && !maxAmountAvailable && !totalAmountAvailable) {
-            return 'Unspecified';
-        }
-
-        // ✅ If min and max are equal → show totalAmountAvailable (or that same value)
-        if (minAmountAvailable && maxAmountAvailable && minAmountAvailable === maxAmountAvailable) {
-            const value = totalAmountAvailable || minAmountAvailable;
-            return currencyFormatter.format(value);
-        }
-
-        // ✅ If min and max both exist but not equal → show range
-        if (minAmountAvailable && maxAmountAvailable) {
-            return `${currencyFormatter.format(minAmountAvailable)} - ${currencyFormatter.format(maxAmountAvailable)}`;
-        }
-
-        // ✅ If only one value exists → show that
-        if (maxAmountAvailable) return currencyFormatter.format(maxAmountAvailable);
-        if (minAmountAvailable) return currencyFormatter.format(minAmountAvailable);
-
-        // ✅ Fallback → show total amount if nothing else
-        return currencyFormatter.format(totalAmountAvailable);
-    };
-
-    // const formatAmount = (amount) => {
-    //     if (!amount) return 'Unspecified';
-
-    //     const amountStr = String(amount);
-
-    //     // Check if amount is a range (contains "-")
-    //     if (amountStr.includes('-')) {
-    //         const [min, max] = amountStr.split('-').map(part =>
-    //             parseFloat(part.replace(/[^0-9.]/g, ''))
-    //         );
-
-    //         if (isNaN(min) || isNaN(max)) return amountStr; // fallback if invalid
-
-    //         const formattedMin = currencyFormatter.format(min);
-    //         const formattedMax = currencyFormatter.format(max);
-    //         return `${formattedMin} - ${formattedMax}`;
-    //     } else {
-    //         const numericValue = parseFloat(amountStr.replace(/[^0-9.]/g, ''));
-    //         if (isNaN(numericValue)) return amountStr;
-    //         return currencyFormatter.format(numericValue);
-    //     }
-    // };
-
-
-    // 3. Deadline: Use 'closeDateTime' from the API
     const deadlineDateString = grant.closeDateTime;
-    const getDaysRemaining = () => {
-        const deadlineDate = parseAustralianDate(deadlineDateString);
-        if (!deadlineDate) return null; // Handle invalid date
-
-        const today = new Date();
-        // Compare dates without time component for accuracy
-        today.setHours(0, 0, 0, 0);
-
-        const diffTime = deadlineDate.getTime() - today.getTime();
-
-        // If the difference is less than zero, the grant has closed.
-        if (diffTime < 0) return null;
-
-        // Use floor to get the number of full days remaining
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
-    };
-
-    const daysRemaining = getDaysRemaining();
-
-    // Check for a valid deadline date for display
     const validDeadlineDate = parseAustralianDate(deadlineDateString);
+    const daysRemaining = getDaysRemaining(deadlineDateString);
 
     return (
         <motion.div
@@ -134,15 +40,12 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
                     onClick={() => setIsModalOpen(true)}
                 >{grant.title}</h3>
                 {/* UPDATED: Use the 'funder' (agency) variable */}
-                <p className="text-xs text-night/60 dark:text-dark-textMuted mb-3 flex-grow font-medium">{funder || 'N/A Agency'}</p>
+                <p className="text-xs text-night/60 dark:text-dark-textMuted mb-3 flex-grow font-medium">{grant.agency || 'N/A Agency'}</p>
 
                 <p className="text-sm text-night/80 dark:text-dark-text/80 mb-4 line-clamp-2">{grant.description}</p>
 
                 <div className="text-sm text-night dark:text-dark-text space-y-2 mt-auto">
                     <div>
-                        {/* UPDATED: Use the 'amountValue' variable */}
-                        {/* <span className="font-bold text-secondary dark:text-dark-secondary text-base">{currencyFormatter.format(amountValue)}</span> */}
-                        {/* <span className="font-semibold text-secondary dark:text-dark-secondary text-base">{formatAmount(grant.totalAmountAvailable)}</span> */}
                         <span className="font-semibold text-secondary dark:text-dark-secondary text-base">
                             {formatAmount(grant)}
                         </span>

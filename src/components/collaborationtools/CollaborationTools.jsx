@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MOCK_TEAM } from '../../../constants';
 import { PaperAirplaneIcon, DocumentTextIcon, TrashIcon, ClockIcon, CheckCircleIcon, UploadIcon, XIcon, SparklesIcon, ChatBubbleOvalLeftEllipsisIcon } from '../icons/Icons';
-import "./Tools.css"
 
 // --- Custom Hooks for Accessibility ---
 const useFocusTrap = (ref) => {

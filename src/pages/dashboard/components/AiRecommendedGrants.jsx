@@ -28,12 +28,10 @@ const AiRecommendedGrants = () => {
 
     // ✅ Limit to only 3 grants from backend data
     const topGrants = suggestions.slice(0, 3);
-    console.log(nearestDeadline);
 
     // ✅ Calculate total amount of these 3 grants
     const totalAmount = topGrants.reduce((sum, grant) => {
         const rawValue = String(grant.totalAmountAvailable || "0");
-
 
         // Extract **all numbers** from the string, even in ranges
         const numbers = (rawValue.match(/\d[\d,\.]*/g) || []).map((num) =>
@@ -57,9 +55,9 @@ const AiRecommendedGrants = () => {
         if (totalAmount) {
             dispatch(setAiTotalAmount(totalAmount));
         }
-       if (!isLoading) {
-        dispatch(setNearestDeadline(nearestDeadline));
-    }
+        if (!isLoading) {
+            dispatch(setNearestDeadline(nearestDeadline));
+        }
     }, [totalAmount, nearestDeadline, dispatch]);
 
 

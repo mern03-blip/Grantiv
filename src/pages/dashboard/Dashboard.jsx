@@ -12,7 +12,7 @@ import AiRecommendedGrants from './components/AiRecommendedGrants';
 import { useDispatch, useSelector } from 'react-redux';
 import { handleGetFavoriteGrants } from '../../api/endpoints/grants';
 import { setSavedGrants } from '../../redux/slices/favoriteGrantSlice';
-// import { json } from 'stream/consumers';
+import { getDaysRemaining } from '../../utils/deadlineDate';
 
 
 const Dashboard = () => {
@@ -23,7 +23,6 @@ const Dashboard = () => {
 
     // Existing state and hooks
     const [suggestions, setSuggestions] = useState([]);
-    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(true);
     const [error, setError] = useState(null);
     const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
     const [isSummaryLoading, setIsSummaryLoading] = useState(false);
@@ -60,10 +59,55 @@ const Dashboard = () => {
         );
     };
 
-    const onSelectGrant = (grant, matchPercentage) => {
-        // This function now just logs the selection, as there is no router to navigate with
-        console.log(`Selected grant: ${grant.title}`);
+    // const onSelectGrant = (grant, matchPercentage) => {
+    //     // This function now just logs the selection, as there is no router to navigate with
+    //     console.log(`Selected grant: ${grant.title}`);
+    // };
+
+    useEffect(() => {
+        if (isSummaryModalOpen) {
+            returnFocusRef.current = document.activeElement;
+        } else {
+            returnFocusRef.current?.focus();
+        }
+    }, [isSummaryModalOpen]);
+
+    const handleGenerateSummary = async () => {
+        setIsSummaryModalOpen(true);
+        setIsSummaryLoading(true);
+        const summary = await getDashboardSummary(suggestions, myGrants, tasks.filter(t => !t.completed));
+        setSummaryContent(summary);
+        setIsSummaryLoading(false);
     };
+
+    const incompleteTasks = tasks.filter(t => !t.completed).slice(0, 4);
+    //Fetch Recomanded Grants
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            setError(null);
+            try {
+                const suggestedResults = await getDashboardSuggestions(ALL_GRANTS);
+                const suggestedGrants = suggestedResults.map(result => {
+                    const grant = ALL_GRANTS.find(g => g.id === result.grantId);
+                    return grant ? { ...grant, matchPercentage: result.matchPercentage } : null;
+                }).filter((g) => !!g);
+                setSuggestions(suggestedGrants);
+            } catch (error) {
+                console.error("Failed to fetch suggestions", error);
+                setError("Could not load grants. Please try again later.");
+            }
+        };
+        fetchSuggestions();
+    }, []);
+
+    //NearestDedline Date
+    useEffect(() => {
+        if (nearestDeadline) {
+            const formatdate = getDaysRemaining(nearestDeadline);
+            // console.log("========",formatdate);
+            setdaysRemaining(formatdate)
+        }
+    }, [nearestDeadline])
 
     //Fetch all fav grant to for fav toggle btn  
     useEffect(() => {
@@ -77,100 +121,6 @@ const Dashboard = () => {
         };
         loadFavorites();
     }, [dispatch]);
-
-    useEffect(() => {
-        if (isSummaryModalOpen) {
-            returnFocusRef.current = document.activeElement;
-        } else {
-            returnFocusRef.current?.focus();
-        }
-    }, [isSummaryModalOpen]);
-
-
-    useEffect(() => {
-        const fetchSuggestions = async () => {
-            setIsLoadingSuggestions(true);
-            setError(null);
-            try {
-                const suggestedResults = await getDashboardSuggestions(ALL_GRANTS);
-                const suggestedGrants = suggestedResults.map(result => {
-                    const grant = ALL_GRANTS.find(g => g.id === result.grantId);
-                    return grant ? { ...grant, matchPercentage: result.matchPercentage } : null;
-                }).filter((g) => !!g);
-                setSuggestions(suggestedGrants);
-            } catch (error) {
-                console.error("Failed to fetch suggestions", error);
-                setError("Could not load grants. Please try again later.");
-            } finally {
-                setIsLoadingSuggestions(false);
-            }
-        };
-        fetchSuggestions();
-    }, []);
-
-    const handleGenerateSummary = async () => {
-        setIsSummaryModalOpen(true);
-        setIsSummaryLoading(true);
-        const summary = await getDashboardSummary(suggestions, myGrants, tasks.filter(t => !t.completed));
-        setSummaryContent(summary);
-        setIsSummaryLoading(false);
-    };
-
-    const potentialFunding = suggestions
-        .filter(grant => grant.matchPercentage >= 85)
-        .reduce((total, grant) => total + grant.amount, 0);
-
-    const currencyFormatter = new Intl.NumberFormat('en-AU', {
-        style: 'currency',
-        currency: 'AUD',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    });
-
-    const incompleteTasks = tasks.filter(t => !t.completed).slice(0, 4);
-
-
-
-    const parseAustralianDate = (dateString) => {
-        console.log(dateString, "\\\\")
-        if (!dateString) return null;
-        if (typeof dateString != "string") return null;
-        const date = new Date(dateString);
-        return isNaN(date.getTime()) ? null : date;
-    };
-    // 3. Deadline: Use 'closeDateTime' from the API
-
-    const getDaysRemaining = (deadlineValue) => {
-        const deadlineDate = parseAustralianDate(deadlineValue);
-        if (!deadlineDate) return null; // Handle invalid date
-
-        const today = new Date();
-        // Compare dates without time component for accuracy
-        today.setHours(0, 0, 0, 0);
-
-        const diffTime = deadlineDate.getTime() - today.getTime();
-
-        // If the difference is less than zero, the grant has closed.
-        if (diffTime < 0) return null;
-
-        // Use floor to get the number of full days remaining
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        setdaysRemaining(diffDays)
-        // return diffDays;
-    };
-
-    // const daysRemaining = getDaysRemaining();
-
-    useEffect(() => {
-        if (nearestDeadline) {
-            // console.log(nearestDeadline, "yes it is working")
-            const deadline = JSON.stringify(nearestDeadline)
-            console.log(deadline, "------");
-
-            getDaysRemaining(deadline)
-        }
-    }, [nearestDeadline])
-
 
     return (
         <div className="space-y-12">

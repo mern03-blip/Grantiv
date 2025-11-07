@@ -38,9 +38,6 @@ export const updateMemberRole = async (memberId, newRole) => {
 };
 
 
-
-
-
 export const deleteMember = async (memberId) => {
   const organizationId = localStorage.getItem("orgId");
   const userId = localStorage.getItem("userId");
