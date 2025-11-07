@@ -9,6 +9,7 @@ import { Placeholder } from '../../assets/image';
 import { jwtDecode } from 'jwt-decode';
 import { TeamChat } from './components/TeamChat';
 import DeleteUserModal from "../../components/modals/DeleteUserModal";
+import { useNavigate } from 'react-router-dom';
 
 
 const UpgradeNotice = ({ featureName, onUpgrade }) => (
@@ -22,7 +23,7 @@ const UpgradeNotice = ({ featureName, onUpgrade }) => (
 );
 
 
-const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
+const TeamsView = ({ isDemoMode, navigateTo }) => {
     const [inviteEmail, setInviteEmail] = useState('');
     const [chatMessages, setChatMessages] = useState(MOCK_TEAM_CHAT_MESSAGES);
     const [inviteRole, setInviteRole] = useState("Member");
@@ -31,11 +32,12 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
 
-
+    const navigate = useNavigate();
 
     const [currentUser, setCurrentUser] = useState(null);
     const userId = localStorage.getItem("userId")
     const organizationId = localStorage.getItem('orgId');
+    const plan = localStorage.getItem('grantiv_user_plan');
     useEffect(() => {
 
         const token = localStorage.getItem('token')
@@ -141,12 +143,12 @@ const TeamsView = ({ plan, isDemoMode, navigateTo }) => {
     };
 
 
-    if (plan === 'Starter' && !isDemoMode) {
+    if (plan !== "Pro") {
         return (
             <div>
                 <h2 className="text-3xl font-bold text-night dark:text-dark-text mb-2 font-heading">Teams</h2>
                 <p className="text-night/60 dark:text-dark-textMuted mb-8">This is where you would manage your team members, roles, and permissions.</p>
-                <UpgradeNotice featureName="Team Management" onUpgrade={() => navigateTo('settings')} />
+                <UpgradeNotice featureName="Team Management" onUpgrade={() => navigate('/settings')} />
             </div>
         )
     }

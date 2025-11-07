@@ -130,11 +130,19 @@ export const getAIRecommendedGrants = async () => {
   };
 
   const response = await axiosInstance.get('/organizations/recommendations', config);
+  // console.log("API Response:", response.data);
 
-  // Format response for frontend use
-  return response.data.map((grant) => ({
+  const { nearestDeadline, recommendedGrants } = response.data;
+
+  // Safely map recommendedGrants
+  const formattedGrants = (recommendedGrants || []).map((grant) => ({
     ...grant,
     id: grant._id,
     matchPercentage: Math.round(grant.score * 100),
   }));
+
+  return {
+    nearestDeadline,
+    recommendedGrants: formattedGrants,
+  };
 };

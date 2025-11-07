@@ -12,8 +12,11 @@ const grantSlice = createSlice({
     setAiTotalAmount: (state, action) => {
       state.aiTotalAmount = action.payload;
     },
+    setNearestDeadline: (state, action) => {
+      state.nearestDeadline = action.payload;
+    },
   },
 });
 
-export const { setAiTotalAmount } = grantSlice.actions;
+export const { setAiTotalAmount, setNearestDeadline } = grantSlice.actions;
 export default grantSlice.reducer;

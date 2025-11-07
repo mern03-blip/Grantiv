@@ -7,29 +7,15 @@ import { handleBusinessForm } from '../../api/endpoints/businessform';
 import { useQuery } from '@tanstack/react-query';
 
 // Mock types for a self-contained component
-/**
- * @typedef {'Starter' | 'Pro' | 'Enterprise'} UserPlan
- * @typedef {'light' | 'dark'} Theme
- * @typedef {object} BusinessProfile
- * @property {string} [id]
- * @property {string} companyName
- * // ... other fields
- */
 
-// Mock data and service functions for a self-contained component
-/** @type {BusinessProfile} */
 const MOCK_BUSINESS_PROFILE = {
     id: '1',
     companyName: 'Grantiv Inc.',
 };
 
-/** @type {UserPlan} */
 const MOCK_USER_PLAN = 'Pro';
 
-/**
- * Saves a business profile to local storage.
- * @param {BusinessProfile} profile - The business profile to save.
- */
+
 const saveProfileToLocalStorage = (profile) => {
     try {
         localStorage.setItem('grantiv_business_profile', JSON.stringify(profile));
@@ -38,10 +24,7 @@ const saveProfileToLocalStorage = (profile) => {
     }
 };
 
-/**
- * Retrieves a business profile from local storage.
- * @returns {BusinessProfile | null} The saved business profile, or null if not found or an error occurs.
- */
+
 const getProfileFromLocalStorage = () => {
     try {
         const savedProfile = localStorage.getItem('grantiv_business_profile');
@@ -52,10 +35,7 @@ const getProfileFromLocalStorage = () => {
     }
 };
 
-/**
- * Retrieves the theme setting from local storage.
- * @returns {Theme} The saved theme ('light' or 'dark'), defaults to 'light'.
- */
+
 const getThemeFromLocalStorage = () => {
     try {
         const savedTheme = localStorage.getItem('grantiv_theme');
@@ -66,19 +46,13 @@ const getThemeFromLocalStorage = () => {
 };
 
 const Settings = () => {
-    /** @typedef {'Profile' | 'Appearance' | 'Subscription' | 'Notifications'} SettingsTab */
-    /** @type {[SettingsTab, React.Dispatch<React.SetStateAction<SettingsTab>>]} */
     const [activeTab, setActiveTab] = useState('Profile');
-    /** @type {[BusinessProfile | null, React.Dispatch<React.SetStateAction<BusinessProfile | null>>]} */
     const [profile, setProfile] = useState(MOCK_BUSINESS_PROFILE);
-    /** @type {[UserPlan, React.Dispatch<React.SetStateAction<UserPlan>>]} */
-    const [plan, setPlan] = useState(MOCK_USER_PLAN);
-    /** @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]} */
+    const [plan, setPlan] = useState("");
     const [isDemoMode, setIsDemoMode] = useState(true);
-    /** @type {[Theme, React.Dispatch<React.SetStateAction<Theme>>]} */
     const [theme, setTheme] = useState(getThemeFromLocalStorage());
 
-   
+
 
     // Effect to load initial state from local storage on mount
     useEffect(() => {
@@ -135,13 +109,13 @@ const Settings = () => {
         });
     }, []);
 
-     const  {data } = useQuery({
-            queryKey: ["businessProfile"],
-            queryFn: handleBusinessForm,
-        });
+    const { data } = useQuery({
+        queryKey: ["businessProfile"],
+        queryFn: handleBusinessForm,
+    });
 
-        console.log(data);
-        
+    console.log(data);
+
 
     const renderContent = () => {
         switch (activeTab) {
@@ -150,7 +124,7 @@ const Settings = () => {
                     <div>
                         <h3 className="text-xl font-bold font-heading text-night dark:text-dark-text mb-1">Business Profile</h3>
                         <p className="text-night/60 dark:text-dark-textMuted mb-6">This information helps our AI match you with the right grants.</p>
-                        <BusinessProfileForm initialProfile={profile || undefined} onSave={handleSaveProfile} buttonText={profile ? "Save Changes" : "Save Profile"} Data={data}/>
+                        <BusinessProfileForm initialProfile={profile || undefined} onSave={handleSaveProfile} buttonText={profile ? "Save Changes" : "Save Profile"} Data={data} />
                     </div>
                 );
             case 'Appearance':
@@ -176,16 +150,6 @@ const Settings = () => {
                     </div>
                 );
             case 'Subscription':
-                /**
-                 * @param {object} props
-                 * @param {string} props.name
-                 * @param {string} props.price
-                 * @param {string} props.description
-                 * @param {string[]} props.features
-                 * @param {boolean} [props.isCurrent]
-                 * @param {boolean} [props.isPopular]
-                 * @param {() => void} props.onSelect
-                 */
                 const PlanCard = ({ name, price, description, features, isCurrent, isPopular, onSelect }) => {
                     const buttonText = isCurrent ? 'Current Plan' : (price === 'Contact Us' ? 'Contact Us' : 'Upgrade');
                     return (
@@ -276,13 +240,6 @@ const Settings = () => {
                     </div>
                 );
             case 'Notifications':
-                /**
-                 * @param {object} props
-                 * @param {string} props.label
-                 * @param {string} props.description
-                 * @param {boolean} props.checked
-                 * @param {() => void} props.onChange
-                 */
                 const Toggle = ({ label, description, checked, onChange }) => (
                     <div className="flex justify-between items-center py-4 border-b border-mercury/30 dark:border-dark-border/50">
                         <div>

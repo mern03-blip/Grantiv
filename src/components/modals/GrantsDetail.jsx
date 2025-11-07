@@ -503,6 +503,40 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
     maximumFractionDigits: 0,
   });
 
+  // ✅ Format grant amount based on conditions
+  const formatGrantAmount = (grant) => {
+    const { minAmountAvailable, maxAmountAvailable, totalAmountAvailable } = grant || {};
+
+    // 🟢 If all are missing
+    if (!minAmountAvailable && !maxAmountAvailable && !totalAmountAvailable)
+      return "Unspecified";
+
+    // 🟢 If min = max → show total amount
+    if (
+      minAmountAvailable &&
+      maxAmountAvailable &&
+      Number(minAmountAvailable) === Number(maxAmountAvailable)
+    ) {
+      const value = totalAmountAvailable || minAmountAvailable;
+      return currencyFormatter.format(Number(value));
+    }
+
+    // 🟢 If min and max are both present and not equal → show range
+    if (minAmountAvailable && maxAmountAvailable) {
+      return `${currencyFormatter.format(Number(minAmountAvailable))} - ${currencyFormatter.format(Number(maxAmountAvailable))}`;
+    }
+
+    // 🟢 If only one value is present → show it
+    if (maxAmountAvailable) return currencyFormatter.format(Number(maxAmountAvailable));
+    if (minAmountAvailable) return currencyFormatter.format(Number(minAmountAvailable));
+
+    // 🟢 Fallback → show total amount
+    if (totalAmountAvailable) return currencyFormatter.format(Number(totalAmountAvailable));
+
+    return "Unspecified";
+  };
+
+
   const getDaysRemaining = () => {
     if (!grant?.closeDateTime) return -1;
     const date = new Date(grant.closeDateTime);
@@ -626,7 +660,7 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
                 onClick={onToggleSave}
                 disabled={isToggling}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full 
-                            font-semibold text-sm transition-all duration-200 ease-in-out 
+                            font-semibold text-sm transition-all duration-200 ease-in-out whitespace-nowrap
                             ${isSaved
                     ? "bg-primary text-white shadow-md hover:bg-primary/90"
                     : "bg-gray-100 dark:bg-gray-700 text-night/70 dark:text-dark-textMuted hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-primary"}`}>
@@ -677,7 +711,7 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
               <p className="text-sm text-night/60 dark:text-dark-textMuted">
                 Amount
               </p>
-              <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">
+              {/* <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">
                 {grant?.totalAmountAvailable !== undefined && grant?.totalAmountAvailable !== null && grant?.totalAmountAvailable !== "0"
                   ? currencyFormatter.format(
                     typeof grant.totalAmountAvailable === "string"
@@ -685,7 +719,11 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
                       : Number(grant.totalAmountAvailable)
                   )
                   : "Unspecified"}
+              </p> */}
+              <p className="font-semibold text-secondary dark:text-dark-secondary text-lg">
+                {formatGrantAmount(grant)}
               </p>
+
 
             </div>
             <div>

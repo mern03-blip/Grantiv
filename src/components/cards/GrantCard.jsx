@@ -18,8 +18,7 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
     // const amountValue = grant.totalAmountAvailable ?
     //     parseFloat(String(grant.totalAmountAvailable).replace(/[^0-9.]/g, '')) : 0; // Use 0 or null if not available
 
-    // 3. Deadline: Use 'closeDateTime' from the API
-    const deadlineDateString = grant.closeDateTime;
+
 
     // 4. ID: Use '_id' from the API for the key and navigation
     const grantId = grant._id;
@@ -31,31 +30,60 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
     });
-
     // ✅ Function to format single or range amounts
-    const formatAmount = (amount) => {
-        if (!amount) return 'Unspecified';
+    const formatAmount = (grant) => {
+        const { minAmountAvailable, maxAmountAvailable, totalAmountAvailable } = grant;
 
-        const amountStr = String(amount);
-
-        // Check if amount is a range (contains "-")
-        if (amountStr.includes('-')) {
-            const [min, max] = amountStr.split('-').map(part =>
-                parseFloat(part.replace(/[^0-9.]/g, ''))
-            );
-
-            if (isNaN(min) || isNaN(max)) return amountStr; // fallback if invalid
-
-            const formattedMin = currencyFormatter.format(min);
-            const formattedMax = currencyFormatter.format(max);
-            return `${formattedMin} - ${formattedMax}`;
-        } else {
-            const numericValue = parseFloat(amountStr.replace(/[^0-9.]/g, ''));
-            if (isNaN(numericValue)) return amountStr;
-            return currencyFormatter.format(numericValue);
+        // If no data, return fallback
+        if (!minAmountAvailable && !maxAmountAvailable && !totalAmountAvailable) {
+            return 'Unspecified';
         }
+
+        // ✅ If min and max are equal → show totalAmountAvailable (or that same value)
+        if (minAmountAvailable && maxAmountAvailable && minAmountAvailable === maxAmountAvailable) {
+            const value = totalAmountAvailable || minAmountAvailable;
+            return currencyFormatter.format(value);
+        }
+
+        // ✅ If min and max both exist but not equal → show range
+        if (minAmountAvailable && maxAmountAvailable) {
+            return `${currencyFormatter.format(minAmountAvailable)} - ${currencyFormatter.format(maxAmountAvailable)}`;
+        }
+
+        // ✅ If only one value exists → show that
+        if (maxAmountAvailable) return currencyFormatter.format(maxAmountAvailable);
+        if (minAmountAvailable) return currencyFormatter.format(minAmountAvailable);
+
+        // ✅ Fallback → show total amount if nothing else
+        return currencyFormatter.format(totalAmountAvailable);
     };
 
+    // const formatAmount = (amount) => {
+    //     if (!amount) return 'Unspecified';
+
+    //     const amountStr = String(amount);
+
+    //     // Check if amount is a range (contains "-")
+    //     if (amountStr.includes('-')) {
+    //         const [min, max] = amountStr.split('-').map(part =>
+    //             parseFloat(part.replace(/[^0-9.]/g, ''))
+    //         );
+
+    //         if (isNaN(min) || isNaN(max)) return amountStr; // fallback if invalid
+
+    //         const formattedMin = currencyFormatter.format(min);
+    //         const formattedMax = currencyFormatter.format(max);
+    //         return `${formattedMin} - ${formattedMax}`;
+    //     } else {
+    //         const numericValue = parseFloat(amountStr.replace(/[^0-9.]/g, ''));
+    //         if (isNaN(numericValue)) return amountStr;
+    //         return currencyFormatter.format(numericValue);
+    //     }
+    // };
+
+
+    // 3. Deadline: Use 'closeDateTime' from the API
+    const deadlineDateString = grant.closeDateTime;
     const getDaysRemaining = () => {
         const deadlineDate = parseAustralianDate(deadlineDateString);
         if (!deadlineDate) return null; // Handle invalid date
@@ -75,7 +103,6 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
     };
 
     const daysRemaining = getDaysRemaining();
-    const navigate = useNavigate();
 
     // Check for a valid deadline date for display
     const validDeadlineDate = parseAustralianDate(deadlineDateString);
@@ -115,7 +142,10 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
                     <div>
                         {/* UPDATED: Use the 'amountValue' variable */}
                         {/* <span className="font-bold text-secondary dark:text-dark-secondary text-base">{currencyFormatter.format(amountValue)}</span> */}
-                        <span className="font-semibold text-secondary dark:text-dark-secondary text-base">{formatAmount(grant.totalAmountAvailable)}</span>
+                        {/* <span className="font-semibold text-secondary dark:text-dark-secondary text-base">{formatAmount(grant.totalAmountAvailable)}</span> */}
+                        <span className="font-semibold text-secondary dark:text-dark-secondary text-base">
+                            {formatAmount(grant)}
+                        </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-night/70 dark:text-dark-textMuted/80">
                         <CalendarDaysIcon className="w-4 h-4" />
@@ -155,5 +185,10 @@ const GrantCard = ({ grant, onSelect, matchPercentage }) => {
     );
 };
 
+
 export default GrantCard;
+
+
+
+
 

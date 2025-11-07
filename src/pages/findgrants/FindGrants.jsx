@@ -248,6 +248,26 @@ const FindGrants = () => {
 
   const { data: cities = [] } = useCitiesQuery();
 
+  // const fetchActiveGrants = async ({ queryKey }) => {
+  //   // ✅ pass the queryKey forward to fetchGrants
+  //   const data = await fetchGrants({ queryKey });
+
+  //   const today = new Date();
+
+  //   // Filter only active grants (not expired)
+  //   const activeGrants = data?.data?.filter(grant => {
+  //     if (!grant.closeDateTime) return true; // include if no close date
+  //     const closeDate = new Date(grant.closeDateTime);
+  //     return closeDate >= today;
+  //   });
+
+  //   // ✅ Keep the same structure as your API response
+  //   return {
+  //     ...data,
+  //     data: activeGrants,
+  //   };
+  // };
+
   // --- Fetch Grants with TanStack Query (now includes filters in queryKey) ---
   const {
     data: Grants,
@@ -295,12 +315,12 @@ const FindGrants = () => {
     performAISearch(newQuery);
   };
 
-  const handleRunSavedSearch = (savedQuery) => {
-    setQuery(savedQuery);
-    setSearchQuery(savedQuery);
-    setIsAIPagination(false);
-    setCurrentPage(1);
-  };
+  // const handleRunSavedSearch = (savedQuery) => {
+  //   setQuery(savedQuery);
+  //   setSearchQuery(savedQuery);
+  //   setIsAIPagination(false);
+  //   setCurrentPage(1);
+  // };
 
   // ✅ NEW: Handle filter save
   const handleSaveFilters = (filterData) => {
@@ -484,7 +504,7 @@ const FindGrants = () => {
       {/* No Results */}
       {!isGlobalLoading && paginatedGrantsForDisplay.length === 0 && (
         <p className="text-center text-night/60 dark:text-dark-textMuted mt-8">
-          No grants found matching your search.
+          No grants found!.
         </p>
       )}
     </div>

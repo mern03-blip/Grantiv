@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import GrantCard from '../../../components/cards/GrantCard';
 import { getAIRecommendedGrants } from '../../../api/endpoints/grants';
-import { setAiTotalAmount } from '../../../redux/slices/grantSlice';
+import { setAiTotalAmount, setNearestDeadline } from '../../../redux/slices/grantSlice';
 import { useDispatch } from 'react-redux';
 
 const AiRecommendedGrants = () => {
@@ -10,7 +10,7 @@ const AiRecommendedGrants = () => {
     const dispatch = useDispatch();
 
     const {
-        data: suggestions = [],
+        data,
         isLoading,
         isError,
         error,
@@ -23,9 +23,12 @@ const AiRecommendedGrants = () => {
         refetchOnWindowFocus: false, // Don't refetch when the browser tab/window regains focus
     });
 
+    const suggestions = data?.recommendedGrants || [];
+    const nearestDeadline = data?.nearestDeadline || null;
+
     // ✅ Limit to only 3 grants from backend data
     const topGrants = suggestions.slice(0, 3);
-    // console.log(suggestions);
+    console.log(nearestDeadline);
 
     // ✅ Calculate total amount of these 3 grants
     const totalAmount = topGrants.reduce((sum, grant) => {
@@ -48,11 +51,16 @@ const AiRecommendedGrants = () => {
         return sum + (amount || 0);
     }, 0);
 
-    console.log("Total amount of top 3 grants:", totalAmount);
+    // console.log("Total amount of top 3 grants:", totalAmount);
 
     useEffect(() => {
-        dispatch(setAiTotalAmount(totalAmount));
-    }, [totalAmount, dispatch]);
+        if (totalAmount) {
+            dispatch(setAiTotalAmount(totalAmount));
+        }
+       if (!isLoading) {
+        dispatch(setNearestDeadline(nearestDeadline));
+    }
+    }, [totalAmount, nearestDeadline, dispatch]);
 
 
     return (

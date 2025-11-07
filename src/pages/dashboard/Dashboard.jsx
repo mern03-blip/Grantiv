@@ -12,6 +12,7 @@ import AiRecommendedGrants from './components/AiRecommendedGrants';
 import { useDispatch, useSelector } from 'react-redux';
 import { handleGetFavoriteGrants } from '../../api/endpoints/grants';
 import { setSavedGrants } from '../../redux/slices/favoriteGrantSlice';
+// import { json } from 'stream/consumers';
 
 
 const Dashboard = () => {
@@ -27,10 +28,11 @@ const Dashboard = () => {
     const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
     const [isSummaryLoading, setIsSummaryLoading] = useState(false);
     const [summaryContent, setSummaryContent] = useState('');
+    const [daysRemaining, setdaysRemaining] = useState("")
 
     const summaryModalRef = useRef(null);
     const returnFocusRef = useRef(null);
-    const aiTotalAmount = useSelector((state) => state.grants.aiTotalAmount);
+    const { aiTotalAmount, nearestDeadline } = useSelector((state) => state.grants);
     const dispatch = useDispatch();
 
     useFocusTrap(isSummaryModalOpen ? summaryModalRef : { current: null });
@@ -127,6 +129,49 @@ const Dashboard = () => {
 
     const incompleteTasks = tasks.filter(t => !t.completed).slice(0, 4);
 
+
+
+    const parseAustralianDate = (dateString) => {
+        console.log(dateString, "\\\\")
+        if (!dateString) return null;
+        if (typeof dateString != "string") return null;
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) ? null : date;
+    };
+    // 3. Deadline: Use 'closeDateTime' from the API
+
+    const getDaysRemaining = (deadlineValue) => {
+        const deadlineDate = parseAustralianDate(deadlineValue);
+        if (!deadlineDate) return null; // Handle invalid date
+
+        const today = new Date();
+        // Compare dates without time component for accuracy
+        today.setHours(0, 0, 0, 0);
+
+        const diffTime = deadlineDate.getTime() - today.getTime();
+
+        // If the difference is less than zero, the grant has closed.
+        if (diffTime < 0) return null;
+
+        // Use floor to get the number of full days remaining
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        setdaysRemaining(diffDays)
+        // return diffDays;
+    };
+
+    // const daysRemaining = getDaysRemaining();
+
+    useEffect(() => {
+        if (nearestDeadline) {
+            // console.log(nearestDeadline, "yes it is working")
+            const deadline = JSON.stringify(nearestDeadline)
+            console.log(deadline, "------");
+
+            getDaysRemaining(deadline)
+        }
+    }, [nearestDeadline])
+
+
     return (
         <div className="space-y-12">
             <div
@@ -156,7 +201,18 @@ const Dashboard = () => {
                                     <p className="opacity-80 text-sm">Overall Status</p>
                                 </div>
                                 <div>
-                                    <p className="font-bold">14 days</p>
+                                    <span>
+                                        {/* UPDATED: Use the validDeadlineDate or fallback string */}
+
+                                        {daysRemaining !== null ? (
+                                            <span className={`font-semibold ml-1`}>
+                                                ({daysRemaining === 0 ? 'Due today' : `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} left`})
+                                            </span>
+                                        ) : (
+                                            {/* <p className="font-bold">14 days</p> */ }
+                                        )}
+                                    </span>
+
                                     <p className="opacity-80 text-sm">Next Deadline</p>
                                 </div>
                             </div>
