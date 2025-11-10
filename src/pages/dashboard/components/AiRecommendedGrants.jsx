@@ -1,19 +1,17 @@
 import React, { useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import GrantCard from '../../../components/cards/GrantCard';
 import { getAIRecommendedGrants } from '../../../api/endpoints/grants';
 import { setAiTotalAmount, setNearestDeadline } from '../../../redux/slices/grantSlice';
 import { useDispatch } from 'react-redux';
 
 const AiRecommendedGrants = () => {
-    const queryClient = useQueryClient();
     const dispatch = useDispatch();
 
     const {
         data,
         isLoading,
         isError,
-        error,
     } = useQuery({
         queryKey: ['ai-recommended-grants'],
         queryFn: getAIRecommendedGrants,

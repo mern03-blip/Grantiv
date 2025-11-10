@@ -72,21 +72,21 @@ const AdminLayout = () => {
         }
     }, []);
 
-    const handleSaveProfile = useCallback((profile) => {
-        try {
-            localStorage.setItem('grantiv_business_profile', "false");
-            localStorage.removeItem('grantiv_onboarding_skipped');
-            if (isOnboarding) {
-                setIsOnboarding(false);
-            }
-            if (currentView === 'settings' || isOnboarding) {
-                setCurrentView('dashboard');
-            }
-        } catch (error) {
-            console.error("Failed to save business profile to local storage", error);
-            alert("There was an error saving your profile.");
-        }
-    }, [currentView, isOnboarding]);
+    // const handleSaveProfile = useCallback((profile) => {
+    //     try {
+    //         localStorage.setItem('grantiv_business_profile', "false");
+    //         localStorage.removeItem('grantiv_onboarding_skipped');
+    //         if (isOnboarding) {
+    //             setIsOnboarding(false);
+    //         }
+    //         if (currentView === 'settings' || isOnboarding) {
+    //             setCurrentView('dashboard');
+    //         }
+    //     } catch (error) {
+    //         console.error("Failed to save business profile to local storage", error);
+    //         alert("There was an error saving your profile.");
+    //     }
+    // }, [currentView, isOnboarding]);
 
     const handleSkipOnboarding = useCallback(() => {
         try {
@@ -159,7 +159,7 @@ const AdminLayout = () => {
                         : 'p-8 bg-[#F7F7F7] dark:bg-dark-background'
                     }`}
             >
-                <div className="max-w-7xl mx-auto">
+                <div className="w-full mx-auto">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={currentView}
