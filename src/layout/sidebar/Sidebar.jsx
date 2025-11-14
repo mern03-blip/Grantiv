@@ -13,7 +13,7 @@ import {
   UsersIcon,
   SunIcon,
 } from '../../components/icons/Icons';
-import Logout from '../../components/modals/Logout'; 
+import Logout from '../../components/modals/Logout';
 import { DarkLogo, SidebarLogo } from '../../assets/image';
 
 export const Sidebar = ({
@@ -143,7 +143,7 @@ export const Sidebar = ({
             <img
               src={SidebarLogo}
               alt="Grantiv Logo"
-              className="w-[320px] px-3 my-[18px] h-auto block dark:hidden"
+              className="w-[320px] h-auto block dark:hidden"
             />
             <img
               src={DarkLogo}

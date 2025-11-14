@@ -4,3 +4,23 @@
   color: white !important;
   font-weight: 600;
 }
+
+
+/* your CSS file or in Tailwind's global.css */
+
+.custom-select .ant-select-selector {
+  background-color: white !important;
+  border-radius: 6px !important;
+  border: 2px solid #8CC84B !important; /* gray-300 */
+  transition: all 0.2s ease;
+}
+
+.custom-select:hover .ant-select-selector {
+  border-color: #8CC84B !important; /* Ant Design primary color */
+  box-shadow: 0 0 5px rgba(22, 119, 255, 0.3);
+}
+
+.custom-select.ant-select-focused .ant-select-selector {
+  border-color: #8CC84B !important;
+  box-shadow: 0 0 5px rgba(22, 119, 255, 0.3);
+}

@@ -29,7 +29,7 @@ export const getGrants = async ({
 
   const response = await axiosInstance.get("/grants/get-grants", { params });
 
-  console.log("All grants:", response.data);
+  // console.log("All grants:", response.data);
   return response.data;
 };
 
@@ -56,7 +56,7 @@ export const handleFavoriteGrants = async (grantId) => {
     organizationId,
   });
 
-  console.log("Favorite grants:", response.data);
+  // console.log("Favorite grants:", response.data);
   return response.data;
 };
 
@@ -68,7 +68,7 @@ export const handleGetFavoriteGrants = async () => {
     userId,
   });
 
-  console.log("Get Favorite grants:", response.data);
+  // console.log("Get Favorite grants:", response.data);
   return response.data;
 };
 

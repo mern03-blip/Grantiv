@@ -189,8 +189,7 @@
 // export default FindGrants;
 
 
-
-//Filter Functionlity
+//Filter Functionlaity
 import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -206,24 +205,7 @@ import { useCitiesQuery } from '../../hooks/useGetCities';
 import { useDispatch } from 'react-redux';
 import { setSavedGrants } from '../../redux/slices/favoriteGrantSlice';
 
-const GRANTS_PER_PAGE = 10;
 
-// Updated fetch function to accept filters
-const fetchGrants = async ({ queryKey }) => {
-  const [, page, searchQuery, filters] = queryKey;
-
-  const response = await getGrants({
-    page,
-    limit: GRANTS_PER_PAGE,
-    search: searchQuery,
-    filterLocation: filters.city || '',
-    filterAgency: filters.agencyName || '',
-    minAmount: filters.minAmount || '',
-    maxAmount: filters.maxAmount || '',
-  });
-
-  return response;
-};
 
 const FindGrants = () => {
   const navigate = useNavigate();
@@ -237,6 +219,26 @@ const FindGrants = () => {
   const [isAIPagination, setIsAIPagination] = useState(false);
   const [savedSearches, setSavedSearches] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [grantsPerPage, setGrantsPerPage] = useState(10);
+
+  // console.log("=======", grantsPerPage);
+
+  // Updated fetch function to accept filters
+  const fetchGrants = async ({ queryKey }) => {
+    const [, page, searchQuery, filters] = queryKey;
+
+    const response = await getGrants({
+      page,
+      limit: grantsPerPage,
+      search: searchQuery,
+      filterLocation: filters.city || '',
+      filterAgency: filters.agencyName || '',
+      minAmount: filters.minAmount || '',
+      maxAmount: filters.maxAmount || '',
+    });
+
+    return response;
+  };
 
   // ✅ NEW: State for filters
   const [filters, setFilters] = useState({
@@ -255,7 +257,7 @@ const FindGrants = () => {
     error,
     isFetching,
   } = useQuery({
-    queryKey: ['grants', currentPage, searchQuery, filters], // ✅ Added filters to queryKey
+    queryKey: ['grants', currentPage, searchQuery, filters, grantsPerPage], // ✅ Added filters to queryKey
     queryFn: fetchGrants,
     enabled: !isAIPagination,
     staleTime: 5 * 60 * 1000,
@@ -266,6 +268,8 @@ const FindGrants = () => {
   const grants = Grants?.data || [];
   const totalItems = Grants?.pagination.totalItems || 0;
   const totalPages = Grants?.pagination.totalPages || 1;
+
+  // console.log("===",totalItems)
 
   // --- Search Logic ---
   const performAISearch = async (searchQueryInput) => {
@@ -333,18 +337,18 @@ const FindGrants = () => {
   // --- Derived values for rendering ---
   const paginatedGrantsForDisplay = useMemo(() => {
     if (isAIPagination && matchedGrants.length > 0) {
-      const startIndex = (currentPage - 1) * GRANTS_PER_PAGE;
-      const endIndex = startIndex + GRANTS_PER_PAGE;
+      const startIndex = (currentPage - 1) * grantsPerPage;
+      const endIndex = startIndex + grantsPerPage;
       return matchedGrants.slice(startIndex, endIndex);
     }
     return grants;
   }, [grants, matchedGrants, isAIPagination, currentPage]);
 
   const paginationTotalPages = isAIPagination
-    ? Math.ceil(matchedGrants.length / GRANTS_PER_PAGE)
+    ? Math.ceil(matchedGrants.length / grantsPerPage)
     : totalPages;
 
-  const isSaveButtonDisabled = !query.trim() || savedSearches.includes(query.trim()) || isFetching;
+  // const isSaveButtonDisabled = !query.trim() || savedSearches.includes(query.trim()) || isFetching;
   const isGlobalLoading = isLoading || isFetching;
 
   // ✅ Check if any filters are active
@@ -377,7 +381,7 @@ const FindGrants = () => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          placeholder="e.g., a community garden project in regional Victoria"
+          placeholder={`Total Available Grants : ${totalItems}`}
           className="w-full p-4 border border-mercury dark:border-dark-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-dark-surface text-night dark:text-dark-text"
         />
 
@@ -419,35 +423,6 @@ const FindGrants = () => {
         />
       </div>
 
-      {/* Display active filters */}
-      {/* {hasActiveFilters && (
-        <div className="mb-4 p-3 bg-primary/10 dark:bg-primary/20 rounded-lg">
-          <p className="text-sm font-semibold text-night dark:text-dark-text mb-2">Active Filters:</p>
-          <div className="flex flex-wrap gap-2">
-            {filters.city && (
-              <span className="px-3 py-1 bg-white dark:bg-dark-surface rounded-full text-sm">
-                City: {filters.city}
-              </span>
-            )}
-            {filters.agencyName && (
-              <span className="px-3 py-1 bg-white dark:bg-dark-surface rounded-full text-sm">
-                Agency: {filters.agencyName}
-              </span>
-            )}
-            {filters.minAmount && (
-              <span className="px-3 py-1 bg-white dark:bg-dark-surface rounded-full text-sm">
-                Min: ${filters.minAmount}
-              </span>
-            )}
-            {filters.maxAmount && (
-              <span className="px-3 py-1 bg-white dark:bg-dark-surface rounded-full text-sm">
-                Max: ${filters.maxAmount}
-              </span>
-            )}
-          </div>
-        </div>
-      )} */}
-
       {/* Display Grants */}
       {!isGlobalLoading && paginatedGrantsForDisplay.length > 0 && (
         <>
@@ -468,6 +443,11 @@ const FindGrants = () => {
                 currentPage={currentPage}
                 totalPages={paginationTotalPages}
                 onPageChange={handlePageChange}
+                grantsPerPage={grantsPerPage}
+                onGrantsPerPageChange={(value) => {
+                  setGrantsPerPage(value);
+                  // setCurrentPage(1);
+                }}
               />
             </div>
           )}
@@ -485,7 +465,3 @@ const FindGrants = () => {
 };
 
 export default FindGrants;
-
-
-
-

@@ -1,8 +1,8 @@
 //images
 export { default as Logo } from "./images/Logo.png"
-export { default as SidebarLogo } from "./images/SidebarLogo.png"
+export { default as SidebarLogo } from "./images/SidebarLogo.svg"
+export { default as DarkLogo } from "./images/DarkLogo.svg"
 export { default as Placeholder } from "./images/Placeholder.png"
-export { default as DarkLogo } from "./images/DarkLogo.png"
 
 
 //Icons
