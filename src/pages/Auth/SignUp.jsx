@@ -1,5 +1,4 @@
 import React from "react";
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Form, Input, message } from "antd";
 import {
@@ -8,7 +7,6 @@ import {
 } from "@ant-design/icons";
 import { User, Mail } from "../../assets/image";
 import { FiLock } from "react-icons/fi";
-import "./signup.css"
 import { userSignUp } from "../../api/endpoints/auth";
 import { useMutation } from "@tanstack/react-query";
 
@@ -17,7 +15,6 @@ const SignUp = () => {
   const navigate = useNavigate();
 
   // ✅ TanStack Mutation Hook
-
   const { mutate: handleSignUp, isPending: loading } = useMutation({
     mutationFn: async ({ email, password, name, organizationName }) => {
       const response = await userSignUp({ email, password, name, organizationName });
@@ -54,7 +51,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className="w-full h-[100%] flex justify-center font-custom">
+    <div className="w-full h-[100%] flex justify-center font-custom overflow-y-auto no-scrollbar">
       <div className="w-[80%] p-6">
 
         {/* Heading Section */}

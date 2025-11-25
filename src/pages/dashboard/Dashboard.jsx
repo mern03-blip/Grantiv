@@ -263,10 +263,10 @@ const Dashboard = () => {
                     )}
                 </div>
             </div>
-
+            
             <AnimatePresence>
                 {isSummaryModalOpen && (
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setIsSummaryModalOpen(false)}>
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 h-screen !m-0" onClick={() => setIsSummaryModalOpen(false)}>
                         <motion.div
                             ref={summaryModalRef}
                             className="bg-white dark:bg-dark-surface rounded-lg shadow-xl p-6 md:p-8 max-w-2xl w-full border border-mercury dark:border-dark-border"
