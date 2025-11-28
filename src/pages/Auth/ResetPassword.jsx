@@ -52,23 +52,23 @@ const ResetPassword = () => {
 
   return (
     <>
-      <div className="relative flex-1 flex items-center justify-center h-screen w-full">
-        <div className="w-[80%] h-[50%]  p-6  rounded-2xl">
+      <div className="relative flex-1 flex items-center justify-center h-screen w-full px-4 sm:px-6">
+        <div className="w-full sm:w-[90%] md:w-[80%] lg:w-[70%] xl:w-[90%] min-h-[50%] p-4 sm:p-6 md:p-8 rounded-2xl">
 
           {/* 🔙 Back Button */}
           <button
             onClick={() => navigate(-1)}
-            className="absolute top-4  rounded-full hover:bg-bgColor mt-4"
+            className="absolute top-2 sm:top-4 left-4 sm:left-6 rounded-full hover:bg-bgColor mt-2 sm:mt-4"
           >
-            <FiArrowLeft className="text-[28px] text-mainColor" />
+            <FiArrowLeft className="text-xl sm:text-2xl md:text-[28px] text-mainColor" />
           </button>
 
-          <Title className=" text-blackColor !text-[28px]  font-b6"
+          <Title className=" text-blackColor !text-xl sm:!text-2xl md:!text-[28px]  font-b6"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
             Reset Password
           </Title>
-          <Title className="!text-[20px] text-blackColor !mb-8 font-b5"
+          <Title className="!text-base sm:!text-lg md:!text-[20px] text-blackColor !mb-6 sm:!mb-8 font-b5"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
             You can now reset your password.
@@ -78,7 +78,7 @@ const ResetPassword = () => {
             {/* New Password */}
             <Form.Item
               label={
-                <span className="font-b5  text-blackColor !font-custom">
+                <span className="font-b5 text-sm sm:text-base text-blackColor !font-custom">
                   Password
                 </span>
               }
@@ -97,13 +97,13 @@ const ResetPassword = () => {
                 size="large"
                 placeholder="***********"
                 style={{ border: "1px solid #DBDBDB" }}
-                className="rounded-custom h-12 p-2 text-sm font-body border-custom"
-                prefix={<FiLock className="text-mainColor text-[20px]" />}
+                className="rounded-custom h-10 sm:h-11 md:h-12 p-2 text-sm sm:text-base font-body border-custom"
+                prefix={<FiLock className="text-mainColor text-base sm:text-lg md:text-[20px]" />}
                 iconRender={(visible) =>
                   visible ? (
-                    <EyeTwoTone twoToneColor="#9CCC5A" style={{ color: "#9CCC5A", fontSize: "24px" }} />
+                    <EyeTwoTone twoToneColor="#9CCC5A" style={{ color: "#9CCC5A", fontSize: window.innerWidth < 640 ? "20px" : "24px" }} />
                   ) : (
-                    <EyeInvisibleOutlined style={{ color: "#9CCC5A", fontSize: "24px" }} />
+                    <EyeInvisibleOutlined style={{ color: "#9CCC5A", fontSize: window.innerWidth < 640 ? "20px" : "24px" }} />
                   )
                 }
               />
@@ -112,7 +112,7 @@ const ResetPassword = () => {
             {/* Confirm Password */}
             <Form.Item
               label={
-                <span className="font-b5  text-blackColor"
+                <span className="font-b5 text-sm sm:text-base text-blackColor"
                   style={{ fontFamily: '"Poppins", sans-serif' }}
                 >
                   Confirm Password
@@ -137,13 +137,13 @@ const ResetPassword = () => {
                 size="large"
                 placeholder="***********"
                 style={{ border: "1px solid #DBDBDB" }}
-                className="rounded-custom h-12 p-2 text-sm font-body border-custom"
-                prefix={<FiLock className="text-mainColor text-[20px]" />}
+                className="rounded-custom h-10 sm:h-11 md:h-12 p-2 text-sm sm:text-base font-body border-custom"
+                prefix={<FiLock className="text-mainColor text-base sm:text-lg md:text-[20px]" />}
                 iconRender={(visible) =>
                   visible ? (
-                    <EyeTwoTone twoToneColor="#9CCC5A" style={{ color: "#9CCC5A", fontSize: "24px" }} />
+                    <EyeTwoTone twoToneColor="#9CCC5A" style={{ color: "#9CCC5A", fontSize: window.innerWidth < 640 ? "20px" : "24px" }} />
                   ) : (
-                    <EyeInvisibleOutlined style={{ color: "#9CCC5A", fontSize: "24px" }} />
+                    <EyeInvisibleOutlined style={{ color: "#9CCC5A", fontSize: window.innerWidth < 640 ? "20px" : "24px" }} />
                   )
                 }
                 onCopy={(e) => e.preventDefault()}
@@ -158,7 +158,7 @@ const ResetPassword = () => {
               // onClick={() => {
               //   setIsModalVisible(true);
               // }}
-              className="w-full h-14 rounded-2xl font-bold !bg-mainColor border-none !font-custom"
+              className="w-full h-12 sm:h-14 md:h-16 rounded-2xl text-base sm:text-lg md:text-xl font-bold !bg-mainColor border-none !font-custom"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Save
@@ -173,35 +173,35 @@ const ResetPassword = () => {
           open={isModalVisible}
           onCancel={() => setIsModalVisible(false)}
           footer={null}
-          width={450} // Set a fixed width for better control
+          width={window.innerWidth < 640 ? "90%" : window.innerWidth < 768 ? 380 : 450}
           closable={false} // We will use a custom close button
           className="rounded-custom" // Use your custom border-radius
         >
-          <div className="font-custom flex flex-col items-left p-6 text-left">
+          <div className="font-custom flex flex-col items-left p-4 sm:p-6 text-left">
 
             {/* Custom Close Button in the top-right corner */}
             <button
               onClick={() => setIsModalVisible(false)}
-              className="absolute top-6 right-6 text-mainColor transition hover:opacity-75"
+              className="absolute top-4 sm:top-6 right-4 sm:right-6 text-mainColor transition hover:opacity-75"
             >
-              <CloseOutlined style={{ fontSize: '20px' }} />
+              <CloseOutlined style={{ fontSize: window.innerWidth < 640 ? '16px' : '20px' }} />
             </button>
 
             {/* Custom Checkmark Icon with double ring */}
             <div>
               <div>
-                <img src={FeaturedIcon} alt="Featured Icon" />
+                <img src={FeaturedIcon} alt="Featured Icon" className="w-12 sm:w-16" />
               </div>
             </div>
 
             {/* Text Content */}
-            <Typography.Title level={4} className="!font-b6 !text-h1 !text-blackColor"
+            <Typography.Title level={4} className="!font-b6 !text-lg sm:!text-xl md:!text-h1 !text-blackColor"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Password Updated
             </Typography.Title>
 
-            <p className="mt-2 mb-8 font-b5 text-h4 text-blackColor"
+            <p className="mt-2 mb-6 sm:mb-8 font-b5 text-sm sm:text-base md:text-h4 text-blackColor"
               style={{ fontFamily: '"Poppins", sans-serif' }}
             >
               Your password has been updated successfully.
@@ -210,7 +210,7 @@ const ResetPassword = () => {
             {/* Login Button */}
             <Button
               type="primary"
-              className="!h-12 w-full !rounded-custom !bg-mainColor !font-b6 !text-h4 !text-whiteColor"
+              className="!h-10 sm:!h-12 w-full !rounded-custom !bg-mainColor !font-b6 !text-sm sm:!text-base md:!text-h4 !text-whiteColor"
               style={{ fontFamily: '"Poppins", sans-serif' }}
               onClick={() => {
                 setIsModalVisible(false);

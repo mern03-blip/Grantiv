@@ -128,35 +128,35 @@ const VerifyOtp = () => {
 
   return (
     <>
-      <div className="relative flex-1 flex items-center justify-center h-screen w-full">
-        <div className="w-[80%] h-[50%]  p-6  rounded-2xl">
+      <div className="relative flex-1 flex items-center justify-center h-screen w-full px-4 sm:px-6">
+        <div className="w-full sm:w-[90%] md:w-[80%] lg:w-[70%] xl:w-[80%] min-h-[50%] p-4 sm:p-6 md:p-8 rounded-2xl">
 
           {/* 🔙 Back Button */}
           <button
             onClick={() => navigate(-1)}
-            className="absolute top-4  rounded-full hover:bg-bgColor mt-4"
+            className="absolute top-2 sm:top-4 left-4 sm:left-6 rounded-full hover:bg-bgColor mt-2 sm:mt-4"
           >
-            <FiArrowLeft className="text-[28px] text-mainColor" />
+            <FiArrowLeft className="text-xl sm:text-2xl md:text-[28px] text-mainColor" />
           </button>
           {/* Heading */}
           <Title
             level={4}
-            className="!m-0 font-b6 text-blackColor !text-[28px] mb-2"
+            className="!m-0 font-b6 text-blackColor !text-xl sm:!text-2xl md:!text-[28px] mb-2"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
             Verify OTP
           </Title>
-          <Text className="block mb-8 text-blackColor font-b5 !text-[20px]"
+          <Text className="block mb-6 sm:mb-8 text-blackColor font-b5 !text-base sm:!text-lg md:!text-[20px]"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
             We have sent an OTP to{" "}
-            <span className="text-mainColor font-b6">{email}</span>
+            <span className="text-mainColor font-b6 break-all">{email}</span>
           </Text>
 
           {/* OTP Inputs */}
           <Form layout="vertical" onFinish={onFinish}>
             <Form.Item>
-              <div className="flex gap-5 ">
+              <div className="flex gap-2 sm:gap-3 md:gap-5 justify-center">
                 {otp.map((digit, index) => (
                   <Input
                     key={index}
@@ -167,7 +167,7 @@ const VerifyOtp = () => {
                     onChange={(e) => handleChange(e.target.value, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
                     ref={(el) => (inputRefs.current[index] = el)}
-                    className="w-[65px] h-[60px] text-center text-lg rounded-custom border border-custom font-b6 text-blackColor"
+                    className="w-10 h-12 sm:w-12 sm:h-14 md:w-[65px] md:h-[60px] text-center text-base sm:text-lg rounded-custom border border-custom font-b6 text-blackColor"
                     style={{ border: "1px solid #DBDBDB" }}
                   />
                 ))}
@@ -200,7 +200,7 @@ const VerifyOtp = () => {
               loading={loading}
               style={{ fontFamily: '"Poppins", sans-serif' }}
               onClick={() => navigate("/auth/reset-password")}
-              className="w-[100%] mx-auto mt-4 h-[60px] rounded-custom !bg-mainColor text-whiteColor font-b7 border-none"
+              className="w-[100%] mx-auto mt-4 h-12 sm:h-14 md:h-[60px] rounded-custom !bg-mainColor text-whiteColor text-base sm:text-lg md:text-xl font-b7 border-none"
             >
               Verify
             </Button>

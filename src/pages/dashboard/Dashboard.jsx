@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ALL_GRANTS, MOCK_TASKS, MOCK_TEAM } from '../../../constants';
-import { getDashboardSuggestions, getDashboardSummary } from '../../services/geminiService';
+import { getDashboardSuggestions, getDashboardSummary } from '../../api/endpoints/geminiService';
 import ProgressBar from '../../components/progressbar/ProgressBar';
 import {
     SparklesIcon, XIcon, CheckCircleIcon, ClockIcon, SpinnerIcon
@@ -123,39 +123,39 @@ const Dashboard = () => {
     }, [dispatch]);
 
     return (
-        <div className="space-y-12">
+        <div className="space-y-6 sm:space-y-8 md:space-y-12">
             <div
-                className="p-8 rounded-xl bg-primary text-night relative overflow-hidden"
+                className="p-4 sm:p-6 md:p-8 rounded-lg sm:rounded-xl bg-primary text-night relative overflow-hidden"
                 style={{
                     backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
                     backgroundSize: '15px 15px',
                 }}
             >
-                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full"></div>
-                <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full"></div>
+                <div className="absolute -top-10 -right-10 w-32 h-32 sm:w-40 sm:h-40 bg-white/10 rounded-full"></div>
+                <div className="absolute top-10 left-10 w-16 h-16 sm:w-20 sm:h-20 bg-white/10 rounded-full"></div>
                 <div className="relative">
-                    <h2 className="text-3xl font-bold font-heading">Welcome back!</h2>
-                    <p>Here's your funding outlook.</p>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-heading">Welcome back!</h2>
+                    <p className="text-sm sm:text-base">Here's your funding outlook.</p>
 
-                    <div className="mt-6 flex justify-between items-end">
+                    <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-6">
                         <div>
                             {/* <p className="text-5xl font-bold font-heading">{currencyFormatter.format(totalGrantAmount)}</p> */}
-                            <p className="text-4xl font-semibold font-heading">${aiTotalAmount.toLocaleString()}
+                            <p className="text-2xl sm:text-3xl md:text-4xl font-semibold font-heading">${aiTotalAmount.toLocaleString()}
                             </p>
-                            <p className="opacity-80">Potential Funding</p>
+                            <p className="opacity-80 text-xs sm:text-sm md:text-base">Potential Funding</p>
                         </div>
-                        <div className="text-right">
-                            <div className="flex gap-6">
+                        <div className="text-left sm:text-right w-full sm:w-auto">
+                            <div className="flex flex-wrap gap-4 sm:gap-6">
                                 <div>
-                                    <p className="font-bold">In Progress</p>
-                                    <p className="opacity-80 text-sm">Overall Status</p>
+                                    <p className="font-bold text-sm sm:text-base">In Progress</p>
+                                    <p className="opacity-80 text-xs sm:text-sm">Overall Status</p>
                                 </div>
                                 <div>
                                     <span>
                                         {/* UPDATED: Use the validDeadlineDate or fallback string */}
 
                                         {daysRemaining !== null ? (
-                                            <span className={`font-semibold ml-1`}>
+                                            <span className={`font-semibold ml-1 text-sm sm:text-base`}>
                                                 ({daysRemaining === 0 ? 'Due today' : `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} left`})
                                             </span>
                                         ) : (
@@ -163,17 +163,17 @@ const Dashboard = () => {
                                         )}
                                     </span>
 
-                                    <p className="opacity-80 text-sm">Next Deadline</p>
+                                    <p className="opacity-80 text-xs sm:text-sm">Next Deadline</p>
                                 </div>
                             </div>
                             <motion.button
                                 onClick={handleGenerateSummary}
-                                className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-night text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
+                                className="mt-3 sm:mt-4 inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-night text-white rounded-full text-xs sm:text-sm font-semibold hover:bg-gray-800 transition-colors"
                                 aria-label="Get an AI-powered summary of your funding outlook"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                             >
-                                <SparklesIcon className="w-4 h-4" stroke="white" style={{}} />
+                                <SparklesIcon className="w-3 h-3 sm:w-4 sm:h-4" stroke="white" style={{}} />
                                 AI Summary
                             </motion.button>
                         </div>
@@ -186,19 +186,19 @@ const Dashboard = () => {
             </div>
 
             <div>
-                <h3 className="text-2xl font-bold text-night dark:text-dark-text mb-4 font-heading">Quick AI Progress</h3>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-night dark:text-dark-text mb-3 sm:mb-4 font-heading">Quick AI Progress</h3>
                 {myGrants.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                         {myGrants.slice(0, 2).map(grant => (
-                            <div key={grant.id} className="bg-white dark:bg-dark-surface p-4 rounded-lg border border-mercury dark:border-dark-border">
-                                <div className="flex justify-between items-center mb-4">
-                                    <div>
-                                        <h4 className="font-bold text-night dark:text-dark-text font-heading">{grant.title}</h4>
-                                        <p className="text-sm text-night/60 dark:text-dark-textMuted">Grant in Progress</p>
+                            <div key={grant.id} className="bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-lg border border-mercury dark:border-dark-border">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-sm sm:text-base text-night dark:text-dark-text font-heading">{grant.title}</h4>
+                                        <p className="text-xs sm:text-sm text-night/60 dark:text-dark-textMuted">Grant in Progress</p>
                                     </div>
                                     <motion.button
                                         // onClick={() => onSelectGrant(grant)}
-                                        className="px-4 py-2 text-sm font-semibold bg-primary text-night rounded-lg hover:bg-secondary transition-colors"
+                                        className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold bg-primary text-night rounded-lg hover:bg-secondary transition-colors w-full sm:w-auto"
                                         aria-label={`Continue application for ${grant.title}`}
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
@@ -211,15 +211,15 @@ const Dashboard = () => {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center p-8 bg-white dark:bg-dark-surface rounded-lg border border-mercury dark:border-dark-border">
-                        <p className="text-night/60 dark:text-dark-textMuted">You have no in-progress applications.</p>
+                    <div className="text-center p-6 sm:p-8 bg-white dark:bg-dark-surface rounded-lg border border-mercury dark:border-dark-border">
+                        <p className="text-sm sm:text-base text-night/60 dark:text-dark-textMuted">You have no in-progress applications.</p>
                     </div>
                 )}
             </div>
 
             <div>
-                <h3 className="text-2xl font-bold text-night dark:text-dark-text mb-4 font-heading">Your To-Do List</h3>
-                <div className="bg-white dark:bg-dark-surface p-4 rounded-lg border border-mercury dark:border-dark-border">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-night dark:text-dark-text mb-3 sm:mb-4 font-heading">Your To-Do List</h3>
+                <div className="bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-lg border border-mercury dark:border-dark-border">
                     {incompleteTasks.length > 0 ? (
                         <div className="space-y-1">
                             {incompleteTasks.map(task => {
@@ -228,27 +228,27 @@ const Dashboard = () => {
                                 const isOverdue = task.deadline && new Date(task.deadline) < new Date();
 
                                 return (
-                                    <div key={task.id} className="flex items-center gap-3 py-2 border-b border-mercury/30 dark:border-dark-border/50 last:border-b-0 group">
+                                    <div key={task.id} className="flex items-start sm:items-center gap-2 sm:gap-3 py-2 border-b border-mercury/30 dark:border-dark-border/50 last:border-b-0 group">
                                         <button
                                             onClick={() => handleToggleTask(task.id)}
-                                            className="flex-shrink-0"
+                                            className="flex-shrink-0 mt-0.5 sm:mt-0"
                                             aria-label={`Mark task as complete: ${task.text}`}
                                         >
-                                            <div className="w-6 h-6 border-2 border-mercury/80 dark:border-dark-border rounded-full group-hover:border-primary transition"></div>
+                                            <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-mercury/80 dark:border-dark-border rounded-full group-hover:border-primary transition"></div>
                                         </button>
-                                        <div className="flex-1">
-                                            <span className="text-sm text-night dark:text-dark-text group-hover:text-secondary transition-colors">{task.text}</span>
-                                            {grant && <p className="text-xs text-night/60 dark:text-dark-textMuted">For: {grant.title}</p>}
+                                        <div className="flex-1 min-w-0">
+                                            <span className="text-xs sm:text-sm text-night dark:text-dark-text group-hover:text-secondary transition-colors break-words">{task.text}</span>
+                                            {grant && <p className="text-xs text-night/60 dark:text-dark-textMuted truncate">For: {grant.title}</p>}
                                         </div>
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3 flex-shrink-0">
                                             {task.deadline && (
-                                                <div className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${isOverdue ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300' : 'bg-mercury/50 dark:bg-dark-border'}`}>
-                                                    <ClockIcon className="w-3 h-3" />
-                                                    <span>{new Date(task.deadline).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}</span>
+                                                <div className={`flex items-center gap-1 text-xs px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap ${isOverdue ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300' : 'bg-mercury/50 dark:bg-dark-border'}`}>
+                                                    <ClockIcon className="w-3 h-3 flex-shrink-0" />
+                                                    <span className="text-xs">{new Date(task.deadline).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}</span>
                                                 </div>
                                             )}
                                             {assignee && (
-                                                <img src={assignee.avatar} alt={assignee.name} title={assignee.name} className="w-7 h-7 rounded-full" />
+                                                <img src={assignee.avatar} alt={assignee.name} title={assignee.name} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full" />
                                             )}
                                         </div>
                                     </div>
@@ -269,24 +269,24 @@ const Dashboard = () => {
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 h-screen !m-0" onClick={() => setIsSummaryModalOpen(false)}>
                         <motion.div
                             ref={summaryModalRef}
-                            className="bg-white dark:bg-dark-surface rounded-lg shadow-xl p-6 md:p-8 max-w-2xl w-full border border-mercury dark:border-dark-border"
+                            className="bg-white dark:bg-dark-surface rounded-lg shadow-xl p-4 sm:p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-mercury dark:border-dark-border"
                             onClick={(e) => e.stopPropagation()}
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
                         >
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-xl font-bold font-heading flex items-center gap-2 text-night dark:text-dark-text">
-                                    <SparklesIcon className="w-6 h-6" />
+                            <div className="flex justify-between items-start gap-4 mb-4">
+                                <h3 className="text-base sm:text-lg md:text-xl font-bold font-heading flex items-center gap-2 text-night dark:text-dark-text">
+                                    <SparklesIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                                     Your Funding Outlook
                                 </h3>
-                                <button onClick={() => setIsSummaryModalOpen(false)} className="text-night/50 dark:text-dark-textMuted hover:text-night dark:hover:text-dark-text" aria-label="Close AI summary modal">
-                                    <XIcon className="w-6 h-6" />
+                                <button onClick={() => setIsSummaryModalOpen(false)} className="text-night/50 dark:text-dark-textMuted hover:text-night dark:hover:text-dark-text flex-shrink-0" aria-label="Close AI summary modal">
+                                    <XIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </button>
                             </div>
                             {isSummaryLoading ? (
-                                <div className="flex justify-center items-center h-48">
-                                    <SpinnerIcon className="w-10 h-10 text-primary" />
+                                <div className="flex justify-center items-center h-32 sm:h-48">
+                                    <SpinnerIcon className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
                                 </div>
                             ) : (
                                 <div

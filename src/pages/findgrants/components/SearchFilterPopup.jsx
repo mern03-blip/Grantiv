@@ -43,7 +43,7 @@ const SearchFilterPopup = ({ isOpen, onClose, onSave, cities, initialFilters = {
     };
 
     const modalFooter = (
-        <Space>
+        <Space className="w-full" direction="horizontal" style={{ justifyContent: 'flex-end' }}>
             {/* Clear Button */}
             {/* <Button onClick={handleClear}>
                 Clear All
@@ -54,7 +54,8 @@ const SearchFilterPopup = ({ isOpen, onClose, onSave, cities, initialFilters = {
                 type="primary"
                 onClick={handleSave}
                 disabled={!isFormValid}
-                className="!bg-mainColor font-custom font-b6"
+                className="!bg-mainColor font-custom font-b6 !h-9 sm:!h-10 text-sm sm:text-base"
+                block={window.innerWidth < 640}
             >
                 Apply Filter
             </Button>
@@ -65,24 +66,26 @@ const SearchFilterPopup = ({ isOpen, onClose, onSave, cities, initialFilters = {
         <Modal
             open={isOpen}
             title={
-                <span className="flex items-center gap-2 text-night dark:text-dark-text">
-                    <CiFilter size={24} />
+                <span className="flex items-center gap-2 text-night dark:text-dark-text text-base sm:text-lg">
+                    <CiFilter size={20} className="sm:w-6 sm:h-6" />
                     Filter Grants
                 </span>
             }
             onCancel={onClose}
             footer={modalFooter}
-            width={520}
+            width="90%"
+            style={{ maxWidth: '520px' }}
+            centered
         >
-            <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-4">
                 {/* 1. Max Amount Field */}
                 <div className="col-span-1">
-                    <label className="block text-sm font-medium text-night dark:text-dark-textMuted mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-night dark:text-dark-textMuted mb-1">
                         Max Amount
                     </label>
                     <Input
                         type="number"
-                        className='!border !border-grey-500 hover:border-custom focus:border-custom h-10'
+                        className='!border !border-grey-500 hover:border-custom focus:border-custom h-9 sm:h-10 text-sm'
                         placeholder="e.g., 500000"
                         value={maxAmount}
                         onChange={(e) => setMaxAmount(e.target.value)}
@@ -91,12 +94,12 @@ const SearchFilterPopup = ({ isOpen, onClose, onSave, cities, initialFilters = {
 
                 {/* 2. Min Amount Field */}
                 <div className="col-span-1">
-                    <label className="block text-sm font-medium text-night dark:text-dark-textMuted mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-night dark:text-dark-textMuted mb-1">
                         Min Amount
                     </label>
                     <Input
                         type="number"
-                        className='!border !border-grey-500 hover:border-custom focus:border-custom h-10'
+                        className='!border !border-grey-500 hover:border-custom focus:border-custom h-9 sm:h-10 text-sm'
                         placeholder="e.g., 100000"
                         value={minAmount}
                         onChange={(e) => setMinAmount(e.target.value)}
@@ -104,13 +107,13 @@ const SearchFilterPopup = ({ isOpen, onClose, onSave, cities, initialFilters = {
                 </div>
 
                 {/* 3. Agency Name Field */}
-                <div className="col-span-2">
-                    <label className="block text-sm font-medium text-night dark:text-dark-textMuted mb-1">
+                <div className="col-span-1 sm:col-span-2">
+                    <label className="block text-xs sm:text-sm font-medium text-night dark:text-dark-textMuted mb-1">
                         Agency Name
                     </label>
                     <Input
                         placeholder="e.g., XYZ Real Estate"
-                        className='!border !border-grey-500 hover:border-custom focus:border-custom h-10'
+                        className='!border !border-grey-500 hover:border-custom focus:border-custom h-9 sm:h-10 text-sm'
                         value={agencyName}
                         onChange={(e) => setAgencyName(e.target.value)}
                     />

@@ -1,28 +1,31 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Form, Input, message } from "antd";
-import {
-  EyeInvisibleOutlined,
-  EyeTwoTone,
-} from "@ant-design/icons";
+import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { User, Mail } from "../../assets/image";
 import { FiLock } from "react-icons/fi";
 import { userSignUp } from "../../api/endpoints/auth";
 import { useMutation } from "@tanstack/react-query";
 
 const SignUp = () => {
-
   const navigate = useNavigate();
 
   // ✅ TanStack Mutation Hook
   const { mutate: handleSignUp, isPending: loading } = useMutation({
     mutationFn: async ({ email, password, name, organizationName }) => {
-      const response = await userSignUp({ email, password, name, organizationName });
+      const response = await userSignUp({
+        email,
+        password,
+        name,
+        organizationName,
+      });
       return response;
     },
     onSuccess: (response, variables) => {
       if (response?.token) {
-        message.success(response.message || "Signup successful! Please verify your email.");
+        message.success(
+          response.message || "Signup successful! Please verify your email."
+        );
         localStorage.setItem("email", variables.email);
         navigate("/auth");
       } else {
@@ -35,7 +38,9 @@ const SignUp = () => {
         error.message ||
         "An unknown error occurred during signup.";
       if (errorMessage.toLowerCase().includes("email already exists")) {
-        message.error("An account with this email already exists. Please log in.");
+        message.error(
+          "An account with this email already exists. Please log in."
+        );
       } else {
         message.error(errorMessage);
       }
@@ -51,19 +56,18 @@ const SignUp = () => {
   };
 
   return (
-    <div className="w-full h-[100%] flex justify-center font-custom overflow-y-auto no-scrollbar">
-      <div className="w-[80%] p-6">
-
+    <div className="w-full h-[100%] flex justify-center font-custom overflow-y-auto no-scrollbar px-4 sm:px-6">
+      <div className="w-full sm:w-[90%] md:w-[80%] lg:w-[70%] xl:w-[90%] p-4 sm:p-6 md:p-8">
         {/* Heading Section */}
-        <div className="mb-8 text-start">
+        <div className="mb-6 sm:mb-8 text-start">
           <h1
-            className="font-b6 text-text3 text-blackColor"
+            className="font-b6 text-xl sm:text-2xl md:text-text3 lg:text-3xl text-blackColor"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
             Sign Up
           </h1>
           <p
-            className="mt-2 font-b5 text-h3 text-blackColor"
+            className="mt-1 sm:mt-2 font-b5 text-sm sm:text-base md:text-h3 text-blackColor"
             style={{ fontFamily: '"Poppins", sans-serif' }}
           >
             Enter your details to get access.
@@ -81,22 +85,32 @@ const SignUp = () => {
           <Form.Item
             name="fullName"
             required={false}
-            label={<span className="font-b5 text-h4 text-blackColor !font-custom">Full Name</span>}
-          // rules={[
-          //   { required: true, message: "Please enter your full name!" },
-          //   {
-          //     pattern: /^[A-Za-z'-]{1,50}$/,
-          //     message:
-          //       "Full name must only contain letters, optional hyphens or apostrophes, and be 1–50 characters long",
-          //   },
-          // ]}
+            label={
+              <span className="font-b5 text-sm sm:text-base md:text-h4 text-blackColor !font-custom">
+                Full Name
+              </span>
+            }
+            rules={[
+              { required: true, message: "Please enter your full name!" },
+              // {
+              //   pattern: /^[A-Za-z'-]{1,50}$/,
+              //   message:
+              //     "Full name must only contain letters, optional hyphens or apostrophes, and be 1–50 characters long",
+              // },
+            ]}
           >
             <Input
-              prefix={<img src={User} alt="User Icon" className="mr-2 text-mainColor" />}
+              prefix={
+                <img
+                  src={User}
+                  alt="User Icon"
+                  className="mr-1 sm:mr-2 text-mainColor w-4 sm:w-5"
+                />
+              }
               style={{ border: "1px solid #DBDBDB" }}
               placeholder="Enter name"
               size="large"
-              className="h-12 rounded-custom border-custom text-h4 hover:border-custom placeholder-primaryTextColor focus:border-mainColor focus:ring-1 focus:ring-mainColor"
+              className="h-10 sm:h-11 md:h-12 rounded-custom border-custom text-sm sm:text-base md:text-h4 hover:border-custom placeholder-primaryTextColor focus:border-mainColor focus:ring-1 focus:ring-mainColor"
             />
           </Form.Item>
 
@@ -104,7 +118,11 @@ const SignUp = () => {
           <Form.Item
             name="email"
             required={false}
-            label={<span className="font-b5 text-h4 text-blackColor !font-custom">Email</span>}
+            label={
+              <span className="font-b5 text-sm sm:text-base md:text-h4 text-blackColor !font-custom">
+                Email
+              </span>
+            }
             rules={[
               { required: true, message: "Please enter your email" },
               { type: "email", message: "Enter a valid email address" },
@@ -112,11 +130,17 @@ const SignUp = () => {
             ]}
           >
             <Input
-              prefix={<img src={Mail} alt="Mail Icon" className="mr-2 text-mainColor" />}
+              prefix={
+                <img
+                  src={Mail}
+                  alt="Mail Icon"
+                  className="mr-1 sm:mr-2 text-mainColor w-4 sm:w-5"
+                />
+              }
               style={{ border: "1px solid #DBDBDB" }}
               placeholder="Enter email"
               size="large"
-              className="h-12 rounded-custom border-custom hover:border-custom text-h4 placeholder-primaryTextColor focus:border-mainColor focus:ring-1 focus:ring-mainColor"
+              className="h-10 sm:h-11 md:h-12 rounded-custom border-custom hover:border-custom text-sm sm:text-base md:text-h4 placeholder-primaryTextColor focus:border-mainColor focus:ring-1 focus:ring-mainColor"
             />
           </Form.Item>
 
@@ -124,27 +148,37 @@ const SignUp = () => {
           <Form.Item
             name="password"
             required={false}
-            label={<span className="font-b5 text-h4 text-blackColor !font-custom">Password</span>}
+            label={
+              <span className="font-b5 text-sm sm:text-base md:text-h4 text-blackColor !font-custom">
+                Password
+              </span>
+            }
             rules={[
               { required: true, message: "Please enter your password" },
               {
-                pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])(?!.*\s).{6,128}$/,
+                pattern:
+                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])(?!.*\s).{6,128}$/,
                 message:
                   "Password must include uppercase, lowercase, number, and a special character",
               },
             ]}
           >
             <Input.Password
-              prefix={<FiLock className="mr-2 size-5 text-mainColor" />}
+              prefix={<FiLock className="mr-1 sm:mr-2 size-4 sm:size-5 text-mainColor" />}
               placeholder="**********"
               style={{ border: "1px solid #DBDBDB" }}
               size="large"
-              className="h-12 rounded-custom border-custom hover:border-custom text-h4 placeholder-primaryTextColor focus:border-mainColor focus:ring-1 focus:ring-mainColor"
+              className="h-10 sm:h-11 md:h-12 rounded-custom border-custom hover:border-custom text-sm sm:text-base md:text-h4 placeholder-primaryTextColor focus:border-mainColor focus:ring-1 focus:ring-mainColor"
               iconRender={(visible) =>
                 visible ? (
-                  <EyeTwoTone twoToneColor="#9CCC5A" style={{ color: "#9CCC5A", fontSize: "24px" }} />
+                  <EyeTwoTone
+                    twoToneColor="#9CCC5A"
+                    style={{ color: "#9CCC5A", fontSize: window.innerWidth < 640 ? "20px" : "24px" }}
+                  />
                 ) : (
-                  <EyeInvisibleOutlined style={{ color: "#9CCC5A", fontSize: "24px" }} />
+                  <EyeInvisibleOutlined
+                    style={{ color: "#9CCC5A", fontSize: window.innerWidth < 640 ? "20px" : "24px" }}
+                  />
                 )
               }
             />
@@ -154,7 +188,11 @@ const SignUp = () => {
           <Form.Item
             name="confirmPassword"
             required={false}
-            label={<span className="font-b5 text-h4 text-blackColor !font-custom">Confirm Password</span>}
+            label={
+              <span className="font-b5 text-sm sm:text-base md:text-h4 text-blackColor !font-custom">
+                Confirm Password
+              </span>
+            }
             dependencies={["password"]}
             rules={[
               { required: true, message: "Please confirm your password!" },
@@ -163,22 +201,31 @@ const SignUp = () => {
                   if (!value || getFieldValue("password") === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error("The two passwords that you entered do not match!"));
+                  return Promise.reject(
+                    new Error(
+                      "The two passwords that you entered do not match!"
+                    )
+                  );
                 },
               }),
             ]}
           >
             <Input.Password
-              prefix={<FiLock className="mr-2 size-5 text-mainColor" />}
+              prefix={<FiLock className="mr-1 sm:mr-2 size-4 sm:size-5 text-mainColor" />}
               placeholder="**********"
               style={{ border: "1px solid #DBDBDB" }}
               size="large"
-              className="h-12 rounded-custom border-custom text-h4 hover:border-custom placeholder-primaryTextColor focus:border-mainColor focus:ring-1 focus:ring-mainColor"
+              className="h-10 sm:h-11 md:h-12 rounded-custom border-custom text-sm sm:text-base md:text-h4 hover:border-custom placeholder-primaryTextColor focus:border-mainColor focus:ring-1 focus:ring-mainColor"
               iconRender={(visible) =>
                 visible ? (
-                  <EyeTwoTone twoToneColor="#9CCC5A" style={{ color: "#9CCC5A", fontSize: "24px" }} />
+                  <EyeTwoTone
+                    twoToneColor="#9CCC5A"
+                    style={{ color: "#9CCC5A", fontSize: window.innerWidth < 640 ? "20px" : "24px" }}
+                  />
                 ) : (
-                  <EyeInvisibleOutlined style={{ color: "#9CCC5A", fontSize: "24px" }} />
+                  <EyeInvisibleOutlined
+                    style={{ color: "#9CCC5A", fontSize: window.innerWidth < 640 ? "20px" : "24px" }}
+                  />
                 )
               }
             />
@@ -188,37 +235,36 @@ const SignUp = () => {
             name="organizationName"
             required={false}
             label={
-              <span className="font-b5 text-h4 text-blackColor !font-custom">
+              <span className="font-b5 text-sm sm:text-base md:text-h4 text-blackColor !font-custom">
                 Organization Name
               </span>
             }
-          // rules={[
-          //   { required: true, message: "Please enter your organization name!" },
-          //   {
-          //     pattern: /^[A-Za-z0-9&'-. ]{2,100}$/,
-          //     message:
-          //       "Organization name can include letters, numbers, spaces, and & ' - . characters (2–100 chars)",
-          //   },
-          // ]}
+            rules={[
+              { required: true, message: "Please enter your organization name!" },
+              // {
+              //   pattern: /^[A-Za-z0-9&'-. ]{2,100}$/,
+              //   message:
+              //     "Organization name can include letters, numbers, spaces, and & ' - . characters (2–100 chars)",
+              // },
+            ]}
           >
             <Input
               // prefix={<img src={BuildingIcon} alt="Building Icon" className="mr-2 text-mainColor" />}
               style={{ border: "1px solid #DBDBDB" }}
               placeholder="Enter organization name"
               size="large"
-              className="h-12 rounded-custom border-custom text-h4 hover:border-custom placeholder-primaryTextColor"
+              className="h-10 sm:h-11 md:h-12 rounded-custom border-custom text-sm sm:text-base md:text-h4 hover:border-custom placeholder-primaryTextColor"
             />
           </Form.Item>
 
-
           {/* Submit Button */}
-          <Form.Item className="!mt-6">
+          <Form.Item className="!mt-4 sm:!mt-6">
             <Button
               type="primary"
               htmlType="submit"
               loading={loading}
               style={{ fontFamily: '"Poppins", sans-serif' }}
-              className="w-[100%] h-[60px] flex justify-center !font-custom rounded-custom !bg-mainColor text-whiteColor font-b7 text-h2 border-none"
+              className="w-[100%] h-12 sm:h-14 md:h-[60px] flex justify-center !font-custom rounded-custom !bg-mainColor text-whiteColor font-b7 text-base sm:text-lg md:text-h2 border-none"
             >
               Sign Up
             </Button>
@@ -226,7 +272,7 @@ const SignUp = () => {
         </Form>
 
         {/* Footer Link */}
-        <p className="mt-10 pb-10 text-center text-text1 text-gray-400 !font-custom">
+        <p className="mt-6 sm:mt-8 md:mt-10 pb-6 sm:pb-8 md:pb-10 text-center text-xs sm:text-sm md:text-text1 text-gray-400 !font-custom">
           Already have an account?{" "}
           <Link to="/auth" className="text-mainColor font-b6 !font-custom">
             Login

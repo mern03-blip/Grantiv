@@ -61,30 +61,30 @@ const AiRecommendedGrants = () => {
 
     return (
         <div>
-            <h3 className="text-2xl font-bold text-night dark:text-dark-text mb-4 font-heading">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-night dark:text-dark-text mb-3 sm:mb-4 font-heading">
                 AI-Recommended Grants
             </h3>
 
             {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                     {[...Array(3)].map((_, i) => (
                         <div
                             key={i}
-                            className="bg-white dark:bg-dark-surface p-4 rounded-lg border border-mercury dark:border-dark-border animate-pulse"
+                            className="bg-white dark:bg-dark-surface p-3 sm:p-4 rounded-lg border border-mercury dark:border-dark-border animate-pulse"
                         >
-                            <div className="h-32 bg-mercury/80 dark:bg-dark-border rounded mb-4"></div>
-                            <div className="h-5 bg-mercury/80 dark:bg-dark-border rounded w-3/4 mb-2"></div>
-                            <div className="h-4 bg-mercury/80 dark:bg-dark-border rounded w-1/2 mb-4"></div>
-                            <div className="h-8 bg-mercury/80 dark:bg-dark-border rounded w-full"></div>
+                            <div className="h-24 sm:h-28 md:h-32 bg-mercury/80 dark:bg-dark-border rounded mb-3 sm:mb-4"></div>
+                            <div className="h-4 sm:h-5 bg-mercury/80 dark:bg-dark-border rounded w-3/4 mb-2"></div>
+                            <div className="h-3 sm:h-4 bg-mercury/80 dark:bg-dark-border rounded w-1/2 mb-3 sm:mb-4"></div>
+                            <div className="h-7 sm:h-8 bg-mercury/80 dark:bg-dark-border rounded w-full"></div>
                         </div>
                     ))}
                 </div>
             ) : isError ? (
-                <div className="text-center p-8 bg-red-50 dark:bg-red-900/30 rounded-lg border border-red-300 dark:border-red-700/50 text-red-700 dark:text-red-300">
-                    <p>{'We couldn’t fetch recommendations. Kindly complete your business profile to proceed.'}</p>
+                <div className="text-center p-4 sm:p-6 md:p-8 bg-red-50 dark:bg-red-900/30 rounded-lg border border-red-300 dark:border-red-700/50 text-red-700 dark:text-red-300">
+                    <p className="text-sm sm:text-base">{'We couldnt fetch recommendations. Kindly complete your business profile to proceed.'}</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                     {topGrants.map((grant) => (
                         <GrantCard
                             key={grant.id}

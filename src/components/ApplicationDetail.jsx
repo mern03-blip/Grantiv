@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generateApplicationChecklist, } from '../services/geminiService';
+import { generateApplicationChecklist, } from '../api/endpoints/geminiService';
 import { TaskItem, DocumentHub, TeamChat } from './collaborationtools/CollaborationTools';
 import { ChevronLeftIcon, DocumentTextIcon, ChatBubbleOvalLeftEllipsisIcon, UsersIcon, } from './icons/Icons';
 import { TeamAssignment } from './TeamAssignment';

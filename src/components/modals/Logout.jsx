@@ -26,12 +26,12 @@ const Logout = ({ open, handleOk, handleCancel }) => {
       open={open}
       onCancel={handleCancel}
       footer={[
-        <div className="flex gap-5 justify-center m-8" key="footer-buttons">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-5 justify-center m-4 sm:m-6 md:m-8" key="footer-buttons">
           <Button
             key="cancel"
             type="primary"
             onClick={handleCancel}
-            className="!bg-red-500 hover:!bg-red-600 text-whiteColor font-custom border-custom font-b6"
+            className="!bg-red-500 hover:!bg-red-600 text-whiteColor font-custom border-custom font-b6 w-full sm:w-auto text-sm sm:text-base"
           >
             Cancel
           </Button>
@@ -40,19 +40,19 @@ const Logout = ({ open, handleOk, handleCancel }) => {
             type="primary"
             onClick={handleConfirm}
             loading={loading}
-            className="!bg-mainColor font-custom font-b6"
+            className="!bg-mainColor font-custom font-b6 w-full sm:w-auto text-sm sm:text-base"
           >
             Logout
           </Button>
         </div>
       ]}
     >
-      <div className="flex flex-col justify-center items-center gap-5">
-        <div className="h-16 w-16">
+      <div className="flex flex-col justify-center items-center gap-3 sm:gap-4 md:gap-5 p-2 sm:p-4">
+        <div className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16">
           {/* Replace with your actual logout icon */}
           <img src={LogoutModal} alt="logout" />
         </div>
-        <p className="text-text1 font-b6 font-custom">
+        <p className="text-sm sm:text-base text-text1 font-b6 font-custom text-center">
           Are you sure you want to logout?
         </p>
       </div>

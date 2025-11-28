@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getAssistantResponse } from '../services/geminiService';
+import { getAssistantResponse } from '../api/endpoints/geminiService';
 import { SparklesIcon, PaperAirplaneIcon } from './icons/Icons';
 
 const AssistantPanel = ({ grant }) => {
