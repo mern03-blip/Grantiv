@@ -18,6 +18,7 @@ const componentMap = {
 
   // MyGrants
   "/my-grants": lazy(() => import("../pages/mygrants/MyGrants")),
+  "/grant-application": lazy(() => import("../pages/mygrants/GrantApplication")),
 
   // Settings
   "/settings": lazy(() => import("../pages/settings/Settings")),

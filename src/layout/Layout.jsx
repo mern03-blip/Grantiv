@@ -112,38 +112,6 @@ const AdminLayout = () => {
       />
     );
   }
-
-  // return (
-  //     <div className="flex h-screen bg-alabaster dark:bg-dark-background font-sans">
-  //         {currentView !== 'ai_assistant' && (
-  //             <Sidebar
-  //                 currentView={currentView}
-  //                 onNavigate={navigateTo}
-  //                 isCollapsed={isSidebarCollapsed}
-  //                 onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
-  //                 theme={theme}
-  //                 setTheme={setTheme}
-  //             />
-  //         )}
-  //         <main className={`flex-1 transition-all duration-300 overflow-y-auto no-scrollbar ${currentView === 'ai_assistant' ? 'w-screen h-screen p-0' : 'p-8 bg-[#F7F7F7] dark:bg-dark-background'}`}>
-  //             <div className={currentView === 'ai_assistant' ? 'h-full' : 'max-w-7xl mx-auto'}>
-  //                 <AnimatePresence mode="wait">
-  //                     <motion.div
-  //                         key={currentView}
-  //                         initial={{ opacity: 0, y: 15 }}
-  //                         animate={{ opacity: 1, y: 0 }}
-  //                         exit={{ opacity: 0, y: -15 }}
-  //                         transition={{ duration: 0.25 }} >
-
-  //                         <MainContent />
-
-  //                     </motion.div>
-  //                 </AnimatePresence>
-  //                 {/* <MainContent /> */}
-  //             </div>
-  //         </main>
-  //     </div>
-  // );
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-alabaster dark:bg-dark-background font-sans">
       {/* Mobile Header */}
@@ -227,12 +195,9 @@ const AdminLayout = () => {
         setTheme={setTheme}
       />
       <main
-        className={`flex-1 transition-all duration-300 overflow-y-auto no-scrollbar 
-                    ${
-                      currentView === "ai_assistant"
-                        ? "pt-20 md:pt-20 lg:pt-0"
-                        : "p-4  pt-20 lg:pt-4 lg:p-4 xl:p-6 2xl:p-8 bg-[#F7F7F7] dark:bg-dark-background"
-                    }`}
+        className={
+          "flex-1 transition-all duration-300 overflow-y-auto no-scrollbar"
+        }
       >
         <div className="w-full mx-auto">
           <AnimatePresence mode="wait">

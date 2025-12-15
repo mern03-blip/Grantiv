@@ -503,7 +503,7 @@ const Settings = () => {
   ];
 
   return (
-    <div>
+    <div className="p-4">
       <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-night dark:text-dark-text mb-2 font-heading">
         Settings
       </h2>
