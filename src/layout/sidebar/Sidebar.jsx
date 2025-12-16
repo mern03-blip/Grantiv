@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   DashboardIcon,
   SearchIcon,
@@ -15,95 +15,148 @@ import {
 import Logout from "../../components/modals/Logout";
 import { DarkLogo, SidebarLogo } from "../../assets/image";
 
+const sidebarItems = [
+  {
+    name: "Dashboard",
+    icon: DashboardIcon,
+    link: "/",
+    paths: ["/"],
+    view: "dashboard"
+  },
+  {
+    name: "AI Assistant",
+    icon: SparklesIcon,
+    link: "/ai-assistant",
+    paths: ["/ai-assistant"],
+    view: "ai_assistant",
+    isAI: true
+  },
+  {
+    name: "Find Grants",
+    icon: SearchIcon,
+    link: "/find-grants", 
+    paths: ["/find-grants"],
+    view: "find_grants"
+  },
+  {
+    name: "My Grants",
+    icon: DocumentIcon,
+    link: "/my-grants",
+    paths: ["/my-grants", "/grant-application"],
+    view: "my_grants"
+  },
+  {
+    name: "Teams",
+    icon: UsersIcon,
+    link: "/teams",
+    paths: ["/teams"],
+    view: "teams"
+  },
+  {
+    name: "Settings",
+    icon: SettingsIcon,
+    link: "/settings",
+    paths: ["/settings"],
+    view: "settings"
+  },
+  {
+    name: "Logout",
+    icon: LogoutIcon,
+    isLogout: true,
+    view: "logout"
+  }
+];
+
 export const Sidebar = ({
-  currentView,
   onNavigate,
   isCollapsed,
   onToggleCollapse,
   isMobileSidebarOpen,
-  setIsMobileSidebarOpen,
   theme,
   setTheme,
 }) => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Helper function to map view to a valid URL path
-  const getPathForView = (view) => {
-    switch (view) {
-      case "dashboard":
-        return "/";
-      case "find_grants":
-        return "/find-grants";
-      case "my_grants":
-        return "/my-grants";
-      case "teams":
-        return "/teams";
-      case "settings":
-        return "/settings";
-      case "ai_assistant":
-        return "/ai-assistant";
-      default:
-        return "#"; // fallback
+  const isActiveRoute = (item) => {
+    if (!item.paths) return false;
+    if (location.pathname === "/" && item.link === "/") {
+      return true;
     }
+    return item.paths.some((path) => {
+      if (path === "/") return false;
+      return location.pathname.startsWith(path);
+    });
   };
 
-  const NavItem = ({ icon, label, view, ariaLabel }) => {
-    const isActive = currentView === view;
-    const path = getPathForView(view);
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
 
-    // Only logout will be a button to trigger modal
-    if (view === "logout") {
+  const NavItem = ({ item }) => {
+    const isActive = isActiveRoute(item);
+    const IconComponent = item.icon;
+
+    // Logout button
+    if (item.isLogout) {
       return (
         <button
-          onClick={() => setShowLogoutModal(true)} // Set state to show modal
+          onClick={() => setShowLogoutModal(true)}
           className={`flex items-center w-full px-3 py-2 lg:px-4 lg:py-3 rounded-lg text-left text-sm lg:text-base transition-colors ${
             isActive
               ? "bg-primary text-night font-semibold"
               : "text-night/60 dark:text-dark-textMuted hover:bg-mercury/50 dark:hover:bg-dark-surface/50"
           } ${isCollapsed ? "justify-center" : ""}`}
-          // aria-label={ariaLabel} // commented out as it was in original
         >
-          {icon}
+          <IconComponent className="w-4 h-4 lg:w-5 lg:h-5" />
           <span
             className={`whitespace-nowrap transition-opacity duration-200 ${
               isCollapsed ? "opacity-0 w-0" : "opacity-100 ml-2 lg:ml-3"
             }`}
           >
-            {label}
+            {item.name}
           </span>
         </button>
       );
     }
 
-    // Rest (including ai_assistant) will be NavLink
+    // Regular navigation items
     return (
-      <NavLink
-        to={path}
-        className={({ isActive: navIsActive }) =>
-          `flex items-center w-full px-3 py-2 lg:px-4 lg:py-3 rounded-lg text-left text-sm lg:text-base transition-colors ${
-            navIsActive
-              ? "bg-primary text-night font-semibold"
-              : "text-night/60 dark:text-dark-textMuted hover:bg-mercury/50 dark:hover:bg-dark-surface/50"
-          } ${isCollapsed ? "justify-center" : ""}`
-        }
-        aria-label={ariaLabel}
-        onClick={() => onNavigate(view)}
+      <Link
+        to={item.link}
+        className={`flex items-center w-full px-3 py-2 lg:px-4 lg:py-3 rounded-lg text-left text-sm lg:text-base transition-colors ${
+          isActive
+            ? "bg-primary text-night font-semibold"
+            : "text-night/60 dark:text-dark-textMuted hover:bg-mercury/50 dark:hover:bg-dark-surface/50"
+        } ${isCollapsed ? "justify-center" : ""}`}
+        onClick={() => onNavigate(item.view)}
       >
-        {icon}
+        <IconComponent className="w-4 h-4 lg:w-5 lg:h-5" />
         <span
           className={`whitespace-nowrap transition-opacity duration-200 ${
             isCollapsed ? "opacity-0 w-0" : "opacity-100 ml-2 lg:ml-3"
           }`}
         >
-          {label}
+          {item.isAI ? (
+            <span>
+              <span
+                className="font-semibold"
+                style={{
+                  color: "#8CC84B",
+                  filter: "drop-shadow(0 0 5px #8CC84B)",
+                }}
+              >
+                AI
+              </span>{" "}
+              Assistant
+            </span>
+          ) : (
+            item.name
+          )}
         </span>
-      </NavLink>
+      </Link>
     );
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
   };
 
   return (
@@ -153,66 +206,15 @@ export const Sidebar = ({
 
       {/* Nav Links */}
       <nav className="flex flex-col gap-1 lg:gap-2 flex-grow">
-        <NavItem
-          icon={<DashboardIcon className="w-4 h-4 lg:w-5 lg:h-5" />}
-          label="Dashboard"
-          view="dashboard"
-          ariaLabel="Navigate to Dashboard"
-        />
-
-        <NavItem
-          icon={<SparklesIcon className={"w-4 h-4 lg:w-5 lg:h-5"} />}
-          label={
-            <span>
-              <span
-                className="font-semibold"
-                style={{
-                  color: "#8CC84B",
-                  filter: "drop-shadow(0 0 5px #8CC84B)",
-                }}
-              >
-                AI
-              </span>{" "}
-              Assistant
-            </span>
-          }
-          view="ai_assistant"
-          ariaLabel="Navigate to AI Assistant"
-        />
-
-        <NavItem
-          icon={<SearchIcon className="w-4 h-4 lg:w-5 lg:h-5" />}
-          label="Find Grants"
-          view="find_grants"
-          ariaLabel="Navigate to Find Grants"
-        />
-        <NavItem
-          icon={<DocumentIcon className="w-4 h-4 lg:w-5 lg:h-5" />}
-          label="My Grants"
-          view="my_grants"
-          ariaLabel="Navigate to My Grants"
-        />
-        <NavItem
-          icon={<UsersIcon className="w-4 h-4 lg:w-5 lg:h-5" />}
-          label="Teams"
-          view="teams"
-          ariaLabel="Navigate to Teams Management"
-        />
+        {sidebarItems.slice(0, -2).map((item, index) => (
+          <NavItem key={index} item={item} />
+        ))}
 
         <div className="flex-grow" />
 
-        <NavItem
-          icon={<SettingsIcon className="w-4 h-4 lg:w-5 lg:h-5" />}
-          label="Settings"
-          view="settings"
-          ariaLabel="Navigate to Settings"
-        />
-        <NavItem
-          icon={<LogoutIcon className="w-4 h-4 lg:w-5 lg:h-5" />}
-          label="Logout"
-          ariaLabel="Logout of your account"
-          view="logout"
-        />
+        {sidebarItems.slice(-2).map((item, index) => (
+          <NavItem key={index + sidebarItems.length - 2} item={item} />
+        ))}
       </nav>
 
       {/* Footer Controls */}

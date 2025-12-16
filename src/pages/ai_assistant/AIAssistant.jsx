@@ -4,13 +4,11 @@ import {
   SparklesIcon,
   PaperAirplaneIcon,
   XIcon,
-  ChevronLeftIcon,
   PaperclipIcon,
 } from "../../components/icons/Icons";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { handleGetFavoriteGrants } from "../../api/endpoints/grants";
-import Loader from "../../components/loading/Loader";
 import { useDispatch } from "react-redux";
 import {
   setLoading,
@@ -405,7 +403,6 @@ const AIAssistant = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Sidebar - Hidden on mobile (lg and above) */}
       <motion.main className="flex-1 flex flex-col min-h-0 relative">
         {/* Mobile Dropdown - Visible only on mobile */}
         <div className="p-3 transition-colors dark:bg-dark-surface border-mercury dark:border-dark-border relative z-20">
@@ -721,3 +718,4 @@ const AIAssistant = () => {
 };
 
 export default AIAssistant;
+
