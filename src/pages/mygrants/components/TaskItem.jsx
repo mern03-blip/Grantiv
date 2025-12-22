@@ -1,117 +1,188 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { CheckCircleIcon } from '../../../components/icons/Icons';
+import React, { useState } from "react";
+import PropTypes from "prop-types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CheckCircleIcon, TrashIcon } from "../../../components/icons/Icons";
+import { toggleTask, deleteTask } from "../../../api/endpoints/grantTask";
+import DeleteUserModal from "../../../components/modals/DeleteUserModal";
 
+const TaskItem = ({ grantId, onRequestToggle, tasks = [] }) => {
+  const queryClient = useQueryClient();
 
-// 1. UserPlan Type equivalent
-const UserPlan = {
-    STARTER: 'Starter',
-    PRO: 'Pro',
-    ENTERPRISE: 'Enterprise',
-};
+  // Mutation for toggling task status
+  const toggleTaskMutation = useMutation({
+    mutationFn: toggleTask,
+    onSuccess: () => {
+      // Invalidate and refetch tasks
+      queryClient.invalidateQueries({ queryKey: ["grantTasks", grantId] });
+    },
+    onError: (error) => {
+      console.error("Error toggling task:", error);
+    },
+  });
 
-// 2. Mock Team Data
-const MOCK_TEAM = [
-    { id: 'm1', name: 'Alice', avatar: 'https://via.placeholder.com/150/0000FF/FFFFFF?text=A' },
-    { id: 'm2', name: 'Bob', avatar: 'https://via.placeholder.com/150/FF0000/FFFFFF?text=B' },
-    { id: 'm3', name: 'Charlie', avatar: 'https://via.placeholder.com/150/00FF00/FFFFFF?text=C' },
-];
+  // Mutation for deleting task
+  const deleteTaskMutation = useMutation({
+    mutationFn: deleteTask,
+    onSuccess: () => {
+      // Invalidate and refetch tasks
+      queryClient.invalidateQueries({ queryKey: ["grantTasks", grantId] });
+    },
+    onError: (error) => {
+      console.error("Error deleting task:", error);
+    },
+  });
 
-// 3. Task PropType Definition
-const TaskPropType = PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    text: PropTypes.string.isRequired,
-    completed: PropTypes.bool.isRequired,
-    deadline: PropTypes.string, // ISO string date
-    assigneeId: PropTypes.string, // Member ID
-});
+  // Handle task toggle
+  const handleTaskToggle = (taskId) => {
+    toggleTaskMutation.mutate(taskId);
+    // Also call the parent callback if provided
+    if (onRequestToggle) {
+      onRequestToggle(taskId);
+    }
+  };
 
+  // Use tasks passed as props
+  const taskArray = Array.isArray(tasks) ? tasks : [];
 
-// --- Utility Functions ---
-
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    if (isNaN(date)) return '';
-    return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }); // e.g., 'Jul 05'
-};
-
-
-export const TaskItem = ({ task, onRequestToggle, onAssign, plan, isDemoMode }) => {
-    
-    const assignee = MOCK_TEAM.find(m => m.id === task.assigneeId);
-    
-    // Permission check: True if not 'Starter' or if in Demo Mode
-    const hasAssignPermission = plan !== UserPlan.STARTER || isDemoMode;
-
-    const isOverdue = (() => {
-        if (!task.deadline || task.completed) return false;
-        const deadlineDate = new Date(task.deadline);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set to start of today
-        return deadlineDate < today;
-    })();
-
+  // Handle empty tasks
+  if (taskArray.length === 0) {
     return (
-        <div className="flex items-center gap-3 py-2 border-b border-mercury/30 dark:border-dark-border/50 last:border-b-0">
-            
-            {/* 1. Toggle Button */}
-            <button
-                onClick={() => onRequestToggle(task.id)}
-                className="flex-shrink-0"
-                aria-label={task.completed ? `Mark task as incomplete: ${task.text}` : `Mark task as complete: ${task.text}`}
-            >
-                {task.completed ? (
-                    <CheckCircleIcon className="w-6 h-6 text-primary" />
-                ) : (
-                    <div className="w-6 h-6 border-2 border-mercury/80 dark:border-dark-border rounded-full hover:border-primary transition"></div>
-                )}
-            </button>
-            
-            {/* 2. Task Text and Deadline */}
-            <div className="flex-1 flex items-center gap-2">
-                <span className={`text-sm transition-colors ${task.completed ? 'line-through text-night/50 dark:text-dark-textMuted/60' : 'text-night dark:text-dark-text'}`}>
-                    {task.text}
-                </span>
-                {task.deadline && !task.completed && (
-                    <span className={`text-xs font-medium ${isOverdue ? 'text-red-600 dark:text-red-500' : 'text-night/60 dark:text-dark-textMuted'}`}>
-                        {formatDate(task.deadline)}
-                    </span>
-                )}
-            </div>
-            
-            {/* 3. Assignment/Team Controls */}
-            <div className="flex items-center gap-2">
-                {assignee && hasAssignPermission && (
-                    <img 
-                        src={assignee.avatar} 
-                        alt={assignee.name} 
-                        title={assignee.name} 
-                        className="w-6 h-6 rounded-full object-cover" 
-                    />
-                )}
-                <select
-                    value={task.assigneeId || ''}
-                    onChange={(e) => onAssign(task.id, e.target.value)}
-                    disabled={!hasAssignPermission}
-                    className="text-xs border border-mercury/50 dark:border-dark-border rounded-md focus:ring-primary focus:border-primary text-night bg-white dark:bg-dark-surface dark:text-dark-text py-1 pl-2 pr-7 disabled:bg-mercury/50 dark:disabled:bg-dark-border disabled:text-night/60"
-                    aria-label={`Assign task: ${task.text}`}
-                >
-                    <option value="">Unassigned</option>
-                    {MOCK_TEAM.map(member => (
-                        <option key={member.id} value={member.id}>{member.name}</option>
-                    ))}
-                </select>
-            </div>
-        </div>
+      <div className="text-center py-4">
+        <span className="text-sm text-night/60 dark:text-dark-textMuted">
+          No tasks found
+        </span>
+      </div>
     );
+  }
+
+  return (
+    <div className="space-y-2">
+      {taskArray.map((task, index) => (
+        <TaskItemRow
+          key={task.id || task._id || `task-${index}`}
+          task={task}
+          onRequestToggle={handleTaskToggle}
+          isLoading={toggleTaskMutation.isPending}
+          deleteTaskMutation={deleteTaskMutation}
+        />
+      ))}
+    </div>
+  );
+};
+
+// Separate component for individual task row
+const TaskItemRow = ({
+  task,
+  onRequestToggle,
+  isLoading,
+  deleteTaskMutation,
+}) => {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleDeleteClick = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    // Trigger delete mutation
+    deleteTaskMutation.mutate(task.id || task._id);
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-3 py-2 border-b border-mercury/30 dark:border-dark-border/50 last:border-b-0">
+        {/* 1. Toggle Button */}
+        <button
+          onClick={() => onRequestToggle(task.id || task._id)}
+          disabled={isLoading}
+          className={`flex-shrink-0 ${
+            isLoading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          aria-label={
+            task.isCompleted
+              ? `Mark task as incomplete: ${task.name || task.text}`
+              : `Mark task as complete: ${task.name || task.text}`
+          }
+        >
+          {task.isCompleted ? (
+            <CheckCircleIcon className="w-6 h-6 text-primary" />
+          ) : (
+            <div className="w-6 h-6 border-2 border-mercury/80 dark:border-dark-border rounded-full hover:border-primary transition"></div>
+          )}
+        </button>
+
+        {/* 2. Task Text*/}
+        <div className="flex-1 flex items-center gap-2">
+          <span
+            className={`text-sm transition-colors ${
+              task.isCompleted
+                ? "line-through text-night/50 dark:text-dark-textMuted/60"
+                : "text-night dark:text-dark-text"
+            }`}
+          >
+            {task.name || task.text || "Untitled Task"}
+          </span>
+        </div>
+
+        {/* 3. Task Status */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleDeleteClick}
+            className="text-night/40 dark:text-dark-textMuted/60 hover:text-red-500 transition-colors"
+            aria-label="Delete task"
+          >
+            <TrashIcon className="w-5 h-5" />
+          </button>
+          <span
+            className={`text-xs px-2 py-1 rounded ${
+              task.isCompleted === true
+                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+            }`}
+          >
+            {task.isCompleted === true ? "Completed" : "Incomplete"}
+          </span>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteUserModal
+        open={isDeleteModalOpen}
+        handleOk={handleDeleteConfirm}
+        handleCancel={handleDeleteCancel}
+        text={`Are you sure you want to delete the task "${
+          task.name || task.text || "Untitled Task"
+        }"?`}
+      />
+    </>
+  );
+};
+
+// PropTypes for TaskItemRow
+TaskItemRow.propTypes = {
+  task: PropTypes.shape({
+    id: PropTypes.string,
+    _id: PropTypes.string,
+    name: PropTypes.string,
+    text: PropTypes.string,
+    isCompleted: PropTypes.bool,
+    deadline: PropTypes.string,
+    status: PropTypes.string,
+  }).isRequired,
+  onRequestToggle: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool,
+  deleteTaskMutation: PropTypes.object.isRequired,
 };
 
 TaskItem.propTypes = {
-    task: TaskPropType.isRequired,
-    onRequestToggle: PropTypes.func.isRequired,
-    onAssign: PropTypes.func.isRequired,
-    plan: PropTypes.oneOf(Object.values(UserPlan)).isRequired,
-    isDemoMode: PropTypes.bool.isRequired,
+  grantId: PropTypes.string.isRequired,
+  onRequestToggle: PropTypes.func.isRequired,
+  tasks: PropTypes.array,
 };
 
 export default TaskItem;

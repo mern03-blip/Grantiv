@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { MOCK_TEAM, MOCK_TEAM_CHAT_MESSAGES } from "../../../constants";
+import {  MOCK_TEAM_CHAT_MESSAGES } from "../../../constants";
 import {
-  UsersIcon,
   XIcon,
   PaperAirplaneIcon,
 } from "../../components/icons/Icons";
@@ -51,7 +50,7 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const userId = localStorage.getItem("userId");
   const organizationId = localStorage.getItem("orgId");
-  const plan = localStorage.getItem("grantiv_user_plan");
+  const plan = localStorage.getItem("plan");
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -155,7 +154,7 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
     setChatMessages((prev) => [...prev, newMessage]);
   };
 
-  if (plan !== "Pro") {
+  if (plan !== "pro") {
     return (
       <div className="p-4">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-night dark:text-dark-text mb-2 font-heading">
@@ -283,6 +282,7 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
                           <DeleteUserModal
                             open={isDeleteModalOpen}
                             memberName={selectedMember?.user?.name}
+                            text={"Are you sure you want to delete this user?"}
                             handleCancel={() => setIsDeleteModalOpen(false)}
                             handleOk={() => {
                               if (selectedMember) {

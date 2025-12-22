@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, message } from "antd";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import {
   SparklesIcon,
   HeartIcon,
@@ -11,11 +12,12 @@ import {
 } from "../icons/Icons";
 import { getGrantQuickReview } from "../../api/endpoints/geminiService";
 import { handleFavoriteGrants } from "../../api/endpoints/grants";
+import { addFavMyGrants } from "../../api/endpoints/customGrant"; 
 import { ReminderModal } from "./ReminderModal";
 import "./grantdetail.scss"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
-import { addFavoriteGrant, removeFavoriteGrant, setSavedGrants } from "../../redux/slices/favoriteGrantSlice";
+import { addFavoriteGrant, removeFavoriteGrant } from "../../redux/slices/favoriteGrantSlice";
 import { formatAmount } from "../../utils/formatAmount";
 import { getDaysRemaining } from "../../utils/deadlineDate";
 
@@ -29,24 +31,45 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
 
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
+  const location = useLocation();
   const savedGrants = useSelector((state) => state.favoriteGrants.savedGrants);
+  const favoriteProjects = useSelector((state) => state.favoriteGrants.favoriteProjects);
   const deadlineDateString = grant.closeDateTime;
   const daysRemaining = getDaysRemaining(deadlineDateString);
   const tabs = ["Overview", "Eligibility", "Documents", "Contacts"];
 
+  // Check if we're on my-grants route
+  const isMyGrantsRoute = location.pathname === '/my-grants';
+
   // ✅ Check if current grant is already favorite
   useEffect(() => {
-    if (grant?._id && savedGrants.length > 0) {
-      const isFavorite = savedGrants.some((g) => g._id === grant._id);
+    if (grant?._id) {
+      // Check both savedGrants and favoriteProjects for comprehensive coverage
+      const isFavoriteInSaved = savedGrants.some((g) => g._id === grant._id);
+      const isFavoriteInProjects = favoriteProjects.some((g) => g._id === grant._id);
+      
+      // Grant is favorite if it exists in either array
+      const isFavorite = isFavoriteInSaved || isFavoriteInProjects;
       setIsSaved(isFavorite);
+    } else {
+      // If no grant ID, default to false
+      setIsSaved(false);
     }
-  }, [grant, savedGrants]);
+  }, [grant?._id, savedGrants, favoriteProjects]);
 
-  // ✅ Mutation for toggle (add/remove favorite)
+  // ✅ Conditional mutation based on route
   const { mutate: toggleFavorite, isPending: isToggling } = useMutation({
-    mutationFn: (grantId) => handleFavoriteGrants(grantId),
+    mutationFn: (grantId) => {
+      // Use different endpoint based on current route
+      if (isMyGrantsRoute) {
+        return addFavMyGrants(grantId);
+      } else {
+        return handleFavoriteGrants(grantId);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["FavGrants"] });
+      // queryClient.invalidateQueries({ queryKey: ["myGrants"] }); 
     },
     onError: () => {
       message.error("Failed to update favorites.");

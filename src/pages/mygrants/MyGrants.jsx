@@ -5,6 +5,12 @@ import { useNavigate } from "react-router-dom";
 import ProgressBar from "../../components/progressbar/ProgressBar";
 import { PlusIcon } from "../../components/icons/Icons";
 import AddGrantModal from "../../components/modals/AddGrantModal";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getMyGrants,
+  updateGrantStatus,
+} from "../../api/endpoints/customGrant";
+import GrantDetailModal from "../../components/modals/GrantsDetail";
 
 // 1. GrantStatus Enum equivalent
 const GrantStatus = {
@@ -16,6 +22,19 @@ const GrantStatus = {
   AWARDED: "AWARDED",
 };
 
+// Map API status to GrantStatus enum
+const mapApiStatusToEnum = (apiStatus) => {
+  const statusMap = {
+    drafting: GrantStatus.DRAFTING,
+    submitted: GrantStatus.SUBMITTED,
+    in_review: GrantStatus.IN_REVIEW,
+    approved: GrantStatus.APPROVED,
+    rejected: GrantStatus.REJECTED,
+    awarded: GrantStatus.AWARDED,
+  };
+  return statusMap[apiStatus?.toLowerCase()] || GrantStatus.DRAFTING;
+};
+
 // 4. Mock Grant Structure for PropTypes
 const GrantPropType = PropTypes.shape({
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
@@ -24,40 +43,43 @@ const GrantPropType = PropTypes.shape({
   status: PropTypes.oneOf(Object.values(GrantStatus)).isRequired,
 });
 
-// --- MOCK Data for Demonstration ---
-const mockMyGrants = [
-  {
-    id: 1,
-    title: "Community Revitalisation Fund",
-    funder: "State Gov Victoria",
-    status: GrantStatus.DRAFTING,
-  },
-  {
-    id: 2,
-    title: "Rural Business Digital Upgrade",
-    funder: "Federal Department of Commerce",
-    status: GrantStatus.SUBMITTED,
-  },
-];
-
 // --- Main Component ---
 
-const MyGrantsView = ({
-  myGrants = [],
-  onSelectGrant,
-  onViewApplication,
-  onAddGrant,
-}) => {
+const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
   // Note: TypeScript enum values are used as string keys in useState
   const [activeTab, setActiveTab] = useState("All");
   const [isAddGrantModalOpen, setIsAddGrantModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedGrant, setSelectedGrant] = useState(null);
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const { data } = useQuery({
+    queryKey: ["myGrants"],
+    queryFn: getMyGrants,
+  });
+
+  // Mutation for updating grant status
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ grantId, status }) => updateGrantStatus(grantId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["myGrants"] });
+    },
+    onError: (error) => {
+      console.error("Error updating grant status:", error);
+    },
+  });
 
   // Use mock data for now, fallback to props if needed
   const grantsArray =
-    mockMyGrants.length > 0
-      ? mockMyGrants
+    data && data.length > 0
+      ? data?.map((grant) => ({
+          ...grant,
+          id: grant._id, // Map _id to id for consistency
+          status: mapApiStatusToEnum(grant.status), // Convert API status to enum
+          funder: grant.agency, // Map agency to funder for consistency
+        }))
       : Array.isArray(myGrants)
       ? myGrants
       : [];
@@ -89,6 +111,10 @@ const MyGrantsView = ({
       console.error("Error processing grant text:", error);
       throw error;
     }
+  };
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
   };
 
   const filteredGrants =
@@ -134,12 +160,17 @@ const MyGrantsView = ({
               {tabs.map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => handleTabClick(tab)}
+                  disabled={updateStatusMutation.isPending}
                   className={`${
                     activeTab === tab
                       ? "border-primary dark:border-dark-primary text-primary dark:text-dark-primary"
                       : "border-transparent text-night/60 dark:text-dark-textMuted hover:text-night dark:hover:text-dark-text hover:border-mercury dark:hover:border-dark-border"
-                  } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors`}
+                  } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    updateStatusMutation.isPending
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }`}
                 >
                   {tab}
                   <span className="ml-2 bg-mercury/80 dark:bg-dark-border text-night/70 dark:text-dark-textMuted text-xs font-semibold px-2 py-0.5 rounded-full">
@@ -164,16 +195,34 @@ const MyGrantsView = ({
                     {grant.title}
                   </h3>
                   <p className="text-sm text-night/60 dark:text-dark-textMuted mb-3">
-                    {grant.funder}
+                    {grant.agency || "N/A"}
                   </p>
-                  <ProgressBar status={grant.status} />
+                  <ProgressBar
+                    status={grant.status}
+                    grantId={grant._id || grant.id}
+                    onStatusUpdate={(grantId, status) =>
+                      updateStatusMutation.mutate({ grantId, status })
+                    }
+                  />
                 </div>
                 <div className="mt-5 flex gap-2">
-                  {/* <motion.button onClick={() => onViewApplication(grant)} className="w-full py-2 bg-primary text-night font-semibold rounded-md hover:bg-secondary transition-colors" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                    View Application
-                                </motion.button> */}
                   <motion.button
-                    onClick={() => navigate("/grant-application")}
+                    onClick={() =>
+                      navigate("/grant-application", {
+                        state: {
+                          grant: {
+                            id: grant._id || grant.id,
+                            title: grant.title,
+                            agency: grant.agency,
+                            status: grant.status,
+                            amount: grant.amount,
+                            deadline: grant.deadline,
+                            description: grant.description,
+                            eligibility: grant.eligibility,
+                          },
+                        },
+                      })
+                    }
                     className="w-full py-2 bg-primary text-night font-semibold rounded-md hover:bg-secondary transition-colors"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -181,13 +230,16 @@ const MyGrantsView = ({
                     View Application
                   </motion.button>
                   <motion.button
-                    onClick={() => onSelectGrant(grant)}
+                    onClick={() => {
+                      setSelectedGrant(grant);
+                      setIsModalOpen(true);
+                    }}
                     className="w-full py-2 bg-mercury/50 dark:bg-dark-border text-night dark:text-dark-text font-semibold rounded-md hover:bg-mercury dark:hover:bg-dark-border/80 transition-colors"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     Details
-                  </motion.button>
+                  </motion.button>              
                 </div>
               </div>
             ))}
@@ -203,6 +255,19 @@ const MyGrantsView = ({
           </div>
         )}
       </div>
+
+      {/* ✅ Move Modal Outside the Map Loop - Single Instance */}
+      {isModalOpen && selectedGrant && (
+        <GrantDetailModal
+          open={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedGrant(null);
+          }}
+          grant={selectedGrant}
+        />
+      )}
+
       <div>
         {/* Add Grant Modal */}
         {isAddGrantModalOpen && (

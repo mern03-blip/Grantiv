@@ -6,10 +6,9 @@ import { getGrants, handleGetFavoriteGrants } from '../../api/endpoints/grants';
 import GrantCard from '../../components/cards/GrantCard';
 import CustomPagination from '../../components/pagination/CustomPagination';
 import Loader from '../../components/loading/Loader';
-import { SpinnerIcon, BookmarkIcon } from '../../components/icons/Icons';
+import { SpinnerIcon } from '../../components/icons/Icons';
 import { CiFilter } from 'react-icons/ci';
 import SearchFilterPopup from './components/SearchFilterPopup';
-import { useCitiesQuery } from '../../hooks/useGetCities';
 import { useDispatch } from 'react-redux';
 import { setSavedGrants } from '../../redux/slices/favoriteGrantSlice';
 

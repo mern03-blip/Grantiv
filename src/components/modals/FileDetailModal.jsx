@@ -2,13 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { XIcon } from '../icons/Icons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { addDocumentComment, getDocumentComments } from '../../api/endpoints/documents';
+import { message } from 'antd';
+import { jwtDecode } from 'jwt-decode';
 
 
-// 1. Mock Team Data and Types
-const MOCK_TEAM = [
-    { id: 'm1', name: 'Alice', avatar: 'https://via.placeholder.com/40/0000FF/FFFFFF?text=A' },
-    { id: 'm2', name: 'Bob', avatar: 'https://via.placeholder.com/40/FF0000/FFFFFF?text=B' },
-];
+
 
 const CommentPropType = PropTypes.shape({
     id: PropTypes.string.isRequired,
@@ -49,14 +49,27 @@ const useKeydown = (key, callback) => {
 };
 
 
-const FileDetailModal = ({ file, onClose, onAddComment }) => {
+const FileDetailModal = ({ file, onClose }) => {
     const [comment, setComment] = useState('');
+    const [currentUser, setCurrentUser] = useState(null);
+    const queryClient = useQueryClient();
     
-    // Create a map for quick access to team member details
-    const teamMembersById = MOCK_TEAM.reduce((acc, member) => {
-        acc[member.id] = member;
-        return acc;
-    }, {});
+    // Get current user from token
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const decodedToken = jwtDecode(token);
+                setCurrentUser({
+                    _id: decodedToken.id,
+                    name: decodedToken.name
+                });
+            } catch (error) {
+                console.error('Error decoding token:', error);
+            }
+        }
+    }, []);
+  
 
     const modalRef = useRef(null);
     const returnFocusRef = useRef(null);
@@ -71,13 +84,36 @@ const FileDetailModal = ({ file, onClose, onAddComment }) => {
         };
     }, []);
 
-    const handleAddComment = () => {
-        if(comment.trim()){
-            onAddComment(file.id, comment.trim());
+    // Fetch comments for this document
+    const { data: comments = [], isLoading: isLoadingComments, error: commentsError } = useQuery({
+        queryKey: ['documentComments', file._id],
+        queryFn: () => getDocumentComments(file._id),
+        enabled: !!file._id,
+    });
+
+    // Add comment mutation
+    const addCommentMutation = useMutation({
+        mutationFn: (commentData) => addDocumentComment(file._id, commentData),
+        onSuccess: () => {
+            message.success("Comment added successfully");
             setComment('');
+            // Invalidate and refetch comments
+            queryClient.invalidateQueries({ queryKey: ['documentComments', file._id] });
+        },
+        onError: (error) => {
+            message.error("Failed to add comment");
+            console.error('Error adding comment:', error);
         }
-    };
-    
+    });
+
+    const handleAddComment = () => {
+        if (comment.trim()) {
+            addCommentMutation.mutate({
+                text: comment.trim(),
+            });
+        }
+    };  
+
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
             <motion.div 
@@ -110,23 +146,32 @@ const FileDetailModal = ({ file, onClose, onAddComment }) => {
                 <div className="flex-1 overflow-y-auto p-6">
                     <h4 className="font-bold text-night dark:text-dark-text mb-3">Comments</h4>
                     <div className="space-y-4">
-                        {(file.comments || []).map(c => {
-                            const member = teamMembersById[c.memberId];
-                            return (
-                                <div key={c.id} className="flex items-start gap-3">
-                                    <img src={member?.avatar} alt={member?.name || 'Unknown User'} className="w-8 h-8 rounded-full object-cover" />
-                                    <div className="flex-1 bg-mercury/50 dark:bg-dark-background p-3 rounded-lg">
-                                        <div className="flex items-baseline gap-2">
-                                            <p className="font-semibold text-sm text-night dark:text-dark-text">{member?.name || 'Unknown User'}</p>
-                                            <p className="text-xs text-night/60 dark:text-dark-textMuted">{new Date(c.timestamp).toLocaleString()}</p>
+                        {isLoadingComments ? (
+                            <p className="text-sm text-night/50 dark:text-dark-textMuted text-center py-4">Loading comments...</p>
+                        ) : commentsError ? (
+                            <p className="text-sm text-red-500 text-center py-4">Error loading comments</p>
+                        ) : comments.length > 0 ? (
+                            comments.map(c => {
+                                // Use API data structure
+                                const commentUser = c.user || c.author || {};
+                                return (
+                                    <div key={c._id || c.id} className="flex items-start gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm">
+                                            {commentUser.name?.charAt(0) || '?'}
                                         </div>
-                                        <p className="text-sm text-night/90 dark:text-dark-text/90 mt-1">{c.text}</p>
+                                        <div className="flex-1 bg-mercury/50 dark:bg-dark-background p-3 rounded-lg">
+                                            <div className="flex items-baseline gap-2">
+                                                <p className="font-semibold text-sm text-night dark:text-dark-text">{commentUser.name || 'Unknown User'}</p>
+                                                <p className="text-xs text-night/60 dark:text-dark-textMuted">{new Date(c.createdAt || c.timestamp).toLocaleString()}</p>
+                                            </div>
+                                            <p className="text-sm text-night/90 dark:text-dark-text/90 mt-1">{c.text || c.content}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-                        {/* Empty Comments State */}
-                        {(!file.comments || file.comments.length === 0) && <p className="text-sm text-night/50 dark:text-dark-textMuted text-center py-4">No comments yet.</p>}
+                                );
+                            })
+                        ) : (
+                            <p className="text-sm text-night/50 dark:text-dark-textMuted text-center py-4">No comments yet.</p>
+                        )}
                     </div>
                 </div>
                 
@@ -144,10 +189,10 @@ const FileDetailModal = ({ file, onClose, onAddComment }) => {
                         />
                         <button 
                             onClick={handleAddComment} 
-                            disabled={!comment.trim()}
+                            disabled={!comment.trim() || addCommentMutation.isPending}
                             className="px-4 py-2 bg-primary text-night font-semibold rounded-lg hover:bg-secondary disabled:bg-mercury/80 dark:disabled:bg-dark-border disabled:text-night/50"
                         >
-                            Send
+                            {addCommentMutation.isPending ? 'Sending...' : 'Send'}
                         </button>
                     </div>
                 </div>

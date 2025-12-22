@@ -10,6 +10,7 @@ import { FiMail, FiLock } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { EyeTwoTone, EyeInvisibleOutlined } from "@ant-design/icons";
 import { userLogin } from "../../api/endpoints/auth";
+import { getSubscriptionStatus } from "../../api/endpoints/payment";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const { Title } = Typography;
@@ -24,7 +25,7 @@ const Login = () => {
       const response = await userLogin({ email, password });
       return response;
     },
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       console.log("Login", response);
 
       if (response?.token) {
@@ -34,6 +35,24 @@ const Login = () => {
         queryClient.removeQueries(["ai-recommended-grants"]);
         localStorage.setItem("token", response.token);
         localStorage.setItem("userId", response.id);
+        
+        // If user has organizations, set the first one as default and fetch subscription
+        if (organizations && organizations.length > 0) {
+          localStorage.setItem("orgId", organizations[0].id);
+          
+          try {
+            // Fetch subscription status after setting orgId
+            const subscriptionData = await getSubscriptionStatus();
+            if (subscriptionData?.plan) {
+              localStorage.setItem("plan", subscriptionData.plan);
+              // console.log("Subscription plan stored:", subscriptionData.plan);
+            }
+          } catch (error) {
+            console.error("Error fetching subscription status:", error);
+            // Don't block login flow if subscription fetch fails
+          }
+        }
+        
         // const role = response?.organizations?.[0]?.role || null;
         // if (role) {
         //   localStorage.setItem("Role", role);

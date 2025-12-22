@@ -196,7 +196,7 @@ const AdminLayout = () => {
       />
       <main
         className={
-          "flex-1 transition-all duration-300 overflow-y-auto no-scrollbar"
+          "flex-1 transition-all duration-300 overflow-y-auto no-scrollbar pt-[73px] lg:pt-0"
         }
       >
         <div className="w-full mx-auto">

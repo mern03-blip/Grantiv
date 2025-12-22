@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   savedGrants: [],
+  favoriteProjects: [], // Add favoriteProjects to store
   isLoading: false,
 };
 
@@ -11,6 +12,9 @@ const favoriteGrantSlice = createSlice({
   reducers: {
     setSavedGrants: (state, action) => {
       state.savedGrants = action.payload;
+    },
+    setFavoriteProjects: (state, action) => {
+      state.favoriteProjects = action.payload;
     },
     toggleFavoriteGrant(state, action) {
       const grant = action.payload;
@@ -35,6 +39,7 @@ const favoriteGrantSlice = createSlice({
 
 export const {
   setSavedGrants,
+  setFavoriteProjects,
   addFavoriteGrant,
   removeFavoriteGrant,
   setLoading,

@@ -13,33 +13,13 @@ import { useDispatch } from "react-redux";
 import {
   setLoading,
   setSavedGrants,
+  setFavoriteProjects,
 } from "../../redux/slices/favoriteGrantSlice";
 import { Select } from "antd";
 
 const { Option, OptGroup } = Select;
 
 // --- MOCK DATA AND MOCKED FUNCTIONS ---
-// These replace the props and external service calls
-const mockGrants = [
-  {
-    id: "grant-123",
-    title: "Small Business Innovation Grant",
-    funder: "Tech Forward Foundation",
-    amount: 50000,
-    deadline: "2025-10-31",
-    description:
-      "A grant to support small businesses in developing innovative technology solutions.",
-  },
-  {
-    id: "grant-456",
-    title: "Community Arts & Culture Fund",
-    funder: "Creative Works Coalition",
-    amount: 25000,
-    deadline: "2025-11-15",
-    description:
-      "Funding for projects that promote community engagement through arts and culture.",
-  },
-];
 
 const mockBusinessProfile = {
   name: "Innovate Solutions LLC",
@@ -51,10 +31,7 @@ const mockBusinessProfile = {
 // Mock the API service calls to return data directly
 const mockGetAssistantResponse = async (
   grant,
-  messages,
   userMessage,
-  attachments,
-  businessProfile
 ) => {
   await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate network delay
   if (userMessage.includes("review")) {
@@ -102,14 +79,13 @@ const AIAssistant = () => {
   const [chatHistories, setChatHistories] = useState({});
   const [profileJustUpdated, setProfileJustUpdated] = useState(true);
 
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const myGrants = mockGrants;
-  // const savedGrants = mockGrants;
   const businessProfile = mockBusinessProfile;
-  const currentGrantKey = selectedGrant?.id || "general";
+  const currentGrantKey = selectedGrant?._id || "general";
   const messages = chatHistories[currentGrantKey] || [];
   const showIntro = messages.length <= 1;
+  // const myGrants = mockGrants;
+  // const savedGrants = mockGrants;
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("grantiv_theme");
@@ -123,17 +99,52 @@ const AIAssistant = () => {
 
   // Fetch Favorited Grants
   const {
-    data: { data: savedGrants = [] } = {},
+    data,
     isLoading: isSavedLoading,
     // refetch: refetchSavedGrants
   } = useQuery({
     queryKey: ["FavGrants"],
     queryFn: handleGetFavoriteGrants,
-    staleTime: 1000 * 60, // 1 min
+    staleTime: 1000 * 60 * 5, // 5 mins - increased stale time to prevent frequent refetches
     retry: 1,
+    refetchOnWindowFocus: false, // Prevent refetch on window focus
+    refetchOnReconnect: false, // Prevent refetch on reconnect
   });
 
-  console.log("Saved Grants in AI Assistant:", savedGrants);
+  // Process the API response correctly
+  const myGrants = React.useMemo(() => {
+    if (!data?.favoriteProjects) return [];
+
+    // Remove duplicates based on _id
+    const uniqueGrants = data.favoriteProjects.reduce((acc, grant) => {
+      const existingGrant = acc.find((g) => g._id === grant._id);
+      if (!existingGrant) {
+        acc.push(grant);
+      }
+      return acc;
+    }, []);
+
+    return uniqueGrants;
+  }, [data?.favoriteProjects]);
+
+  const savedGrants = React.useMemo(() => {
+    if (!data?.data) return [];
+
+    // Remove duplicates based on _id
+    const uniqueGrants = data.data.reduce((acc, grant) => {
+      const existingGrant = acc.find((g) => g._id === grant._id);
+      if (!existingGrant) {
+        acc.push(grant);
+      }
+      return acc;
+    }, []);
+
+    return uniqueGrants;
+  }, [data?.data]);
+
+  console.log("My Grants (Favorite Projects):", myGrants);
+  console.log("Saved Grants (Regular Grants):", savedGrants);
+  console.log("Total Grants Count:", myGrants.length + savedGrants.length);
 
   useEffect(() => {
     dispatch(setLoading(isLoading));
@@ -141,12 +152,27 @@ const AIAssistant = () => {
 
   useEffect(() => {
     if (savedGrants.length > 0) {
+      console.log(
+        "Dispatching savedGrants to Redux:",
+        savedGrants.length,
+        "grants"
+      );
       dispatch(setSavedGrants(savedGrants));
     }
   }, [savedGrants, dispatch]);
 
-  //Others Logics
+  useEffect(() => {
+    if (myGrants.length > 0) {
+      console.log(
+        "Dispatching favoriteProjects to Redux:",
+        myGrants.length,
+        "projects"
+      );
+      dispatch(setFavoriteProjects(myGrants));
+    }
+  }, [myGrants, dispatch]);
 
+  //Others Logics
   const onUpdateChatHistory = (key, action) => {
     setChatHistories((prev) => {
       const newHistory =
@@ -317,29 +343,6 @@ const AIAssistant = () => {
     }
   };
 
-  const GrantSelectionButton = ({ isSelected, onClick, title, subtext }) => (
-    <>
-      {/* {console.log( title, subtext)} */}
-      <motion.button
-        onClick={onClick}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className={`w-full p-2 lg:p-3 border-l-4 text-left transition-colors duration-200 ${
-          isSelected
-            ? "bg-primary/80 dark:bg-primary/20 border-primary text-night dark:text-dark-primary"
-            : "bg-transparent border-transparent text-night/70 dark:text-dark-textMuted hover:bg-mercury/50 dark:hover:bg-dark-border/20 hover:text-night dark:hover:text-dark-text"
-        }`}
-      >
-        <h4 className="font-bold text-xs lg:text-sm font-heading truncate">
-          {title}
-        </h4>
-        <p className="text-[10px] lg:text-xs opacity-80 mt-0.5 truncate">
-          {subtext}
-        </p>
-      </motion.button>
-    </>
-  );
-
   const lightPattern = `url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgODAwIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNFMkRGREUiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTcuMiA3LjJsNzE3LjIgNzE3LjIiIG9wYWNpdHk9Ii4xNSIvPjxwYXRoIGQ9Ik03MjQuNCA3LjJMNy4yIDcyNC40IiBvcGFjaXR5PSIuMTUiLz48cGF0aCBkPSJNNTAzLjIgNzI0LjRMMjIzLjIgNDQ0LjQiIG9wYWNpdHk9Ii4xNSIvPjxwYXRoIGQ9Ik0yOTUuNiA3LjJMNTc1LjYgMjg3LjIiIG9wYWNpdHk9Ii4xNSIvPjxwYXRoIGQ9Ik03OTIuOCAzOTIuOGMwLTIxNy0xNzUuMi0zOTIuOC0zOTIuOC0zOTIuOCIgb3BhY2l0eT0iLjIiLz48cGF0aCBkPSJNNy4yIDM5Mi44YzAtMjE3IDE3NS4yLTM5Mi44IDM5Mi44LTM5Mi44IiBvcGFjaXR5PSIuMiIvPjwvZz48L3N2Zz4=')`;
   const darkPattern = `url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgODAwIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiMzYTNkNDAiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTcuMiA3LjJsNzE3LjIgNzE3LjIiIG9wYWNpdHk9Ii4xNSIvPjxwYXRoIGQ9Ik03MjQuNCA3LjJMNy4yIDcyNC40IiBvcGFjaXR5PSIuMTUiLz48cGF0aCBkPSJNNTAzLjIgNzI0LjRMMjIzLjIgNDQ0LjQiIG9wYWNpdHk9Ii4xNSIvPjxwYXRoIGQ9Ik0yOTUuNiA3LjJMNTc1LjYgMjg3LjIiIG9wYWNpdHk9Ii4xNSIvPjxwYXRoIGQ9Ik03OTIuOCAzOTIuOGMwLTIxNy0xNzUuMi0zOTIuOC0zOTIuOC0zOTIuOCIgb3BhY2l0eT0iLjIiLz48cGF0aCBkPSJNNy4yIDM5Mi44YzAtMjE3IDE3NS4yLTM5Mi44IDM5Mi44LTM5Mi44IiBvcGFjaXR5PSIuMiIvPjwvZz48L3N2Zz4=')`;
 
@@ -407,13 +410,13 @@ const AIAssistant = () => {
         {/* Mobile Dropdown - Visible only on mobile */}
         <div className="p-3 transition-colors dark:bg-dark-surface border-mercury dark:border-dark-border relative z-20">
           <Select
-            value={selectedGrant?.id || selectedGrant?._id || "general"}
+            value={selectedGrant?._id || "general"}
             onChange={(value) => {
               if (value === "general") {
                 setSelectedGrant(null);
               } else {
                 const grant = [...myGrants, ...savedGrants].find(
-                  (g) => (g.id || g._id) === value
+                  (g) => g._id === value
                 );
                 setSelectedGrant(grant);
               }
@@ -443,16 +446,16 @@ const AIAssistant = () => {
                 </div>
               </Option>
             </OptGroup>
-            {myGrants.length > 0 && (
-              <OptGroup label="In-Progress Applications">
-                {myGrants.map((grant) => (
-                  <Option key={grant.id} value={grant.id}>
+            {myGrants?.length > 0 && (
+              <OptGroup label="Favorite Projects">
+                {myGrants?.map((grant) => (
+                  <Option key={grant._id} value={grant._id}>
                     <div className="py-1">
                       <div className="font-semibold text-sm truncate">
                         {grant.title}
                       </div>
                       <div className="text-xs opacity-70 truncate">
-                        {grant.funder}
+                        {grant.agency || "No agency specified"}
                       </div>
                     </div>
                   </Option>
@@ -460,12 +463,9 @@ const AIAssistant = () => {
               </OptGroup>
             )}
             {!isSavedLoading && savedGrants.length > 0 && (
-              <OptGroup label="Saved Opportunities">
-                {savedGrants.map((grant) => (
-                  <Option
-                    key={grant.id || grant._id}
-                    value={grant.id || grant._id}
-                  >
+              <OptGroup label="Favorite Grants">
+                {savedGrants?.map((grant) => (
+                  <Option key={grant._id} value={grant._id}>
                     <div className="py-1">
                       <div className="font-semibold text-sm truncate">
                         {grant.title || "N/A"}
@@ -505,7 +505,7 @@ const AIAssistant = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 sm:p-6 md:p-8 z-10"
+              className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 sm:p-6 md:p-8 z-10 mb-10"
             >
               <SparklesIcon className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-primary mb-3 sm:mb-4 animate-pulse-glow" />
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold font-heading text-night dark:text-dark-text px-2">
@@ -718,4 +718,3 @@ const AIAssistant = () => {
 };
 
 export default AIAssistant;
-

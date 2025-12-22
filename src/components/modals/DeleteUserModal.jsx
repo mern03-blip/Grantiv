@@ -3,7 +3,7 @@ import { Button, Modal, message } from "antd";
 import { Delete } from "../../assets/image";
 import "./modal.scss"
 
-const DeleteUserModal = ({ open, handleOk, handleCancel }) => {
+const DeleteUserModal = ({ open, handleOk, handleCancel,text }) => {
     const [loading, setLoading] = useState(false);
 
     const handleConfirm = async () => {
@@ -53,7 +53,7 @@ const DeleteUserModal = ({ open, handleOk, handleCancel }) => {
                     <img src={Delete} alt="delete user" />
                 </div>
                 <p className="text-sm sm:text-base text-text1 font-b6 font-custom">
-                    Are you sure you want to delete this user?
+                   {text}
                 </p>
 
             </div>

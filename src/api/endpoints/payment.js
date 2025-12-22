@@ -11,9 +11,20 @@ const getAuthHeaders = () => {
   };
 };
 
+const getHeaders = () => {
+  const token = localStorage.getItem('token');
+  const orgId = localStorage.getItem('orgId');
+
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "X-Organization-ID": orgId
+    }
+  };
+};
+
 export const getSubscriptionStatus = async () => {
-  const organizationId = localStorage.getItem('orgId');
-  const response = await axiosInstance.post("/subscription", { organizationId }, getAuthHeaders());
+  const response = await axiosInstance.get("/subscription",  getHeaders());
   return response.data;
 };
 

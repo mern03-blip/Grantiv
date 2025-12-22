@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
+import { useMutation } from '@tanstack/react-query';
 import { SpinnerIcon, XIcon } from '../icons/Icons';
+import { extractMyGrants, createMyGrants } from '../../api/endpoints/customGrant';
 
 
 // 3. Mock useFocusTrap (Basic implementation)
@@ -36,25 +38,49 @@ const useKeydown = (key, callback) => {
 const AddGrantModal = ({ onClose, onAddFromText }) => {
     const modalRef = useRef(null);
     const [grantText, setGrantText] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     
     useFocusTrap(modalRef);
     useKeydown('Escape', onClose);
     
-    const handleSubmit = async () => {
-        if (!grantText.trim()) return;
-        setIsLoading(true);
-        try {
-            await onAddFromText(grantText);
-            // Optionally close the modal upon successful submission
-            onClose(); 
-        } catch (error) {
-            console.error("Error adding grant:", error);
-            // Keep modal open and handle error display if necessary
-        } finally {
-            setIsLoading(false);
+    // Extract grants mutation
+    const extractMutation = useMutation({
+        mutationFn: extractMyGrants,
+        onSuccess: (extractResponse) => {
+            console.log("Grant extraction response:", extractResponse);
+            // Trigger create mutation with extract response
+            createMutation.mutate(extractResponse);
+        },
+        onError: (error) => {
+            console.error("Error extracting grant:", error);
         }
+    });
+    
+    // Create grants mutation
+    const createMutation = useMutation({
+        mutationFn: createMyGrants,
+        onSuccess: async (createResponse) => {
+            console.log("Grant creation response:", createResponse);
+            
+            // Call the parent callback if provided
+            if (onAddFromText) {
+                await onAddFromText(createResponse);
+            }
+            
+            // Close the modal upon successful submission
+            onClose();
+        },
+        onError: (error) => {
+            console.error("Error creating grant:", error);
+        }
+    });
+    
+    const handleSubmit = () => {
+        if (!grantText.trim()) return;
+        extractMutation.mutate(grantText);
     };
+    
+    // Combined loading state
+    const isLoading = extractMutation.isPending || createMutation.isPending;
 
 
     return (
