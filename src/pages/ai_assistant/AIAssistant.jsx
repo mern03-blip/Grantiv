@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { SparklesIcon } from "../../components/icons/Icons";
 
 // Import Sub-Components
-import ContextSelector from "../../components/AIAssistant/ContextSelector";
-import MessageList from "../../components/AIAssistant/MessageList";
-import ChatInput from "../../components/AIAssistant/ChatInput";
+import ContextSelector from "./components/ContextSelector";
+import MessageList from "./components/MessageList";
+import ChatInput from "./components/ChatInput";
 
 // Import API Services
 import {

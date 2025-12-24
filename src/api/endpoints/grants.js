@@ -6,30 +6,18 @@ export const getGrants = async ({
   page = 1,
   limit = 10,
   search = "",
-  sortBy = "_id",
-  sortOrder = "asc",
-  filterLocation = "",
-  filterAgency = "",
-  minAmount = "",
-  maxAmount = "",
+  sortFilter = "",
 } = {}) => {
   // Dynamically build params object (only include filled fields)
   const params = {
     page,
     limit,
-    search,
-    sortBy,
-    sortOrder,
+    ...(search && { search }),
+    ...(sortFilter && { sortFilter }),
   };
-
-  if (filterLocation) params.filterLocation = filterLocation;
-  if (filterAgency) params.filterAgency = filterAgency;
-  if (minAmount) params.minAmount = minAmount;
-  if (maxAmount) params.maxAmount = maxAmount;
-
+  
   const response = await axiosInstance.get("/grants/get-grants", { params });
 
-  // console.log("All grants:", response.data);
   return response.data;
 };
 

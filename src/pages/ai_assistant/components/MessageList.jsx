@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SparklesIcon } from "../../components/icons/Icons"; // Adjust path
+import { SparklesIcon } from "../../../components/icons/Icons"; // Adjust path
 
 const MessageList = ({ messages, isLoading }) => {
   const messagesEndRef = useRef(null);

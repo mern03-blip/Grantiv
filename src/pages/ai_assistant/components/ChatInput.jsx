@@ -4,7 +4,7 @@ import {
   PaperAirplaneIcon,
   PaperclipIcon,
   XIcon,
-} from "../../components/icons/Icons"; // Adjust path
+} from "../../../components/icons/Icons"; // Adjust path
 
 const ChatInput = ({
   input,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,9 @@ import {
   CheckCircleIcon,
 } from "../../../components/icons/Icons";
 import { DarkLogo, SidebarLogo } from "../../../assets/image";
+import { handleBusinessForm } from "../../../api/endpoints/businessform";
+import { useQuery } from "@tanstack/react-query";
+import { getMyGrants } from "../../../api/endpoints/customGrant";
 
 const EmptyDashboardStep = ({
   title,
@@ -80,7 +83,7 @@ EmptyDashboardStep.propTypes = {
   buttonText: PropTypes.string.isRequired,
   onAction: PropTypes.func.isRequired,
   icon: PropTypes.node.isRequired,
-  isComplete: PropTypes.bool.isRequired
+  isComplete: PropTypes.bool.isRequired,
 };
 
 const EmptyDashboardView = ({
@@ -169,24 +172,60 @@ EmptyDashboardView.propTypes = {
   isProfileComplete: PropTypes.bool,
   isGrantFound: PropTypes.bool,
   isProjectStarted: PropTypes.bool,
-  onSkip: PropTypes.func.isRequired
+  onSkip: PropTypes.func.isRequired,
 };
 
 EmptyDashboardView.defaultProps = {
   isProfileComplete: false,
   isGrantFound: false,
-  isProjectStarted: false
+  isProjectStarted: false,
 };
 
-const DashboardOnboarding = ({ 
+const DashboardOnboarding = ({
   onNavigate: propOnNavigate,
   onAddGrant: propOnAddGrant,
   isProfileComplete = false,
   isGrantFound = false,
   isProjectStarted = false,
-  onSkip
+  onSkip,
 }) => {
   const navigate = useNavigate();
+
+  const [localProfileComplete, setLocalProfileComplete] =
+    useState(isProfileComplete);
+
+  // Fetch user's grants to determine if they've found/started a project
+  const { data: myGrantsData } = useQuery({
+    queryKey: ["myGrants"],
+    queryFn: getMyGrants,
+  });
+
+  const hasGrants = React.useMemo(() => {
+    if (!myGrantsData) return false;
+    if (Array.isArray(myGrantsData)) return myGrantsData.length > 0;
+    if (typeof myGrantsData === "object")
+      return Object.keys(myGrantsData).length > 0;
+    return false;
+  }, [myGrantsData]);
+
+  useEffect(() => {
+    let mounted = true;
+    const checkProfile = async () => {
+      try {
+        const profileData = await handleBusinessForm();
+        if (!mounted) return;
+        setLocalProfileComplete(
+          !!(profileData && Object.keys(profileData).length > 0)
+        );
+      } catch (err) {
+        console.error("Error fetching profile data:", err);
+      }
+    };
+    checkProfile();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleNavigate = (view) => {
     if (propOnNavigate) {
@@ -223,25 +262,16 @@ const DashboardOnboarding = ({
   };
 
   // Check if all steps are complete to show main dashboard
-  const allStepsComplete = isProfileComplete && isGrantFound && isProjectStarted;
-
-  if (allStepsComplete) {
-    // Return main dashboard content here
-    return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold">Welcome to your Dashboard!</h1>
-        <p>All onboarding steps completed.</p>
-      </div>
-    );
-  }
+  const effectiveGrantFound = isGrantFound || hasGrants;
+  const effectiveProjectStarted = isProjectStarted || hasGrants;
 
   return (
     <EmptyDashboardView
       onNavigate={handleNavigate}
       onAddGrant={handleAddGrant}
-      isProfileComplete={isProfileComplete}
-      isGrantFound={isGrantFound}
-      isProjectStarted={isProjectStarted}
+      isProfileComplete={localProfileComplete}
+      isGrantFound={effectiveGrantFound}
+      isProjectStarted={effectiveProjectStarted}
       onSkip={handleSkip}
     />
   );
@@ -254,7 +284,7 @@ DashboardOnboarding.propTypes = {
   isProfileComplete: PropTypes.bool,
   isGrantFound: PropTypes.bool,
   isProjectStarted: PropTypes.bool,
-  onSkip: PropTypes.func
+  onSkip: PropTypes.func,
 };
 
 DashboardOnboarding.defaultProps = {
@@ -263,9 +293,7 @@ DashboardOnboarding.defaultProps = {
   isProfileComplete: false,
   isGrantFound: false,
   isProjectStarted: false,
-  onSkip: null
+  onSkip: null,
 };
 
 export default DashboardOnboarding;
-
-

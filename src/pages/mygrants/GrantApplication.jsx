@@ -13,6 +13,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { updateGrantStatus } from "../../api/endpoints/customGrant";
 import { getTask } from "../../api/endpoints/grantTask";
 import AddChkTaskModal from "../../components/modals/AddChkTaskModal";
+import GrantApproveModal from "../../components/modals/GrantApproveModal";
 
 const GrantApplication = ({
   onRequestToggleTask = () => {},
@@ -31,18 +32,41 @@ const GrantApplication = ({
 
   const [showAddTaskModal, setShowAddTaskModal] = React.useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [localStatus, setLocalStatus] = useState(grant.status);
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [pendingOutcome, setPendingOutcome] = useState(null);
+
   const organizationId = localStorage.getItem("orgId");
 
   // Mutation for updating grant status
   const updateStatusMutation = useMutation({
     mutationFn: ({ grantId, status }) => updateGrantStatus(grantId, status),
-    onSuccess: () => {
+
+    onMutate: async ({ status }) => {
+      setLocalStatus(status);
+    },
+
+    onError: () => {
+      setLocalStatus(grant.status);
+    },
+
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["myGrants"] });
     },
-    onError: (error) => {
-      console.error("Error updating grant status:", error);
-    },
   });
+
+  // Handler for status updates coming from ProgressBar
+  const handleStatusUpdate = (grantId, status) => {
+    // If user clicked the Outcome step, show confirmation modal instead of immediate mutation
+    if (status === "AWARDED") {
+      setPendingOutcome(status);
+      setShowApproveModal(true);
+      return;
+    }
+
+    // For other statuses, proceed normally
+    updateStatusMutation.mutate({ grantId, status });
+  };
 
   // Fetch tasks for this grant
   const {
@@ -52,7 +76,7 @@ const GrantApplication = ({
   } = useQuery({
     queryKey: ["grantTasks", grant.id],
     queryFn: () => getTask(grant.id),
-    enabled: !!grant.id, // Only run query if grant.id exists
+    enabled: !!grant.id,
   });
 
   // Process tasks data
@@ -64,19 +88,19 @@ const GrantApplication = ({
       realTasks = [fetchedTasks];
     }
   }
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       const decodedToken = jwtDecode(token);
-      // The user ID is often stored in 'id' or 'sub' field of the token
       setCurrentUser({
         _id: decodedToken.id,
-        name: decodedToken.name /* add other user fields */,
+        name: decodedToken.name,
       });
     }
   }, []);
 
-  // Calculate progress based on real tasks or fallback to mock data
+  // Calculate progress based on real tasks
   const tasksToUse = realTasks.length > 0 ? realTasks : [];
   const completedTasks = tasksToUse.filter(
     (task) => task.isCompleted === true || task.completed === true
@@ -87,13 +111,10 @@ const GrantApplication = ({
 
   const handleNavigate = () => {
     console.log("Navigating to settings/upgrade page.");
-    // Add navigation logic here
   };
 
   const handleAddTask = async (newTask) => {
     console.log("Adding new task:", newTask);
-    // Here you would typically call an API to add the task
-    // For now, we'll just log it and close the modal
     return Promise.resolve();
   };
 
@@ -111,6 +132,7 @@ const GrantApplication = ({
           </button>
         </div>
 
+        {/* Grant Info Card with Progress Bar */}
         <div className="bg-white dark:bg-dark-surface p-6 rounded-lg border border-mercury dark:border-dark-border">
           <h2 className="text-2xl font-bold text-night dark:text-dark-text font-heading mb-2">
             {grant.title}
@@ -118,12 +140,16 @@ const GrantApplication = ({
           <p className="text-night/60 dark:text-dark-textMuted mb-4">
             {grant.agency}
           </p>
+
+          {/* Reusable ProgressBar - Clickable to update status */}
           <ProgressBar
-            status={grant.status}
+            status={localStatus}
             grantId={grant.id}
-            onStatusUpdate={(grantId, status) =>
-              updateStatusMutation.mutate({ grantId, status })
-            }
+            onStatusUpdate={handleStatusUpdate}
+            isClickable={true} // Enable clicking to change status
+            disableOptimisticStatuses={["AWARDED"]} // Don't optimistically update AWARDED
+            showTitle={true}
+            showCurrentStatus={true}
           />
         </div>
 
@@ -141,7 +167,7 @@ const GrantApplication = ({
                   </span>
                   <Button
                     onClick={() => setShowAddTaskModal(true)}
-                    className="!border  !border-mercury/50 dark:border-dark-border/50 !text-night dark:hover:text-dark-text hover:border-mercury/30"
+                    className="!border !border-mercury/50 dark:border-dark-border/50 !text-night dark:hover:text-dark-text hover:border-mercury/30"
                   >
                     Add Task
                   </Button>
@@ -169,10 +195,11 @@ const GrantApplication = ({
                 <TaskItem
                   grantId={grant.id}
                   onRequestToggle={onRequestToggleTask}
-                  tasks={realTasks} // Pass the fetched tasks
+                  tasks={realTasks}
                 />
               )}
             </div>
+
             {/* Document Hub */}
             <DocumentHub
               grantId={grant.id}
@@ -181,8 +208,8 @@ const GrantApplication = ({
               navigateToSettings={handleNavigate}
             />
           </div>
-          {/* Team Chat */}
 
+          {/* Team Chat */}
           <div className="lg:col-span-1 min-h-[500px]">
             <TeamChat
               currentUser={currentUser}
@@ -201,6 +228,21 @@ const GrantApplication = ({
           grantId={grant.id}
         />
       )}
+
+      {/* Approve/Reject Outcome Modal */}
+      <GrantApproveModal
+        open={showApproveModal}
+        grantTitle={grant.title}
+        onCancel={() => setShowApproveModal(false)}
+        onAccept={async () => {
+          setShowApproveModal(false);
+          updateStatusMutation.mutate({ grantId: grant.id, status: "AWARDED" });
+        }}
+        onReject={async () => {
+          setShowApproveModal(false);
+          updateStatusMutation.mutate({ grantId: grant.id, status: "REJECTED" });
+        }}
+      />
     </div>
   );
 };

@@ -1,35 +1,63 @@
-// ✅ Common currency formatter for AUD
-export const currencyFormatter = new Intl.NumberFormat('en-AU', {
-    style: 'currency',
-    currency: 'AUD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+export const currencyFormatter = new Intl.NumberFormat("en-AU", {
+  style: "currency",
+  currency: "AUD",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
 });
+
+// ✅ Helper to safely get numeric value
+const getValidAmount = (...values) => {
+  for (const val of values) {
+    const num = Number(val);
+    if (!isNaN(num) && num > 0) return num;
+  }
+  return null;
+};
 
 // ✅ Function to format single or range amounts
 export const formatAmount = (grant) => {
-    const { minAmountAvailable, maxAmountAvailable, totalAmountAvailable } = grant || {};
+  const {
+    minAmountAvailable,
+    maxAmountAvailable,
+    totalAmountAvailable,
+    amount,
+  } = grant || {};
 
-    // If no data, return fallback
-    if (!minAmountAvailable && !maxAmountAvailable && !totalAmountAvailable) {
-        return 'Unspecified';
-    }
+  // pick single valid amount from totalAmountAvailable OR amount
+  const singleAmount = getValidAmount(amount, totalAmountAvailable);
 
-    // ✅ If min and max are equal → show totalAmountAvailable (or that same value)
-    if (minAmountAvailable && maxAmountAvailable && minAmountAvailable === maxAmountAvailable) {
-        const value = totalAmountAvailable || minAmountAvailable;
-        return currencyFormatter.format(value);
-    }
+  // ❌ If nothing exists
+  if (!minAmountAvailable && !maxAmountAvailable && !singleAmount) {
+    return "Unspecified";
+  }
 
-    // ✅ If min and max both exist but not equal → show range
-    if (minAmountAvailable && maxAmountAvailable) {
-        return `${currencyFormatter.format(minAmountAvailable)} - ${currencyFormatter.format(maxAmountAvailable)}`;
-    }
+  // ✅ If min & max exist and equal
+  if (
+    minAmountAvailable &&
+    maxAmountAvailable &&
+    minAmountAvailable === maxAmountAvailable
+  ) {
+    return currencyFormatter.format(
+      getValidAmount(singleAmount, minAmountAvailable)
+    );
+  }
 
-    // ✅ If only one value exists → show that
-    if (maxAmountAvailable) return currencyFormatter.format(maxAmountAvailable);
-    if (minAmountAvailable) return currencyFormatter.format(minAmountAvailable);
+  // ✅ If min & max both exist → range
+  if (minAmountAvailable && maxAmountAvailable) {
+    return `${currencyFormatter.format(
+      minAmountAvailable
+    )} - ${currencyFormatter.format(maxAmountAvailable)}`;
+  }
 
-    // ✅ Fallback → show total amount if nothing else
-    return currencyFormatter.format(totalAmountAvailable);
+  // ✅ If only single value exists (amount OR totalAmountAvailable)
+  if (singleAmount) {
+    return currencyFormatter.format(singleAmount);
+  }
+
+  // ✅ If only one bound exists
+  if (maxAmountAvailable) return currencyFormatter.format(maxAmountAvailable);
+
+  if (minAmountAvailable) return currencyFormatter.format(minAmountAvailable);
+
+  return "Unspecified";
 };

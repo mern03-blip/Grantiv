@@ -5,10 +5,9 @@ import { useNavigate } from "react-router-dom";
 import ProgressBar from "../../components/progressbar/ProgressBar";
 import { PlusIcon } from "../../components/icons/Icons";
 import AddGrantModal from "../../components/modals/AddGrantModal";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   getMyGrants,
-  updateGrantStatus,
 } from "../../api/endpoints/customGrant";
 import GrantDetailModal from "../../components/modals/GrantsDetail";
 
@@ -53,22 +52,10 @@ const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
   const [selectedGrant, setSelectedGrant] = useState(null);
 
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const { data } = useQuery({
     queryKey: ["myGrants"],
     queryFn: getMyGrants,
-  });
-
-  // Mutation for updating grant status
-  const updateStatusMutation = useMutation({
-    mutationFn: ({ grantId, status }) => updateGrantStatus(grantId, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["myGrants"] });
-    },
-    onError: (error) => {
-      console.error("Error updating grant status:", error);
-    },
   });
 
   // Use mock data for now, fallback to props if needed
@@ -161,16 +148,11 @@ const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
                 <button
                   key={tab}
                   onClick={() => handleTabClick(tab)}
-                  disabled={updateStatusMutation.isPending}
                   className={`${
                     activeTab === tab
                       ? "border-primary dark:border-dark-primary text-primary dark:text-dark-primary"
                       : "border-transparent text-night/60 dark:text-dark-textMuted hover:text-night dark:hover:text-dark-text hover:border-mercury dark:hover:border-dark-border"
-                  } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    updateStatusMutation.isPending
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                  }`}
+                  } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors `}
                 >
                   {tab}
                   <span className="ml-2 bg-mercury/80 dark:bg-dark-border text-night/70 dark:text-dark-textMuted text-xs font-semibold px-2 py-0.5 rounded-full">
@@ -200,9 +182,6 @@ const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
                   <ProgressBar
                     status={grant.status}
                     grantId={grant._id || grant.id}
-                    onStatusUpdate={(grantId, status) =>
-                      updateStatusMutation.mutate({ grantId, status })
-                    }
                   />
                 </div>
                 <div className="mt-5 flex gap-2">

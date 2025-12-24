@@ -1,60 +1,41 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { getGrants, handleGetFavoriteGrants } from '../../api/endpoints/grants';
-import GrantCard from '../../components/cards/GrantCard';
-import CustomPagination from '../../components/pagination/CustomPagination';
-import Loader from '../../components/loading/Loader';
-import { SpinnerIcon } from '../../components/icons/Icons';
-import { CiFilter } from 'react-icons/ci';
-import SearchFilterPopup from './components/SearchFilterPopup';
-import { useDispatch } from 'react-redux';
-import { setSavedGrants } from '../../redux/slices/favoriteGrantSlice';
-
+import React, { useState, useMemo, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { getGrants, handleGetFavoriteGrants } from "../../api/endpoints/grants";
+import GrantCard from "../../components/cards/GrantCard";
+import CustomPagination from "../../components/pagination/CustomPagination";
+import Loader from "../../components/loading/Loader";
+import { SpinnerIcon } from "../../components/icons/Icons";
+import { CiFilter } from "react-icons/ci";
+import { Dropdown } from "antd";
+import { useDispatch } from "react-redux";
+import { setSavedGrants } from "../../redux/slices/favoriteGrantSlice";
 
 const FindGrants = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   // --- Local states ---
   const [currentPage, setCurrentPage] = useState(1);
-  const [query, setQuery] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [matchedGrants, setMatchedGrants] = useState([]);
   const [isAIPagination, setIsAIPagination] = useState(false);
-  const [savedSearches, setSavedSearches] = useState([]);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [grantsPerPage, setGrantsPerPage] = useState(10);
-
-  // console.log("=======", grantsPerPage);
+  const [sortOption, setSortOption] = useState("date_soonest");
 
   // Updated fetch function to accept filters
   const fetchGrants = async ({ queryKey }) => {
-    const [, page, searchQuery, filters] = queryKey;
+    const [, page, searchQuery, grantsPerPage, sortOption] = queryKey;
 
     const response = await getGrants({
       page,
       limit: grantsPerPage,
       search: searchQuery,
-      filterLocation: filters.city || '',
-      filterAgency: filters.agencyName || '',
-      minAmount: filters.minAmount || '',
-      maxAmount: filters.maxAmount || '',
+      sortFilter: sortOption || "",
     });
 
     return response;
   };
-
-  // ✅ NEW: State for filters
-  const [filters, setFilters] = useState({
-    city: '',
-    agencyName: '',
-    minAmount: '',
-    maxAmount: '',
-  });
-
-  // const { data: cities = [] } = useCitiesQuery();
 
   // --- Fetch Grants with TanStack Query (now includes filters in queryKey) ---
   const {
@@ -63,7 +44,13 @@ const FindGrants = () => {
     error,
     isFetching,
   } = useQuery({
-    queryKey: ['grants', currentPage, searchQuery, filters, grantsPerPage], // ✅ Added filters to queryKey
+    queryKey: [
+      "grants",
+      currentPage,
+      searchQuery,
+      grantsPerPage,
+      sortOption,
+    ],
     queryFn: fetchGrants,
     enabled: !isAIPagination,
     staleTime: 5 * 60 * 1000,
@@ -75,8 +62,6 @@ const FindGrants = () => {
   const totalItems = Grants?.pagination.totalItems || 0;
   const totalPages = Grants?.pagination.totalPages || 1;
 
-  // console.log("===",totalItems)
-
   // --- Search Logic ---
   const performAISearch = async (searchQueryInput) => {
     setSearchQuery(searchQueryInput);
@@ -87,7 +72,7 @@ const FindGrants = () => {
   // --- Handlers ---
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 300, behavior: 'smooth' });
+    window.scrollTo({ top: 300, behavior: "smooth" });
   };
 
   // ✅ Automatically refetch when input is cleared
@@ -105,29 +90,7 @@ const FindGrants = () => {
     performAISearch(newQuery);
   };
 
-  // ✅ NEW: Handle filter save
-  const handleSaveFilters = (filterData) => {
-    setFilters({
-      city: filterData.city || '',
-      agencyName: filterData.agencyName || '',
-      minAmount: filterData.minAmount || '',
-      maxAmount: filterData.maxAmount || '',
-    });
-    setCurrentPage(1); // Reset to page 1 when filters change
-  };
-
-  // ✅ NEW: Clear filters function
-  const handleClearFilters = () => {
-    setFilters({
-      city: '',
-      agencyName: '',
-      minAmount: '',
-      maxAmount: '',
-    });
-    setCurrentPage(1);
-  };
-
-  //Fetch all fav grant to for fav toggle btn  
+  // Fetch all fav grant to for fav toggle btn
   useEffect(() => {
     const loadFavorites = async () => {
       try {
@@ -148,17 +111,31 @@ const FindGrants = () => {
       return matchedGrants.slice(startIndex, endIndex);
     }
     return grants;
-  }, [grants, matchedGrants, isAIPagination, currentPage]);
+  }, [grants, matchedGrants, isAIPagination, currentPage, grantsPerPage]);
 
   const paginationTotalPages = isAIPagination
     ? Math.ceil(matchedGrants.length / grantsPerPage)
     : totalPages;
 
-  // const isSaveButtonDisabled = !query.trim() || savedSearches.includes(query.trim()) || isFetching;
   const isGlobalLoading = isLoading || isFetching;
 
   // ✅ Check if any filters are active
-  const hasActiveFilters = Object.values(filters).some(value => value !== '');
+  const hasActiveFilters = sortOption !== "";
+
+  // ✅ Get filter label for display
+  const getFilterLabel = () => {
+    const filterLabels = {
+      title_asc: "Ascending: A-Z",
+      title_desc: "Descending: Z-A",
+      date_latest: "Soonest to Latest",
+      date_soonest: "Latest to Soonest",
+      amount_high: "High to Low",
+      amount_low: "Low to High",
+      recent_added: "Recently Added",
+      recent_updated: "Recently Updated",
+    };
+    return filterLabels[sortOption] || "Filter";
+  };
 
   // --- Conditional rendering ---
   if (isLoading && !isFetching) return <Loader />;
@@ -166,13 +143,13 @@ const FindGrants = () => {
   if (error) {
     return (
       <div className="text-red-500 p-4 bg-red-100 rounded-lg">
-        Error loading grants: {error.message || 'An unknown error occurred.'}
+        Error loading grants: {error.message || "An unknown error occurred."}
       </div>
     );
   }
 
   return (
-    <div className='p-4'>
+    <div className="p-4">
       <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-night dark:text-dark-text mb-2 font-heading">
         Find & Match Grants
       </h2>
@@ -186,9 +163,9 @@ const FindGrants = () => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          placeholder={`Total Available Grants : ${totalItems}`}
-          className="w-full p-3 sm:p-4 text-sm sm:text-base border border-mercury dark:border-dark-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-dark-surface text-night dark:text-dark-text"
+          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+          placeholder={`Total Available Grants: ${totalItems}`}
+          className="w-[66%] p-3 sm:p-4 text-sm sm:text-base border border-mercury dark:border-dark-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-dark-surface text-night dark:text-dark-text"
         />
 
         <div className="flex gap-2">
@@ -199,36 +176,46 @@ const FindGrants = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            {(isLoading || isFetching) ? <SpinnerIcon className="w-5 h-5 sm:w-6 sm:h-6" /> : 'Search'}
+            {isLoading || isFetching ? (
+              <SpinnerIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+            ) : (
+              "Search"
+            )}
           </motion.button>
 
-          <button
-            onClick={() => setIsPopupOpen(true)}
-            className="px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-dark-surface border border-mercury dark:border-dark-border text-night dark:text-dark-text text-sm sm:text-base font-semibold rounded-lg hover:bg-mercury/50 dark:hover:bg-dark-border/50 transition-all duration-300 disabled:bg-mercury/50 dark:disabled:bg-dark-border disabled:text-night/50 dark:disabled:text-dark-textMuted disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2"
+          <Dropdown
+            menu={{
+              items: [
+                { key: "title_asc", label: "Grant Title: Ascending" },
+                { key: "title_desc", label: "Grant Title: Descending" },
+                {
+                  key: "date_latest",
+                  label: "Closing Date: Soonest to Latest",
+                },
+                {
+                  key: "date_soonest",
+                  label: "Closing Date: Latest to Soonest",
+                },
+                { key: "amount_high", label: "Amount: High to Low" },
+                { key: "amount_low", label: "Amount: Low to High" },
+                { key: "recent_added", label: "Most Recently Added" },
+                { key: "recent_updated", label: "Most Recently Updated" },
+              ],
+              onClick: ({ key }) => {
+                setSortOption(key);
+                setCurrentPage(1);
+              },
+            }}
+            trigger={["click"]}
           >
-            <CiFilter size={20} className="sm:w-6 sm:h-6" />
-            <span className="hidden sm:inline">Filter</span>
-          </button>
-
-          {/* Clear Filters Button (only show when filters are active) */}
-          {hasActiveFilters && (
-            <button
-              onClick={handleClearFilters}
-              className="px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-mainColor text-white font-semibold rounded-lg transition-all duration-300 whitespace-nowrap"
-            >
-              Clear
+            <button className="w-[220px] px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-dark-surface border border-mercury dark:border-dark-border text-night dark:text-dark-text text-sm sm:text-base font-semibold rounded-lg hover:bg-mercury/50 dark:hover:bg-dark-border/50 transition-all duration-300 disabled:bg-mercury/50 dark:disabled:bg-dark-border disabled:text-night/50 dark:disabled:text-dark-textMuted disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2">
+              <CiFilter size={20} className="sm:w-6 sm:h-6" />
+              <span className="hidden sm:inline">
+                {hasActiveFilters ? getFilterLabel() : "Filter"}
+              </span>
             </button>
-          )}
+          </Dropdown>
         </div>
-
-        {/* Filter Popup */}
-        <SearchFilterPopup
-          isOpen={isPopupOpen}
-          onClose={() => setIsPopupOpen(false)}
-          // cities={cities}
-          onSave={handleSaveFilters}
-          initialFilters={filters} // Pass current filters to popup
-        />
       </div>
 
       {/* Display Grants */}
@@ -254,7 +241,7 @@ const FindGrants = () => {
                 grantsPerPage={grantsPerPage}
                 onGrantsPerPageChange={(value) => {
                   setGrantsPerPage(value);
-                  // setCurrentPage(1);
+                  setCurrentPage(1);
                 }}
               />
             </div>
@@ -265,7 +252,7 @@ const FindGrants = () => {
       {/* No Results */}
       {!isGlobalLoading && paginatedGrantsForDisplay.length === 0 && (
         <p className="text-center text-sm sm:text-base text-night/60 dark:text-dark-textMuted mt-6 sm:mt-8">
-          No grants found!.
+          No grants found!
         </p>
       )}
     </div>

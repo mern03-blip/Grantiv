@@ -8,6 +8,8 @@ import {
   CurrencyDollarIcon,
 } from "../../../components/icons/Icons";
 import { useSelector } from "react-redux";
+import { useQuery } from "@tanstack/react-query";
+import { getMyGrants } from "../../../api/endpoints/customGrant";
 
 // --- StatCard Component (Converted to JSX) ---
 const StatCard = ({ icon: Icon, title, value }) => (
@@ -36,18 +38,32 @@ StatCard.propTypes = {
 
 // --- Mock Data ---
 const mockData = {
-
-    inProgressGrants: 3,
   incompleteTasks: 7,
-  awardedAmount: 45000,
 };
 
-const StatCards = ({
-  inProgressGrants,
-  incompleteTasks,
-  awardedAmount,
-}) => {
+const StatCards = ({ incompleteTasks }) => {
   const { aiTotalAmount } = useSelector((state) => state.grants);
+
+  const { data } = useQuery({
+    queryKey: ["myGrants"],
+    queryFn: getMyGrants,
+  });
+
+  const inProgressGrants = data?.filter(
+    (grant) => grant.status !== "awarded"
+  ).length;
+
+const calculateTotalGrantAmount = (grants = []) => {
+  return grants.reduce((total, grant) => {
+    if (grant.status !== "awarded") return total;
+
+    const amount = Number(grant.amount);
+    return total + (isNaN(amount) ? 0 : amount);
+  }, 0);
+};
+
+const totalGrantAmount = calculateTotalGrantAmount(data);
+
 
   // Helper function to format AUD currency
   const formatCurrency = (amount) => {
@@ -79,7 +95,7 @@ const StatCards = ({
       <StatCard
         icon={CurrencyDollarIcon}
         title="Total Awarded"
-        value={formatCurrency(awardedAmount)}
+        value={formatCurrency(totalGrantAmount)}
       />
     </div>
   );

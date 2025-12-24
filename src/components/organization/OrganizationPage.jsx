@@ -1,15 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { handleBusinessForm } from '../../api/endpoints/businessform';
-
-// Simple SVG Icon
-const BriefcaseIcon = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-        strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round"
-            d="M20.25 14.15v4.07a2.25 2.25 0 01-2.25 2.25H5.998a2.25 2.25 0 01-2.25-2.25v-4.07a2.25 2.25 0 01.52-1.42l3.5-4.5a2.25 2.25 0 013.44 0l3.5 4.5a2.25 2.25 0 01.52 1.42zM3 10.5h18M7.5 6.75h.008v.008H7.5V6.75z" />
-    </svg>
-);
+import { BriefcaseIcon } from '../icons/Icons';
 
 const OrganizationPage = () => {
     const navigate = useNavigate();
