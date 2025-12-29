@@ -12,9 +12,9 @@ const DeleteUserModal = ({ open, handleOk, handleCancel,text }) => {
             // simulate delete API call
             await new Promise((resolve) => setTimeout(resolve, 1000));
             handleOk(); // parent se function call
-            message.success("User deleted successfully.");
+            message.success("Deleted successfully.");
         } catch {
-            message.error("Failed to delete user. Please try again.");
+            message.error("Failed to delete. Please try again.");
         } finally {
             setLoading(false);
         }

@@ -208,24 +208,29 @@ const DashboardOnboarding = ({
     return false;
   }, [myGrantsData]);
 
-  useEffect(() => {
-    let mounted = true;
-    const checkProfile = async () => {
-      try {
-        const profileData = await handleBusinessForm();
-        if (!mounted) return;
-        setLocalProfileComplete(
-          !!(profileData && Object.keys(profileData).length > 0)
-        );
-      } catch (err) {
-        console.error("Error fetching profile data:", err);
+ useEffect(() => {
+  let mounted = true;
+  const checkProfile = async () => {
+    try {
+      const profileData = await handleBusinessForm();
+      if (!mounted) return;
+      const isComplete = !!(profileData && Object.keys(profileData).length > 0);
+      setLocalProfileComplete(isComplete);
+
+      // 🔹 If profile is complete, skip onboarding automatically
+      if (isComplete) {
+        handleSkip();
       }
-    };
-    checkProfile();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    } catch (err) {
+      console.error("Error fetching profile data:", err);
+    }
+  };
+  checkProfile();
+  return () => {
+    mounted = false;
+  };
+}, []);
+
 
   const handleNavigate = (view) => {
     if (propOnNavigate) {

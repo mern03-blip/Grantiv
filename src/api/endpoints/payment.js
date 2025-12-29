@@ -1,42 +1,42 @@
 import axiosInstance from "../axios/axiosInstance";
 
 
-// Helper to get headers with token
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  };
-};
+// // Helper to get headers with token
+// const getAuthHeaders = () => {
+//   const token = localStorage.getItem('token');
+//   return {
+//     headers: {
+//       Authorization: `Bearer ${token}`
+//     }
+//   };
+// };
 
-const getHeaders = () => {
-  const token = localStorage.getItem('token');
-  const orgId = localStorage.getItem('orgId');
+// const getHeaders = () => {
+//   const token = localStorage.getItem('token');
+//   const orgId = localStorage.getItem('orgId');
 
-  return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "X-Organization-ID": orgId
-    }
-  };
-};
+//   return {
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//       "X-Organization-ID": orgId
+//     }
+//   };
+// };
 
 export const getSubscriptionStatus = async () => {
-  const response = await axiosInstance.get("/subscription",  getHeaders());
+  const response = await axiosInstance.get("/subscription");
   return response.data;
 };
 
 export const createCheckoutSession = async (plan) => {
   // Plan should be 'starter' or 'pro'
   const organizationId = localStorage.getItem('orgId');
-  const response = await axiosInstance.post(`/subscription/create-checkout`, { plan, organizationId }, getAuthHeaders());
+  const response = await axiosInstance.post(`/subscription/create-checkout`, { plan, organizationId });
   return response.data; // Returns { url: "https://checkout.stripe.com/..." }
 };
 
 export const cancelSubscription = async () => {
   const organizationId = localStorage.getItem('orgId');
-  const response = await axiosInstance.post(`/subscription/cancel`, { organizationId }, getAuthHeaders());
+  const response = await axiosInstance.post(`/subscription/cancel`, { organizationId });
   return response.data;
 };

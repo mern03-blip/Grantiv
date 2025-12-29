@@ -105,20 +105,20 @@ const Billing = () => {
                 </li>
               ))}
             </ul>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <button className="w-full text-center text-sm font-bold text-night bg-primary rounded-md py-2.5 transition-all duration-300 hover:bg-secondary">
                 Change Plan
               </button>
-            </div>
+            </div> */}
           </div>
-          <div className="bg-white dark:bg-dark-surface border border-mercury dark:border-dark-border p-4 sm:p-5 md:p-6 rounded-lg">
+          {/* <div className="bg-white dark:bg-dark-surface border border-mercury dark:border-dark-border p-4 sm:p-5 md:p-6 rounded-lg">
             <h4 className="text-sm sm:text-base font-bold text-night dark:text-dark-text mb-2 sm:mb-3 flex items-center gap-2">
               <ReceiptIcon className="w-4 h-4 sm:w-5 sm:h-5" /> Billing History
             </h4>
             <p className="text-xs sm:text-sm text-night/50 dark:text-dark-textMuted">
               Your invoices will appear here.
             </p>
-          </div>
+          </div> */}
           <div className="bg-white dark:bg-dark-surface border-2 border-red-500/50 dark:border-red-500/30 p-4 sm:p-5 md:p-6 rounded-lg">
             <h4 className="text-sm sm:text-base font-bold text-red-600 dark:text-red-400 mb-2">
               Cancel Subscription

@@ -20,7 +20,7 @@ const OrganizationPage = () => {
             // Save selected org in localStorage
             localStorage.setItem('orgId', orgId);
             localStorage.setItem('orgName', orgName);
-            localStorage.setItem('Role', orgRole);
+            localStorage.setItem('role', orgRole);
 
             // ✅ Call API to check organization profile
             const profileData = await handleBusinessForm();

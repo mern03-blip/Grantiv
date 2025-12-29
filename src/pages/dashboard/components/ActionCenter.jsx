@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import AddGrantModal from "../../../components/modals/AddGrantModal";
+import DeleteUserModal from "../../../components/modals/DeleteUserModal";
 import ConfirmationModal from "../../../components/modals/ConfirmationModal";
 import AddTaskModal from "../../../components/modals/AddTaskModal";
 import {
@@ -9,47 +10,17 @@ import {
   PlusCircleIcon,
   SparklesIcon,
   ChevronRightIcon,
+  TrashIcon,
+  CheckIcon,
 } from "../../../components/icons/Icons";
 import { Button } from "antd";
-
-// --- Mock Data for demonstration ---
-const mockTasks = [
-  {
-    id: "t1",
-    text: "Submit budget draft for Innovation Fund",
-    deadline: "2025-12-15T00:00:00Z",
-    completed: false,
-    grantId: "g1",
-  },
-  {
-    id: "t2",
-    text: "Review feedback on Small Business grant",
-    deadline: "2025-12-08T00:00:00Z",
-    completed: false,
-    grantId: "g2",
-  }, // Past due
-  {
-    id: "t3",
-    text: "Finalize documents for Research grant",
-    deadline: "2025-12-24T00:00:00Z",
-    completed: false,
-    grantId: "g1",
-  },
-  {
-    id: "t4",
-    text: "Follow up with Funder X",
-    deadline: "2025-12-20T00:00:00Z",
-    completed: false,
-    grantId: "g3",
-  },
-  {
-    id: "t5",
-    text: "Completed Onboarding Task",
-    deadline: "2025-11-01T00:00:00Z",
-    completed: true,
-    grantId: "g1",
-  },
-];
+import {
+  completetasks,
+  createtasks,
+  deletetasks,
+  gettasks,
+} from "../../../api/endpoints/personaltask";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // --- ActionLinkCard Component (Moved and Converted to JSX) ---
 const ActionLinkCard = ({ icon: Icon, title, description, onClick }) => (
@@ -78,16 +49,21 @@ ActionLinkCard.propTypes = {
 };
 
 // --- Main ActionCenterCard Component ---
-const ActionCenter = ({
-  onAddGrant,
-  tasks = mockTasks, 
-  onRequestToggleTask,
-  myGrants = [],
-}) => {
+const ActionCenter = ({ onAddGrant, myGrants = [] }) => {
   // Modal state management
   const [isAddGrantModalOpen, setIsAddGrantModalOpen] = useState(false);
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
   const [taskToConfirm, setTaskToConfirm] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [taskToDeleteId, setTaskToDeleteId] = useState(null);
+  const queryClient = useQueryClient();
+
+  const { data } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: () => gettasks(),
+  });
+
+  const tasks = data?.data || [];
 
   const navigate = useNavigate();
 
@@ -116,14 +92,11 @@ const ActionCenter = ({
   // Handle adding a new task
   const handleAddTask = async (newTask) => {
     try {
-      console.log('Adding new task:', newTask);
-      // You can implement your task creation logic here
-      // For example: dispatch(addTask(newTask)) or call an API
-      
-      // Close the modal after successful task creation
+      await createtasks(newTask.name, newTask.dueDate);
+      queryClient.invalidateQueries(["tasks"]);
       setIsAddTaskModalOpen(false);
     } catch (error) {
-      console.error('Error adding task:', error);
+      console.error("Error adding task:", error);
       throw error; // Re-throw to let the modal handle it
     }
   };
@@ -134,11 +107,17 @@ const ActionCenter = ({
   };
 
   // Handle confirmed task completion
-  const handleConfirmToggleTask = () => {
-    if (taskToConfirm && onRequestToggleTask) {
-      onRequestToggleTask(taskToConfirm.id);
+  const handleConfirmToggleTask = async () => {
+    if (!taskToConfirm) return;
+    try {
+      await completetasks(taskToConfirm._id);
+      queryClient.invalidateQueries(["tasks"]);
+    } catch (error) {
+      console.error("Error completing task:", error);
+      throw error;
+    } finally {
+      setTaskToConfirm(null);
     }
-    setTaskToConfirm(null);
   };
 
   const handleAddFromText = async (grantText) => {
@@ -191,39 +170,61 @@ const ActionCenter = ({
         </div>
 
         {/* Urgent Tasks Section */}
-        {incompleteTasks.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-mercury/50 dark:border-dark-border/50">
-            <div className="flex justify-between ">
-              <h4 className="font-bold text-night dark:text-dark-text mb-3">
-                Urgent Tasks ({incompleteTasks.length})
-              </h4>
-              <Button 
-                onClick={handleAddTaskClick}
-                className="!border  !border-mercury/50 dark:border-dark-border/50 !text-night dark:hover:text-dark-text hover:border-mercury/30"
-              >
-                Add Task
-              </Button>
-            </div>
+        <div className="mt-6 pt-6 border-t border-mercury/50 dark:border-dark-border/50">
+          {/* Header Section - Always Visible */}
+          <div className="flex justify-between items-center mb-3">
+            <h4 className="font-bold text-night dark:text-dark-text">
+              Urgent Tasks ({incompleteTasks.length})
+            </h4>
+            <Button
+              onClick={handleAddTaskClick}
+              className="!border !border-mercury/50 dark:border-dark-border/50 !text-night dark:hover:text-dark-text hover:border-mercury/30"
+            >
+              Add Task
+            </Button>
+          </div>
+
+          {/* Conditional Task List */}
+          {incompleteTasks.length > 0 ? (
             <div className="space-y-2">
               {incompleteTasks.map((task) => {
-                const deadlineDate = new Date(task.deadline);
+                const deadlineDate = new Date(task.dueDate);
                 const isPastDue = deadlineDate < new Date();
 
                 return (
                   <div
-                    key={task.id}
+                    key={task._id}
                     className="flex items-center gap-3 py-2 border-b border-mercury/30 dark:border-dark-border/50 last:border-b-0"
                   >
+                    {/* Checkbox */}
                     <button
                       onClick={() => handleTaskToggleClick(task)}
-                      className="w-5 h-5 border-2 border-mercury/80 dark:border-dark-border rounded-full hover:border-primary transition flex-shrink-0"
-                      aria-label={`Mark task as complete: ${task.text}`}
-                    ></button>
+                      className={`w-5 h-5 border-2 rounded-full flex items-center justify-center transition flex-shrink-0
+                ${
+                  task.isCompleted
+                    ? "bg-primary border-primary text-white"
+                    : "border-mercury/80 dark:border-dark-border hover:border-primary"
+                }`}
+                      aria-label={`Mark task as complete: ${task.name}`}
+                    >
+                      {task.isCompleted && (
+                        <CheckIcon className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+
+                    {/* Task content */}
                     <div className="flex-1">
-                      <span className="text-sm text-night dark:text-dark-text">
-                        {task.text}
+                      <span
+                        className={`text-sm ${
+                          task.isCompleted
+                            ? "line-through text-night/40 dark:text-dark-textMuted"
+                            : "text-night dark:text-dark-text"
+                        }`}
+                      >
+                        {task.name}
                       </span>
-                      {task.deadline && (
+
+                      {task.dueDate && !task.isCompleted && (
                         <p
                           className={`text-xs font-bold ${
                             isPastDue
@@ -235,21 +236,32 @@ const ActionCenter = ({
                         </p>
                       )}
                     </div>
+
+                    {/* Trash icon */}
+                    <button
+                      onClick={() => {
+                        setTaskToDeleteId(task._id);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      className="text-night/40 dark:text-dark-textMuted hover:text-red-600 dark:hover:text-red-400 transition"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
                   </div>
                 );
               })}
             </div>
-          </div>
-        )}
-
-        {/* All Tasks Complete Message */}
-        {incompleteTasks.length === 0 && myGrants.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-mercury/50 dark:border-dark-border/50 text-center">
-            <p className="text-sm text-night/60 dark:text-dark-textMuted">
-              All tasks completed! ✨
-            </p>
-          </div>
-        )}
+          ) : (
+            /* Empty State - Shown when tasks length is 0 */
+            <div className="text-center py-4">
+              <p className="text-sm text-night/60 dark:text-dark-textMuted">
+                {myGrants && myGrants.length > 0
+                  ? "All tasks completed! ✨"
+                  : "No tasks yet  add your task."}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Add Grant Modal */}
@@ -276,10 +288,32 @@ const ActionCenter = ({
         title="Complete Task?"
         message={
           taskToConfirm
-            ? `Are you sure you want to mark "${taskToConfirm.text}" as complete?`
+            ? `Are you sure you want to mark "${taskToConfirm.name}" as complete?`
             : "Are you sure you want to mark this task as complete?"
         }
         confirmButtonText="Yes, Complete"
+      />
+
+      {/* Delete Task Confirmation Modal */}
+      <DeleteUserModal
+        open={isDeleteModalOpen}
+        handleCancel={() => {
+          setIsDeleteModalOpen(false);
+          setTaskToDeleteId(null);
+        }}
+        handleOk={async () => {
+          if (!taskToDeleteId) return;
+          try {
+            await deletetasks(taskToDeleteId);
+            queryClient.invalidateQueries(["tasks"]);
+          } catch (err) {
+            console.error("Error deleting task:", err);
+          } finally {
+            setIsDeleteModalOpen(false);
+            setTaskToDeleteId(null);
+          }
+        }}
+        text={"Are you sure you want to delete this task?"}
       />
     </div>
   );
@@ -301,7 +335,6 @@ ActionCenter.propTypes = {
 };
 
 ActionCenter.defaultProps = {
-  tasks: mockTasks,
   myGrants: [],
 };
 

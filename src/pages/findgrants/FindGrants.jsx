@@ -165,7 +165,7 @@ const FindGrants = () => {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           placeholder={`Total Available Grants: ${totalItems}`}
-          className="w-[66%] p-3 sm:p-4 text-sm sm:text-base border border-mercury dark:border-dark-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-dark-surface text-night dark:text-dark-text"
+          className="w-[80%] p-3 sm:p-4 text-sm sm:text-base border border-mercury dark:border-dark-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-dark-surface text-night dark:text-dark-text"
         />
 
         <div className="flex gap-2">
