@@ -154,7 +154,7 @@ const ActiveProjects = () => {
 
   // Main component rendering
   return (
-    <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl border overflow-y-auto h-[330px] no-scrollbar border-mercury/50 dark:border-dark-border/50 shadow-sm">
+    <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl border overflow-y-auto h-[210px] no-scrollbar border-mercury/50 dark:border-dark-border/50 shadow-sm">
       <h2 className="text-xl font-bold font-heading mb-4 text-night dark:text-dark-text">
         Active Projects
       </h2>
