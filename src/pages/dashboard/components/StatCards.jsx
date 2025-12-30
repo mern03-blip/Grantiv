@@ -53,8 +53,8 @@ const StatCards = () => {
     const totalTasks = tasksData?.data.length || 0;
 
   const inProgressGrants = data?.filter(
-    (grant) => grant.status !== "awarded"
-  ).length;
+    (grant) => grant?.status !== "awarded"
+  )?.length;
 
 const calculateTotalGrantAmount = (grants = []) => {
   return grants.reduce((total, grant) => {

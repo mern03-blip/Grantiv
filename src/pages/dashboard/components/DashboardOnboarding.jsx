@@ -12,6 +12,7 @@ import { DarkLogo, SidebarLogo } from "../../../assets/image";
 import { handleBusinessForm } from "../../../api/endpoints/businessform";
 import { useQuery } from "@tanstack/react-query";
 import { getMyGrants } from "../../../api/endpoints/customGrant";
+import Loader from "../../../components/loading/Loader";
 
 const EmptyDashboardStep = ({
   title,
@@ -369,6 +370,11 @@ const DashboardOnboarding = ({
     if (propOnAddGrant) propOnAddGrant();
     else navigate("/my-grants");
   };
+
+   // Show loader while checking subscription
+  if (isLoadingGrants) {
+    return <Loader />;
+  }
 
   return (
     <EmptyDashboardView

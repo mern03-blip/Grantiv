@@ -7,19 +7,19 @@ import {
   getSubscriptionStatus,
 } from "../../../api/endpoints/payment";
 import { message } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import Loader from "../../../components/loading/Loader";
 
 const Billing = () => {
-  const [plan, setPlan] = useState("");
   const [loadingPlan, setLoadingPlan] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
-  // Load plan from localStorage on component mount
-  useEffect(() => {
-    const savedPlan = getSubscriptionStatus().plan;
-    if (savedPlan) {
-      setPlan(savedPlan);
-    }
-  }, []);
+    const { data: subscriptionData, isLoading: isLoadingSubscription } = useQuery({
+    queryKey: ["subscription-plan"],
+    queryFn: getSubscriptionStatus,
+  });
+
+  const plan = subscriptionData?.plan || 'trial';
 
   // Get plan-specific features
   const getPlanFeatures = (planName) => {
@@ -79,6 +79,12 @@ const Billing = () => {
     },
     [plan]
   );
+
+
+   // Show loader while checking subscription
+  if (isLoadingSubscription) {
+    return <Loader />;
+  }
 
   return (
     <div>
