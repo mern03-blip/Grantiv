@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {  MOCK_TEAM_CHAT_MESSAGES } from "../../../constants";
-import {
-  XIcon,
-  PaperAirplaneIcon,
-} from "../../components/icons/Icons";
+import { MOCK_TEAM_CHAT_MESSAGES } from "../../../constants";
+import { XIcon, PaperAirplaneIcon } from "../../components/icons/Icons";
 import { inviteMember } from "../../api/endpoints/invitation";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,6 +14,7 @@ import { jwtDecode } from "jwt-decode";
 import { TeamChat } from "./components/TeamChat";
 import DeleteUserModal from "../../components/modals/DeleteUserModal";
 import { useNavigate } from "react-router-dom";
+import { getSubscriptionStatus } from "../../api/endpoints/payment";
 
 const UpgradeNotice = ({ featureName, onUpgrade }) => (
   <div className="text-center p-4 sm:p-6 md:p-8 bg-mercury/30 dark:bg-dark-surface/50 rounded-lg border-2 border-dashed border-mercury/80 dark:border-dark-border max-w-2xl mx-auto">
@@ -44,24 +42,18 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
   const [message, setMessage] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
-
-  const navigate = useNavigate();
-
   const [currentUser, setCurrentUser] = useState(null);
   const userId = localStorage.getItem("userId");
   const organizationId = localStorage.getItem("orgId");
-  const plan = localStorage.getItem("plan");
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const decodedToken = jwtDecode(token);
-      // The user ID is often stored in 'id' or 'sub' field of the token
-      setCurrentUser({
-        _id: decodedToken.id,
-        name: decodedToken.name /* add other user fields */,
-      });
+  const navigate = useNavigate();
+
+  // --- 1. Fetch Subscription Status (MOVED TO TOP) ---
+  const { data: subscriptionData, isLoading: isLoadingSubscription } = useQuery(
+    {
+      queryKey: ["subscription-plan"],
+      queryFn: getSubscriptionStatus,
     }
-  }, []);
+  );
 
   // ✅ React Query to fetch members
   const {
@@ -75,6 +67,18 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
     queryFn: () => getOrganizationMembers(organizationId),
     enabled: !!organizationId, // Only run if orgId exists
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      // The user ID is often stored in 'id' or 'sub' field of the token
+      setCurrentUser({
+        _id: decodedToken.id,
+        name: decodedToken.name /* add other user fields */,
+      });
+    }
+  }, []);
 
   // ✅ Handle send invite button
   const handleSendInvite = async () => {
@@ -144,17 +148,25 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
     }
   };
 
-  const handleSendMessage = (text) => {
-    const newMessage = {
-      id: `msg${Date.now()}`,
-      memberId: "t1", // Mocking current user as Jane Doe
-      text,
-      timestamp: new Date().toISOString(),
-    };
-    setChatMessages((prev) => [...prev, newMessage]);
-  };
+  // const handleSendMessage = (text) => {
+  //   const newMessage = {
+  //     id: `msg${Date.now()}`,
+  //     memberId: "t1", // Mocking current user as Jane Doe
+  //     text,
+  //     timestamp: new Date().toISOString(),
+  //   };
+  //   setChatMessages((prev) => [...prev, newMessage]);
+  // };
 
-  if (plan !== "pro") {
+  const plan = subscriptionData?.plan || "free";
+
+
+  // Show loader while checking subscription
+  if (isLoadingSubscription) {
+    return <Loader />;
+  }
+
+  if (plan !== "pro" && plan !== "enterprise") {
     return (
       <div className="p-4">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-night dark:text-dark-text mb-2 font-heading">
@@ -193,14 +205,6 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-start">
         {/* Left Column: Team Chat */}
         <div className="lg:col-span-1 h-full">
-          {/* <TeamChat
-                        plan={plan}
-                        isDemoMode={isDemoMode}
-                        messages={chatMessages}
-                        onSendMessage={handleSendMessage}
-                        navigateToSettings={() => navigateTo('settings')}
-                    /> */}
-
           <TeamChat currentUser={currentUser} selectedOrgId={organizationId} />
         </div>
 

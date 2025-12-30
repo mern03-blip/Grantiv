@@ -10,6 +10,7 @@ import {
 import { useSelector } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 import { getMyGrants } from "../../../api/endpoints/customGrant";
+import { gettasks } from "../../../api/endpoints/personaltask";
 
 // --- StatCard Component (Converted to JSX) ---
 const StatCard = ({ icon: Icon, title, value }) => (
@@ -36,18 +37,20 @@ StatCard.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-// --- Mock Data ---
-const mockData = {
-  incompleteTasks: 7,
-};
-
-const StatCards = ({ incompleteTasks }) => {
+const StatCards = () => {
   const { aiTotalAmount } = useSelector((state) => state.grants);
 
   const { data } = useQuery({
     queryKey: ["myGrants"],
     queryFn: getMyGrants,
   });
+
+  const { data: tasksData } = useQuery({
+      queryKey: ["tasks"],
+      queryFn: () => gettasks(),
+    });
+  
+    const totalTasks = tasksData?.data.length || 0;
 
   const inProgressGrants = data?.filter(
     (grant) => grant.status !== "awarded"
@@ -90,7 +93,7 @@ const totalGrantAmount = calculateTotalGrantAmount(data);
       <StatCard
         icon={ListBulletIcon}
         title="Tasks To-Do"
-        value={`${incompleteTasks}`}
+        value={`${totalTasks}`}
       />
       <StatCard
         icon={CurrencyDollarIcon}
@@ -108,6 +111,5 @@ StatCards.propTypes = {
   awardedAmount: PropTypes.number.isRequired,
 };
 
-StatCards.defaultProps = mockData;
 
 export default StatCards;

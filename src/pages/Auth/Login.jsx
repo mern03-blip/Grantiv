@@ -31,7 +31,6 @@ const Login = () => {
       if (response?.token) {
         const organizations = response.organizations;
 
-        message.success(response.message || "Login successful");
         queryClient.removeQueries(["ai-recommended-grants"]);
         localStorage.setItem("token", response.token);
         localStorage.setItem("userId", response.id);
@@ -44,7 +43,6 @@ const Login = () => {
             // Fetch subscription status after setting orgId
             const subscriptionData = await getSubscriptionStatus();
             if (subscriptionData?.plan) {
-              localStorage.setItem("plan", subscriptionData.plan);
               // console.log("Subscription plan stored:", subscriptionData.plan);
             }
           } catch (error) {
@@ -57,6 +55,7 @@ const Login = () => {
         // if (role) {
         //   localStorage.setItem("Role", role);
         // }
+        message.success(response.message || "Login successful");
         navigate("/organization-page", {
           state: {
             organizations: organizations,

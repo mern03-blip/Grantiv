@@ -44,6 +44,7 @@ const AnimatedRoutes = () => {
       {/* Others Routes */}
       <Route path="accept-invite/:token" element={<InvitationPage />} />
       <Route path="organization-page" element={<LazyComponent path="/organization-page"></LazyComponent>} />
+      <Route path="payment" element={<LazyComponent path="/payment"></LazyComponent>} />
 
     </Routes>
   );

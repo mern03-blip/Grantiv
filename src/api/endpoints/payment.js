@@ -1,28 +1,6 @@
 import axiosInstance from "../axios/axiosInstance";
 
 
-// // Helper to get headers with token
-// const getAuthHeaders = () => {
-//   const token = localStorage.getItem('token');
-//   return {
-//     headers: {
-//       Authorization: `Bearer ${token}`
-//     }
-//   };
-// };
-
-// const getHeaders = () => {
-//   const token = localStorage.getItem('token');
-//   const orgId = localStorage.getItem('orgId');
-
-//   return {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//       "X-Organization-ID": orgId
-//     }
-//   };
-// };
-
 export const getSubscriptionStatus = async () => {
   const response = await axiosInstance.get("/subscription");
   return response.data;

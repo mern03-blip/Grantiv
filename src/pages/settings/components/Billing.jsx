@@ -4,6 +4,7 @@ import SubCancelModal from "../../../components/modals/SubCancelModal";
 import { CheckCircleIcon, ReceiptIcon } from "../../../components/icons/Icons";
 import {
   createCheckoutSession,
+  getSubscriptionStatus,
 } from "../../../api/endpoints/payment";
 import { message } from "antd";
 
@@ -14,7 +15,7 @@ const Billing = () => {
 
   // Load plan from localStorage on component mount
   useEffect(() => {
-    const savedPlan = localStorage.getItem("plan");
+    const savedPlan = getSubscriptionStatus().plan;
     if (savedPlan) {
       setPlan(savedPlan);
     }
@@ -23,30 +24,28 @@ const Billing = () => {
   // Get plan-specific features
   const getPlanFeatures = (planName) => {
     switch (planName?.toLowerCase()) {
-      case 'starter':
+      case "starter":
         return [
           "5 Grant Matches/Month",
-          "Standard AI Assistance", 
-          "1 User Seat"
+          "Standard AI Assistance",
+          "1 User Seat",
         ];
-      case 'pro':
+      case "pro":
         return [
           "Unlimited Grant Matches",
           "Advanced AI Assistance",
           "5 User Seats",
-          "Team Collaboration"
+          "Team Collaboration",
         ];
-      case 'enterprise':
+      case "enterprise":
         return [
           "Everything in Pro",
           "Dedicated Team Chat",
           "Advanced Task Assignment",
-          "Priority Support"
+          "Priority Support",
         ];
       default:
-        return [
-          "Loading features..."
-        ];
+        return ["Not Purchased"];
     }
   };
 
@@ -81,8 +80,6 @@ const Billing = () => {
     [plan]
   );
 
-
-
   return (
     <div>
       <h3 className="text-lg sm:text-xl font-bold font-heading text-night dark:text-dark-text mb-4 sm:mb-6">
@@ -96,7 +93,7 @@ const Billing = () => {
               Current Plan
             </h4>
             <p className="text-xl sm:text-2xl font-bold font-heading text-secondary dark:text-dark-secondary">
-              {plan || 'Loading...'}
+              {plan || "Free Trail"}
             </p>
             <ul className="text-[10px] sm:text-xs space-y-1 my-3 sm:my-4 text-night/70 dark:text-dark-textMuted">
               {getPlanFeatures(plan).map((feature, index) => (
@@ -119,21 +116,23 @@ const Billing = () => {
               Your invoices will appear here.
             </p>
           </div> */}
-          <div className="bg-white dark:bg-dark-surface border-2 border-red-500/50 dark:border-red-500/30 p-4 sm:p-5 md:p-6 rounded-lg">
-            <h4 className="text-sm sm:text-base font-bold text-red-600 dark:text-red-400 mb-2">
-              Cancel Subscription
-            </h4>
-            <p className="text-xs sm:text-sm text-night/60 dark:text-dark-textMuted mb-3">
-              This action will downgrade your plan to 'Starter' at the end of
-              your billing cycle.
-            </p>
-            <button
-              onClick={() => setShowCancelModal(true)}
-              className="w-full text-center text-sm font-bold transition-all duration-300 rounded-md py-2 text-red-600 dark:text-red-300 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50"
-            >
-              Request Cancellation
-            </button>
-          </div>
+          {plan?.toLowerCase() === "starter" && (
+            <div className="bg-white dark:bg-dark-surface border-2 border-red-500/50 dark:border-red-500/30 p-4 sm:p-5 md:p-6 rounded-lg">
+              <h4 className="text-sm sm:text-base font-bold text-red-600 dark:text-red-400 mb-2">
+                Cancel Subscription
+              </h4>
+              <p className="text-xs sm:text-sm text-night/60 dark:text-dark-textMuted mb-3">
+                This action will downgrade your plan to <b>Free</b> at the end
+                of your billing cycle.
+              </p>
+              <button
+                onClick={() => setShowCancelModal(true)}
+                className="w-full text-center text-sm font-bold transition-all duration-300 rounded-md py-2 text-red-600 dark:text-red-300 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50"
+              >
+                Request Cancellation
+              </button>
+            </div>
+          )}
         </div>
         <div className="lg:col-span-2">
           <h4 className="text-sm sm:text-base font-bold text-night dark:text-dark-text mb-3">

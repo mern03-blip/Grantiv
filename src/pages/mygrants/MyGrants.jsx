@@ -6,10 +6,10 @@ import ProgressBar from "../../components/progressbar/ProgressBar";
 import { PlusIcon } from "../../components/icons/Icons";
 import AddGrantModal from "../../components/modals/AddGrantModal";
 import { useQuery } from "@tanstack/react-query";
-import {
-  getMyGrants,
-} from "../../api/endpoints/customGrant";
+import { getMyGrants } from "../../api/endpoints/customGrant";
 import GrantDetailModal from "../../components/modals/GrantsDetail";
+import { getSubscriptionStatus } from "../../api/endpoints/payment";
+import Loader from "../../components/loading/Loader";
 
 // 1. GrantStatus Enum equivalent
 const GrantStatus = {
@@ -53,6 +53,15 @@ const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
 
   const navigate = useNavigate();
 
+  // --- 1. Fetch Subscription Status (MOVED TO TOP) ---
+  const { data: subscriptionData, isLoading: isLoadingSubscription } = useQuery(
+    {
+      queryKey: ["subscription-plan"],
+      queryFn: getSubscriptionStatus,
+    }
+  );
+
+  // --- 2. Fetch My Grants ---
   const { data } = useQuery({
     queryKey: ["myGrants"],
     queryFn: getMyGrants,
@@ -116,6 +125,51 @@ const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
       ? grantsArray.length
       : grantsArray.filter((g) => g.status === tab).length;
   };
+
+  // --- NOW WE CAN USE CONDITIONAL LOGIC (after all hooks) ---
+
+  const plan = subscriptionData?.plan || "free";
+
+  // Show loader while checking subscription
+  if (isLoadingSubscription) {
+    return <Loader />;
+  }
+
+  // --- Helper Components ---
+  const UpgradeNotice = ({ featureName, onUpgrade }) => (
+    <div className="text-center p-4 sm:p-6 md:p-8 bg-mercury/30 dark:bg-dark-surface/50 rounded-lg border-2 border-dashed border-mercury/80 dark:border-dark-border max-w-2xl mx-auto">
+      <h2 className="text-lg sm:text-xl md:text-2xl font-bold font-heading text-night dark:text-dark-text">
+        {featureName}
+      </h2>
+      <p className="text-sm sm:text-base text-night/60 dark:text-dark-textMuted mt-2 mb-3 sm:mb-4">
+        Creating Your Grants is a premium feature. Upgrade your
+        plan to unlock powerful collaboration tools.
+      </p>
+      <button
+        onClick={onUpgrade}
+        className="px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold bg-primary text-night rounded-lg hover:bg-secondary transition-colors"
+      >
+        View Subscription Plans
+      </button>
+    </div>
+  );
+
+  if (plan !== "pro" && plan !== "enterprise" && plan !== "starter") {
+    return (
+      <div className="p-4">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-night dark:text-dark-text mb-2 font-heading">
+          My Grants
+        </h2>
+        <p className="text-sm sm:text-base text-night/60 dark:text-dark-textMuted mb-6 sm:mb-8">
+          This is where you can create your own grants.
+        </p>
+        <UpgradeNotice
+          featureName="My Grants"
+          onUpgrade={() => navigate("/settings")}
+        />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -218,7 +272,7 @@ const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
                     whileTap={{ scale: 0.95 }}
                   >
                     Details
-                  </motion.button>              
+                  </motion.button>
                 </div>
               </div>
             ))}

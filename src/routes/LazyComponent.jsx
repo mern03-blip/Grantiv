@@ -29,6 +29,9 @@ const componentMap = {
   // AiAssistant
   "/ai-assistant": lazy(() => import("../pages/ai_assistant/AIAssistant")),
   "/organization-page": lazy(() => import("../components/organization/OrganizationPage")),
+
+  // Payment
+  "/payment": lazy(() => import("../components/payment/Payment")),
 };
 
 const LazyComponent = ({ path }) => {

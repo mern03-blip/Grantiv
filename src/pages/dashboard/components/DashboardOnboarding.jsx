@@ -181,6 +181,102 @@ EmptyDashboardView.defaultProps = {
   isProjectStarted: false,
 };
 
+// const DashboardOnboarding = ({
+//   onNavigate: propOnNavigate,
+//   onAddGrant: propOnAddGrant,
+//   isProfileComplete = false,
+//   isGrantFound = false,
+//   isProjectStarted = false,
+//   onSkip,
+// }) => {
+//   const navigate = useNavigate();
+
+//   const [localProfileComplete, setLocalProfileComplete] =
+//     useState(isProfileComplete);
+
+//   // Fetch user's grants to determine if they've found/started a project
+//   const { data: myGrantsData } = useQuery({
+//     queryKey: ["myGrants"],
+//     queryFn: getMyGrants,
+//   });
+
+//   const hasGrants = React.useMemo(() => {
+//     if (!myGrantsData) return false;
+//     if (Array.isArray(myGrantsData)) return myGrantsData.length > 0;
+//     if (typeof myGrantsData === "object")
+//       return Object.keys(myGrantsData).length > 0;
+//     return false;
+//   }, [myGrantsData]);
+
+//   useEffect(() => {
+//     let mounted = true;
+//     const checkProfile = async () => {
+//       try {
+//         const profileData = await handleBusinessForm();
+//         if (!mounted) return;
+//         setLocalProfileComplete(
+//           !!(profileData && Object.keys(profileData).length > 0)
+//         );
+//       } catch (err) {
+//         console.error("Error fetching profile data:", err);
+//       }
+//     };
+//     checkProfile();
+//     return () => {
+//       mounted = false;
+//     };
+//   }, []);
+
+//   const handleNavigate = (view) => {
+//     if (propOnNavigate) {
+//       propOnNavigate(view);
+//     } else {
+//       switch (view) {
+//         case "settings":
+//           navigate("/settings");
+//           break;
+//         case "find_grants":
+//           navigate("/find-grants");
+//           break;
+//         default:
+//           break;
+//       }
+//     }
+//   };
+
+//   const handleAddGrant = () => {
+//     if (propOnAddGrant) {
+//       propOnAddGrant();
+//     } else {
+//       navigate("/my-grants");
+//     }
+//   };
+
+//   const handleSkip = () => {
+//     localStorage.setItem("dashboard-onboarding-skipped", "true");
+//     if (onSkip) {
+//       onSkip(); // Call the parent's onSkip handler
+//     } else {
+//       window.location.reload(); // Fallback if no onSkip prop
+//     }
+//   };
+
+//   // Check if all steps are complete to show main dashboard
+//   const effectiveGrantFound = isGrantFound || hasGrants;
+//   const effectiveProjectStarted = isProjectStarted || hasGrants;
+
+//   return (
+//     <EmptyDashboardView
+//       onNavigate={handleNavigate}
+//       onAddGrant={handleAddGrant}
+//       isProfileComplete={localProfileComplete}
+//       isGrantFound={effectiveGrantFound}
+//       isProjectStarted={effectiveProjectStarted}
+//       onSkip={handleSkip}
+//     />
+//   );
+// };
+
 const DashboardOnboarding = ({
   onNavigate: propOnNavigate,
   onAddGrant: propOnAddGrant,
@@ -190,12 +286,11 @@ const DashboardOnboarding = ({
   onSkip,
 }) => {
   const navigate = useNavigate();
+  const [localProfileComplete, setLocalProfileComplete] = useState(isProfileComplete);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true); // Track loading state
 
-  const [localProfileComplete, setLocalProfileComplete] =
-    useState(isProfileComplete);
-
-  // Fetch user's grants to determine if they've found/started a project
-  const { data: myGrantsData } = useQuery({
+  // Fetch user's grants
+  const { data: myGrantsData, isLoading: isLoadingGrants } = useQuery({
     queryKey: ["myGrants"],
     queryFn: getMyGrants,
   });
@@ -203,80 +298,85 @@ const DashboardOnboarding = ({
   const hasGrants = React.useMemo(() => {
     if (!myGrantsData) return false;
     if (Array.isArray(myGrantsData)) return myGrantsData.length > 0;
-    if (typeof myGrantsData === "object")
-      return Object.keys(myGrantsData).length > 0;
+    if (typeof myGrantsData === "object") return Object.keys(myGrantsData).length > 0;
     return false;
   }, [myGrantsData]);
 
- useEffect(() => {
-  let mounted = true;
-  const checkProfile = async () => {
-    try {
-      const profileData = await handleBusinessForm();
-      if (!mounted) return;
-      const isComplete = !!(profileData && Object.keys(profileData).length > 0);
-      setLocalProfileComplete(isComplete);
+  // Check Profile Completion
+  useEffect(() => {
+    let mounted = true;
+    const checkProfile = async () => {
+      try {
+        const profileData = await handleBusinessForm();
+        if (!mounted) return;
+        
+        // Check if profile exists and has actual data (e.g., businessName)
+        const isComplete = !!(profileData && Object.keys(profileData).length > 0);
+        setLocalProfileComplete(isComplete);
+      } catch (err) {
+        console.error("Error fetching profile data:", err);
+      } finally {
+        if (mounted) setIsLoadingProfile(false);
+      }
+    };
+    checkProfile();
+    return () => { mounted = false; };
+  }, []);
 
-      // 🔹 If profile is complete, skip onboarding automatically
-      if (isComplete) {
+  const handleSkip = React.useCallback(() => {
+    localStorage.setItem("dashboard-onboarding-skipped", "true");
+    if (onSkip) {
+      onSkip();
+    } else {
+      window.location.reload();
+    }
+  }, [onSkip]);
+
+  // --- AUTO REDIRECT LOGIC ---
+  useEffect(() => {
+    // Only redirect if we have finished loading both checks
+    if (!isLoadingProfile && !isLoadingGrants) {
+      if (localProfileComplete && hasGrants) {
         handleSkip();
       }
-    } catch (err) {
-      console.error("Error fetching profile data:", err);
     }
-  };
-  checkProfile();
-  return () => {
-    mounted = false;
-  };
-}, []);
+  }, [localProfileComplete, hasGrants, isLoadingProfile, isLoadingGrants, handleSkip]);
 
+  // Prevent "flash" of onboarding content while checking status
+  if (isLoadingProfile || isLoadingGrants) {
+    return null; // Or a loading spinner
+  }
 
+  // If already complete, don't render anything (useEffect will handle redirect)
+  if (localProfileComplete && hasGrants) {
+    return null;
+  }
+
+  // ... rest of your handleNavigate / handleAddGrant functions
   const handleNavigate = (view) => {
     if (propOnNavigate) {
       propOnNavigate(view);
     } else {
       switch (view) {
-        case "settings":
-          navigate("/settings");
-          break;
-        case "find_grants":
-          navigate("/find-grants");
-          break;
-        default:
-          break;
+        case "settings": navigate("/settings"); break;
+        case "find_grants": navigate("/find-grants"); break;
+        default: break;
       }
     }
   };
 
   const handleAddGrant = () => {
-    if (propOnAddGrant) {
-      propOnAddGrant();
-    } else {
-      navigate("/my-grants");
-    }
+    if (propOnAddGrant) propOnAddGrant();
+    else navigate("/my-grants");
   };
-
-  const handleSkip = () => {
-    localStorage.setItem("dashboard-onboarding-skipped", "true");
-    if (onSkip) {
-      onSkip(); // Call the parent's onSkip handler
-    } else {
-      window.location.reload(); // Fallback if no onSkip prop
-    }
-  };
-
-  // Check if all steps are complete to show main dashboard
-  const effectiveGrantFound = isGrantFound || hasGrants;
-  const effectiveProjectStarted = isProjectStarted || hasGrants;
 
   return (
     <EmptyDashboardView
       onNavigate={handleNavigate}
       onAddGrant={handleAddGrant}
       isProfileComplete={localProfileComplete}
-      isGrantFound={effectiveGrantFound}
-      isProjectStarted={effectiveProjectStarted}
+      isGrantFound={isGrantFound || hasGrants}
+      isProjectStarted={isProjectStarted || hasGrants}
       onSkip={handleSkip}
     />
   );
