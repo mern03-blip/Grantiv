@@ -31,7 +31,6 @@ const SubscriptionCard = ({
     queryFn: getOrganizationSubscription,
   });
 
-  console.log("detail org", organization);
 
   const handleContactSales = () => {
     const subject = `Enterprise Inquiry: ${organization?.data?.name}`;
