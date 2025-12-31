@@ -1,6 +1,5 @@
 import axiosInstance from "../axios/axiosInstance";
 
-
 export const getSubscriptionStatus = async () => {
   const response = await axiosInstance.get("/subscription");
   return response.data;
@@ -8,13 +7,27 @@ export const getSubscriptionStatus = async () => {
 
 export const createCheckoutSession = async (plan) => {
   // Plan should be 'starter' or 'pro'
-  const organizationId = localStorage.getItem('orgId');
-  const response = await axiosInstance.post(`/subscription/create-checkout`, { plan, organizationId });
+  const organizationId = localStorage.getItem("orgId");
+  const response = await axiosInstance.post(`/subscription/create-checkout`, {
+    plan,
+    organizationId,
+  });
   return response.data; // Returns { url: "https://checkout.stripe.com/..." }
 };
 
 export const cancelSubscription = async () => {
-  const organizationId = localStorage.getItem('orgId');
-  const response = await axiosInstance.post(`/subscription/cancel`, { organizationId });
+  const organizationId = localStorage.getItem("orgId");
+  const response = await axiosInstance.post(`/subscription/cancel`, {
+    organizationId,
+  });
+  return response.data;
+};
+
+//Get organization subscription details
+export const getOrganizationSubscription = async () => {
+  const orgId = localStorage.getItem("orgId");
+  const response = await axiosInstance.get(
+    `/organizations/${orgId}/details`
+  );
   return response.data;
 };

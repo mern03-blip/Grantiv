@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { CheckIcon } from "../../../components/icons/Icons";
+import { useQuery } from "@tanstack/react-query";
+import { getOrganizationSubscription } from "../../../api/endpoints/payment";
 
 const SubscriptionCard = ({
   name,
@@ -23,6 +25,24 @@ const SubscriptionCard = ({
       : isLoading
       ? "Processing..."
       : "Upgrade");
+
+  const { data: organization } = useQuery({
+    queryKey: ["organization-info"],
+    queryFn: getOrganizationSubscription,
+  });
+
+  console.log("detail org", organization);
+
+  const handleContactSales = () => {
+    const subject = `Enterprise Inquiry: ${organization?.data?.name}`;
+    const body = `
+    Organization ID: ${organization?.data?._id}
+    Owner Email: ${organization?.data?.owner?.email}
+  `;
+    window.location.href = `mailto:hello@grantiv.com.au?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+  };
 
   return (
     <div
@@ -64,7 +84,7 @@ const SubscriptionCard = ({
       <button
         onClick={() => {
           if (price === "Contact Us") {
-            window.location.href = "mailto:hello@grantiv.com.au";
+            handleContactSales();
           } else {
             onSelect();
           }
