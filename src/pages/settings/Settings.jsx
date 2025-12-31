@@ -84,7 +84,6 @@ const Settings = () => {
     queryFn: handleBusinessForm,
   });
 
-  console.log(data);
 
   const renderContent = () => {
     switch (activeTab) {

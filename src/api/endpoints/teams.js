@@ -9,7 +9,6 @@ export const getOrganizationMembers = async () => {
     },
   });
 
-  console.log("✅ Get Members:", response.data);
   return response.data;
 };
 

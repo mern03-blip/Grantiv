@@ -72,7 +72,6 @@ export const DocumentHub = ({
     queryFn: () => getDocuments(grantId),
   });
 
-  console.log("Fetched documents:", data);
 
   //Delete file function
   const handleDeleteFile = useMutation({

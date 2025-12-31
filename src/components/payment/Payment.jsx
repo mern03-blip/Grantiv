@@ -1,19 +1,19 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import SubscriptionCard from "../../pages/settings/components/SubscriptionCard";
-import { createCheckoutSession } from "../../api/endpoints/payment";
+import { createCheckoutSession, getSubscriptionStatus } from "../../api/endpoints/payment";
 import { message } from "antd";
+import { useQuery } from "@tanstack/react-query";
 
 const Payment = () => {
-  const [plan, setPlan] = useState("");
   const [loadingPlan, setLoadingPlan] = useState(null);
 
-  // Load plan from localStorage on component mount
-  useEffect(() => {
-    const savedPlan = localStorage.getItem("plan");
-    if (savedPlan) {
-      setPlan(savedPlan);
-    }
-  }, []);
+    const { data: subscriptionData, } = useQuery({
+    queryKey: ["subscription-plan"],
+    queryFn: getSubscriptionStatus,
+  });
+
+  const plan = subscriptionData?.plan || 'trial';
+
 
   // Handle subscription upgrade
   const handleUpgrade = useCallback(

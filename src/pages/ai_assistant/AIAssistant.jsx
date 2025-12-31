@@ -159,8 +159,6 @@ const AIAssistant = () => {
     if (!input.trim() && attachments.length === 0) return;
 
     // 1. Add User Message Locally
-    // Note: If you have attachments, you might want to upload them first
-    // or include their names in the text sent to AI.
     let contentToSend = input;
     if (attachments.length > 0) {
       contentToSend += `\n[Attachments: ${attachments

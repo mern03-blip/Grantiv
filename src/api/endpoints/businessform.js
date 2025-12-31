@@ -29,7 +29,6 @@ export const handleBusinessForm = async () => {
         }
     );
 
-    console.log(response.data);
 
     return response.data;
 };
