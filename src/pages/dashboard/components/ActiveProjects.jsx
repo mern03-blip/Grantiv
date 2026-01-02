@@ -82,7 +82,7 @@ const ActiveProjects = () => {
     return (
       <motion.div
         key={grant?.id}
-        className="bg-alabaster dark:bg-dark-background/60 p-4 rounded-xl border border-mercury/50 dark:border-dark-border/50 flex items-center gap-4 transition-colors"
+        className="bg-alabaster dark:bg-dark-background/60 p-4 rounded-xl border border-mercury/50 dark:border-dark-border/50 flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-colors"
         whileHover={{ borderColor: "rgba(168, 221, 107, 0.5)" }}
       >
         <div className="flex-1">
@@ -143,7 +143,7 @@ const ActiveProjects = () => {
               },
             })
           }
-          className="px-4 py-2 text-sm font-semibold bg-primary/80 text-night dark:text-dark-text rounded-lg hover:bg-primary transition-colors flex-shrink-0"
+          className="px-4 py-2 text-sm font-semibold bg-primary/80 text-night dark:text-dark-text rounded-lg hover:bg-primary transition-colors sm:flex-shrink-0"
           whileTap={{ scale: 0.95 }}
         >
           View
@@ -154,7 +154,7 @@ const ActiveProjects = () => {
 
   // Main component rendering
   return (
-    <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl border overflow-y-auto h-[210px] no-scrollbar border-mercury/50 dark:border-dark-border/50 shadow-sm">
+    <div className="bg-white dark:bg-dark-surface p-4 sm:p-6 rounded-2xl border overflow-y-auto md:h-[210px] h-auto no-scrollbar border-mercury/50 dark:border-dark-border/50 shadow-sm">
       <h2 className="text-xl font-bold font-heading mb-4 text-night dark:text-dark-text">
         Active Projects
       </h2>

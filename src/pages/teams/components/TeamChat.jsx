@@ -43,8 +43,8 @@ export const TeamChat = ({ currentUser, selectedOrgId, projectId }) => {
         const fetchData = async () => {
             try {
                 // We need the user's token and orgId to make authenticated requests
-                const token = localStorage.getItem('token');
-                const orgId = selectedOrgId || localStorage.getItem('orgId');
+                // const token = localStorage.getItem('token');
+                // const orgId = selectedOrgId || localStorage.getItem('orgId');
                 
                 if (projectId) {
                     // Project-specific chat - fetch project chat history
@@ -54,17 +54,17 @@ export const TeamChat = ({ currentUser, selectedOrgId, projectId }) => {
                     setMembers([]);
                 } else {
                     // General organization chat
-                    const config = {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'X-Organization-ID': orgId,
-                        },
-                    };
+                    // const config = {
+                    //     headers: {
+                    //         Authorization: `Bearer ${token}`,
+                    //         'X-Organization-ID': orgId,
+                    //     },
+                    // };
 
                     // Fetch chat history and member list in parallel
                     const [historyRes, membersRes] = await Promise.all([
-                        axiosInstance.get('/chat/messages', config),
-                        axiosInstance.get('/organizations/members', config)
+                        axiosInstance.get('/chat/messages', ),
+                        axiosInstance.get('/organizations/members',)
                     ]);
 
                     setMessages(historyRes.data);

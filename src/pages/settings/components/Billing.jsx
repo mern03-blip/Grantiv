@@ -4,48 +4,24 @@ import SubCancelModal from "../../../components/modals/SubCancelModal";
 import { CheckCircleIcon } from "../../../components/icons/Icons";
 import {
   createCheckoutSession,
+  getOrganizationSubscription,
   getSubscriptionStatus,
 } from "../../../api/endpoints/payment";
 import { message } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "../../../components/loading/Loader";
-// import axiosInstance from "../../../api/axios/axiosInstance";
 
 const Billing = () => {
   const [loadingPlan, setLoadingPlan] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
-  // const [organization, setOrganization] = useState({});
 
-  // Get token from storage (adjust depending on your auth setup)
-  // const getAuthHeader = () => {
-  //   const token = localStorage.getItem("token");
-  //   return { headers: { Authorization: `Bearer ${token}` } };
-  // };
+  const { data: organizationData } = useQuery({
+    queryKey: ["organization-details"],
+    queryFn: getOrganizationSubscription,
+  });
 
-  // useEffect(() => {
-  //   const orgId = localStorage.getItem("orgId");
-  //   const fetchOrgDetails = async (orgId) => {
-  //     try {
-  //       const response = await axiosInstance.get(
-  //         `/organizations/${orgId}/details`,
-  //         getAuthHeader()
-  //       );
-  //       return response.data;
-  //     } catch (error) {
-  //       throw error.response?.data?.message || "Failed to fetch details";
-  //     }
-  //   };
 
-  //   fetchOrgDetails(orgId)
-  //     .then((data) => {
-  //       console.log("Organization details:", data);
-  //       setOrganization(data?.data);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching organization details:", error);
-  //     });
-  // }, []);
-
+  const organization = organizationData?.data || {};
   const { data: subscriptionData, isLoading: isLoadingSubscription } = useQuery(
     {
       queryKey: ["subscription-plan"],
@@ -119,23 +95,23 @@ const Billing = () => {
     return <Loader />;
   }
 
-  // const handleContactSales = () => {
-  //   console.log("Contacting sales for organization:", organization);
-  //   const subject = `Enterprise Inquiry: ${organization.name}`;
-  //   const body = `
-  //   Hi Grantiv Team,
+  const handleContactSales = () => {
+    // console.log("Contacting sales for organization:", organization);
+    const subject = `Enterprise Inquiry: ${organization.name}`;
+    const body = `
+    Hi Grantiv Team,
 
-  //   I am interested in the Enterprise plan.
+    I am interested in the Enterprise plan.
 
-  //   --- SYSTEM INFO (DO NOT DELETE) ---
-  //   Organization ID: ${organization._id}
-  //   Owner Email: ${organization.owner.email}
-  //   -----------------------------------
-  // `;
-  //   window.location.href = `mailto:sales@grantiv.com?subject=${encodeURIComponent(
-  //     subject
-  //   )}&body=${encodeURIComponent(body)}`;
-  // };
+    --- SYSTEM INFO (DO NOT DELETE) ---
+    Organization ID: ${organization._id}
+    Owner Email: ${organization.owner.email}
+    -----------------------------------
+  `;
+    window.location.href = `mailto:sales@grantiv.com?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+  };
 
   return (
     <div>
@@ -173,7 +149,7 @@ const Billing = () => {
               Your invoices will appear here.
             </p>
           </div> */}
-          {plan?.toLowerCase() === "starter" && (
+          {plan?.toLowerCase() !== "trial" && (
             <div className="bg-white dark:bg-dark-surface border-2 border-red-500/50 dark:border-red-500/30 p-4 sm:p-5 md:p-6 rounded-lg">
               <h4 className="text-sm sm:text-base font-bold text-red-600 dark:text-red-400 mb-2">
                 Cancel Subscription
@@ -226,6 +202,7 @@ const Billing = () => {
             />
             <SubscriptionCard
               name="Enterprise"
+              onClick={handleContactSales}
               price="Contact Us"
               description="Custom solutions for large organizations needing advanced collaboration and support."
               features={[
@@ -234,7 +211,7 @@ const Billing = () => {
                 "Advanced Task Assignment",
                 "Priority Support",
               ]}
-              onSelect={() => {}}
+              onSelect={() => { }}
               isCurrent={plan?.toLowerCase() === "enterprise"}
               isLoading={loadingPlan === "Enterprise"}
             />

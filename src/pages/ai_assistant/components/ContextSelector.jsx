@@ -7,10 +7,11 @@ const ContextSelector = ({ contexts, selectedContext, onSelect }) => {
   const isDark = document.documentElement.classList.contains("dark");
 
   return (
-    <div className="p-3 transition-colors dark:bg-dark-surface border-mercury dark:border-dark-border relative z-20">
+    <div className="p-3  transition-colors dark:bg-dark-surface border-mercury dark:border-dark-border relative z-20">
       <Select
         value={selectedContext?.contextId || "general"}
         onChange={(value) => onSelect(value)}
+        //  className="w-full mt-16 lg:mt-0"
         className="w-full"
         size="large"
         placeholder="Select a context"

@@ -133,11 +133,11 @@ const GrantApplication = ({
         </div>
 
         {/* Grant Info Card with Progress Bar */}
-        <div className="bg-white dark:bg-dark-surface p-6 rounded-lg border border-mercury dark:border-dark-border">
-          <h2 className="text-2xl font-bold text-night dark:text-dark-text font-heading mb-2">
+        <div className="bg-white dark:bg-dark-surface p-4 sm:p-6 rounded-lg border border-mercury dark:border-dark-border">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-night dark:text-dark-text font-heading mb-2">
             {grant.title}
           </h2>
-          <p className="text-night/60 dark:text-dark-textMuted mb-4">
+          <p className="text-sm sm:text-base text-night/60 dark:text-dark-textMuted mb-4">
             {grant.agency}
           </p>
 
@@ -156,18 +156,18 @@ const GrantApplication = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2">
             {/* Tasks */}
-            <div className="mb-8 bg-white dark:bg-dark-surface p-6 rounded-lg border border-mercury dark:border-dark-border">
-              <div className="flex justify-between items-center mb-4">
+            <div className="mb-8 bg-white dark:bg-dark-surface p-4 sm:p-6 rounded-lg border border-mercury dark:border-dark-border">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 mb-4">
                 <h3 className="text-lg font-bold text-night dark:text-dark-text font-heading">
                   Application Checklist
                 </h3>
-                <div className="space-x-2">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                   <span className="text-sm font-medium text-night/60 dark:text-dark-textMuted">
                     {completedTasks} / {totalTasks} Tasks Complete
                   </span>
                   <Button
                     onClick={() => setShowAddTaskModal(true)}
-                    className="!border !border-mercury/50 dark:border-dark-border/50 !text-night dark:hover:text-dark-text hover:border-mercury/30"
+                    className="!w-full sm:!w-auto !border !border-mercury/50 dark:border-dark-border/50 !text-night dark:hover:text-dark-text hover:border-mercury/30"
                   >
                     Add Task
                   </Button>

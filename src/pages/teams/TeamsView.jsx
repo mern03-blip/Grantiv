@@ -34,10 +34,9 @@ const UpgradeNotice = ({ featureName, onUpgrade }) => (
   </div>
 );
 
-const TeamsView = ({ isDemoMode, navigateTo }) => {
+const TeamsView = () => {
   const [inviteEmail, setInviteEmail] = useState("");
-  const [chatMessages, setChatMessages] = useState(MOCK_TEAM_CHAT_MESSAGES);
-  const [inviteRole, setInviteRole] = useState("Member");
+  const [inviteRole, setInviteRole] = useState("admin");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -234,7 +233,7 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
 
                   {(() => {
                     // ✅ Get logged-in user role from localStorage
-                    const currentUserRole = localStorage.getItem("Role");
+                    const currentUserRole = localStorage.getItem("role");
 
                     // ✅ Show only if logged-in user is admin
                     if (currentUserRole === "admin") {
@@ -247,12 +246,11 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
                             }
                             disabled={member.role === "admin"} // disable dropdown for admin members
                             className={`text-xs sm:text-sm border-mercury/80 dark:border-dark-border rounded-md focus:ring-primary focus:border-primary text-night bg-white dark:bg-dark-surface dark:text-dark-text py-1 sm:py-1.5 pl-1.5 sm:pl-2 pr-6 sm:pr-7 
-                                                        ${
-                                                          member.role ===
-                                                          "admin"
-                                                            ? "cursor-not-allowed opacity-60"
-                                                            : ""
-                                                        }`}
+                                                        ${member.role ===
+                                "admin"
+                                ? "cursor-not-allowed opacity-60"
+                                : ""
+                              }`}
                           >
                             <option>admin</option>
                             <option>lead-writer</option>
@@ -268,12 +266,11 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
                             }}
                             disabled={member.role === "admin"}
                             className={`p-1.5 sm:p-2 text-night/50 dark:text-dark-textMuted/70 hover:text-red-500 dark:hover:text-red-400 
-                                                        ${
-                                                          member.role ===
-                                                          "admin"
-                                                            ? "cursor-not-allowed opacity-60 hover:text-night/50 dark:hover:text-dark-textMuted/70"
-                                                            : ""
-                                                        }`}
+                                                        ${member.role ===
+                                "admin"
+                                ? "cursor-not-allowed opacity-60 hover:text-night/50 dark:hover:text-dark-textMuted/70"
+                                : ""
+                              }`}
                             aria-label={`Remove ${member.name}`}
                           >
                             <XIcon className="w-4 h-4 sm:w-5 sm:h-5" />

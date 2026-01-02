@@ -341,26 +341,28 @@ const GrantDetailModal = ({ open, onClose, grant }) => {
             <TabContent />
           </div>
 
-          {/* Footer Buttons */}
-          <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-mercury/30 dark:border-dark-border flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
-            <motion.button
-              onClick={() => window.open(grant?.applyUrl, "_blank")}
-              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base bg-primary font-semibold text-night rounded-lg hover:bg-secondary transition-colors duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Apply Now
-            </motion.button>
-            <motion.button
-              onClick={handleQuickReview}
-              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base bg-night dark:bg-dark-border text-white dark:text-dark-text rounded-lg flex items-center justify-center gap-2 border border-mercury/50 dark:border-dark-border hover:bg-gray-800 dark:hover:bg-dark-border/50 transition-colors duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              Quick AI Review
-            </motion.button>
-          </div>
+          {/* Footer Buttons (hidden on /my-grants route) */}
+          {!isMyGrantsRoute && (
+            <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-mercury/30 dark:border-dark-border flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+              <motion.button
+                onClick={() => window.open(grant?.applyUrl, "_blank")}
+                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base bg-primary font-semibold text-night rounded-lg hover:bg-secondary transition-colors duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Apply Now
+              </motion.button>
+              <motion.button
+                onClick={handleQuickReview}
+                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base bg-night dark:bg-dark-border text-white dark:text-dark-text rounded-lg flex items-center justify-center gap-2 border border-mercury/50 dark:border-dark-border hover:bg-gray-800 dark:hover:bg-dark-border/50 transition-colors duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                Quick AI Review
+              </motion.button>
+            </div>
+          )}
 
           {/* Review Modal */}
           {isReviewModalOpen && (

@@ -158,21 +158,21 @@ const FindGrants = () => {
       </p>
 
       {/* Search Input + Buttons */}
-      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 mb-4 sm:mb-6">
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           placeholder={`Total Available Grants: ${totalItems}`}
-          className="w-[80%] p-3 sm:p-4 text-sm sm:text-base border border-mercury dark:border-dark-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-dark-surface text-night dark:text-dark-text"
+          className="w-full sm:flex-1 p-3 sm:p-4 text-sm sm:text-base border border-mercury dark:border-dark-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-dark-surface text-night dark:text-dark-text"
         />
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <motion.button
             onClick={handleSearch}
             disabled={isGlobalLoading}
-            className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base bg-primary text-night font-semibold rounded-lg hover:bg-secondary transition-all duration-300 disabled:bg-mercury dark:disabled:bg-dark-border shadow-[0_0_10px_theme(colors.primary/0.4)] hover:shadow-[0_0_15px_theme(colors.primary/0.6)]"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base bg-primary text-night font-semibold rounded-lg hover:bg-secondary transition-all duration-300 disabled:bg-mercury dark:disabled:bg-dark-border shadow-[0_0_10px_theme(colors.primary/0.4)] hover:shadow-[0_0_15px_theme(colors.primary/0.6)]"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -208,7 +208,7 @@ const FindGrants = () => {
             }}
             trigger={["click"]}
           >
-            <button className="w-[220px] px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-dark-surface border border-mercury dark:border-dark-border text-night dark:text-dark-text text-sm sm:text-base font-semibold rounded-lg hover:bg-mercury/50 dark:hover:bg-dark-border/50 transition-all duration-300 disabled:bg-mercury/50 dark:disabled:bg-dark-border disabled:text-night/50 dark:disabled:text-dark-textMuted disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2">
+            <button aria-label="Filter grants" className="w-full sm:w-[220px] px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-dark-surface border border-mercury dark:border-dark-border text-night dark:text-dark-text text-sm sm:text-base font-semibold rounded-lg hover:bg-mercury/50 dark:hover:bg-dark-border/50 transition-all duration-300 disabled:bg-mercury/50 dark:disabled:bg-dark-border disabled:text-night/50 dark:disabled:text-dark-textMuted disabled:cursor-not-allowed flex items-center justify-center sm:justify-start gap-1 sm:gap-2">
               <CiFilter size={20} className="sm:w-6 sm:h-6" />
               <span className="hidden sm:inline">
                 {hasActiveFilters ? getFilterLabel() : "Filter"}

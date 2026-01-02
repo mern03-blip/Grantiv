@@ -62,9 +62,9 @@ axiosInstance.interceptors.response.use(
 
     // 🔴 Token expired / Unauthorized
     if (status === 401) {
-      //     localStorage.clear();
-      // window.location.href = "/auth";
-      // redirect to auth
+          localStorage.clear();
+      window.location.href = "/auth";
+      // redirect to auth page
     }
 
     return Promise.reject(error);

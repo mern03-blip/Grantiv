@@ -242,7 +242,7 @@ const AIAssistant = () => {
         }}
       />
 
-      <motion.main className="flex-1 flex flex-col min-h-0 relative z-10">
+      <motion.main className="flex-1 flex flex-col min-h-0 relative z-10 border">
         {/* 1. Context Selector (Sidebar/Header) */}
         <ContextSelector
           contexts={contextsData}

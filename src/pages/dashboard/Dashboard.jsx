@@ -29,10 +29,10 @@ const Dashboard = () => {
   if (shouldShowDashboard) {
     return (
       <div className="min-h-screen bg-alabaster dark:bg-dark-background">
-        <div className="max-w-7xl mx-auto p-4">
+        <div className="max-w-7xl mx-auto p-4 sm:px-6 lg:p-4">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-night dark:text-dark-text mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-night dark:text-dark-text mb-2">
               Welcom Back!
             </h1>
             <p className="text-night/60 dark:text-dark-textMuted mt-1 tracking-wide">
@@ -45,8 +45,8 @@ const Dashboard = () => {
             <StatCards />
           </div>
 
-          <div className="flex gap-8">
-            <div className="w-[70%]">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+            <div className="w-full lg:w-[70%]">
               <div className="gap-8 mb-8">
                 <AISnapshotCard />
               </div>
@@ -63,7 +63,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div>
+            <div className="w-full lg:w-[30%] mt-6 lg:mt-0">
               <ActionCenter />
             </div>
           </div>

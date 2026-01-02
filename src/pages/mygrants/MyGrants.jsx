@@ -173,10 +173,10 @@ const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
 
   return (
     <>
-      <div className="space-y-8 p-4">
-        <div className="flex justify-between items-center">
+      <div className="space-y-8 p-4 sm:px-6 lg:p-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-night dark:text-dark-text font-heading">
+            <h1 className="text-2xl sm:text-3xl font-bold text-night dark:text-dark-text font-heading">
               My Grants
             </h1>
             <p className="text-night/60 dark:text-dark-textMuted">
@@ -185,7 +185,7 @@ const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
           </div>
           <motion.button
             onClick={handleAddGrantClick}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-night font-semibold rounded-lg hover:bg-secondary transition-colors"
+            className="w-full sm:w-auto flex items-center gap-2 px-4 py-2 bg-primary text-night font-semibold rounded-lg hover:bg-secondary transition-colors"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -197,7 +197,7 @@ const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
         <div>
           {/* Tab Navigation */}
           <div className="border-b border-mercury/50 dark:border-dark-border">
-            <nav className="-mb-px flex space-x-6" aria-label="Tabs">
+            <nav className="-mb-px flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar flex-nowrap" aria-label="Tabs">
               {tabs.map((tab) => (
                 <button
                   key={tab}
@@ -220,7 +220,7 @@ const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
 
         {/* Grant List / Empty State */}
         {filteredGrants.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredGrants.map((grant) => (
               <div
                 key={grant.id}
@@ -278,7 +278,7 @@ const MyGrantsView = ({ myGrants = [], onAddGrant }) => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-white dark:bg-dark-surface rounded-lg border-2 border-dashed border-mercury dark:border-dark-border">
+          <div className="text-center py-10 sm:py-16 bg-white dark:bg-dark-surface rounded-lg border-2 border-dashed border-mercury dark:border-dark-border">
             <p className="font-semibold text-lg text-night dark:text-dark-text">
               No grants in this category
             </p>
