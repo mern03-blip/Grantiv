@@ -49,7 +49,7 @@ const PrivateRoute = ({ children }) => {
   const { data: subscriptionData, isLoading } = useQuery({
     queryKey: ["subscription-plan", orgId],
     queryFn: getSubscriptionStatus,
-    enabled: isAuthenticated,
+    enabled: !!isAuthenticated,
   });
 
   if (isLoading) {

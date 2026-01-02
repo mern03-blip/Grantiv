@@ -86,9 +86,7 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
       setLoading(true);
       setMessage("");
 
-      // 1️⃣ Get organizationId from localStorage
       const organizationId = localStorage.getItem("orgId");
-      // console.log(organizationId);
 
       if (!organizationId) {
         setMessage("Organization ID not found.");
@@ -96,7 +94,6 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
         return;
       }
 
-      // 2️⃣ Call imported inviteMember function
       const response = await inviteMember(organizationId, {
         email: inviteEmail,
         role: inviteRole,
@@ -107,12 +104,12 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
       console.log("✅ Invite Response:", response);
       setMessage("Invitation sent successfully!");
 
-      // Reset form
       setInviteEmail("");
-      // setInviteRole("member");
     } catch (error) {
       console.error("❌ Error inviting member:", error);
-      setMessage(error.message || "Failed to send invitation. Try again.");
+      setMessage(
+        error.response.data.message || "Failed to send invitation. Try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -160,7 +157,6 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
 
   const plan = subscriptionData?.plan || "free";
 
-
   // Show loader while checking subscription
   if (isLoadingSubscription) {
     return <Loader />;
@@ -204,7 +200,7 @@ const TeamsView = ({ isDemoMode, navigateTo }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-start">
         {/* Left Column: Team Chat */}
-        <div className="lg:col-span-1 h-full">
+        <div className="lg:col-span-1 h-[80%]">
           <TeamChat currentUser={currentUser} selectedOrgId={organizationId} />
         </div>
 

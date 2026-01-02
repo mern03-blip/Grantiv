@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import SubscriptionCard from "./SubscriptionCard";
 import SubCancelModal from "../../../components/modals/SubCancelModal";
-import { CheckCircleIcon, ReceiptIcon } from "../../../components/icons/Icons";
+import { CheckCircleIcon } from "../../../components/icons/Icons";
 import {
   createCheckoutSession,
   getSubscriptionStatus,
@@ -9,17 +9,51 @@ import {
 import { message } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "../../../components/loading/Loader";
+// import axiosInstance from "../../../api/axios/axiosInstance";
 
 const Billing = () => {
   const [loadingPlan, setLoadingPlan] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  // const [organization, setOrganization] = useState({});
 
-    const { data: subscriptionData, isLoading: isLoadingSubscription } = useQuery({
-    queryKey: ["subscription-plan"],
-    queryFn: getSubscriptionStatus,
-  });
+  // Get token from storage (adjust depending on your auth setup)
+  // const getAuthHeader = () => {
+  //   const token = localStorage.getItem("token");
+  //   return { headers: { Authorization: `Bearer ${token}` } };
+  // };
 
-  const plan = subscriptionData?.plan || 'trial';
+  // useEffect(() => {
+  //   const orgId = localStorage.getItem("orgId");
+  //   const fetchOrgDetails = async (orgId) => {
+  //     try {
+  //       const response = await axiosInstance.get(
+  //         `/organizations/${orgId}/details`,
+  //         getAuthHeader()
+  //       );
+  //       return response.data;
+  //     } catch (error) {
+  //       throw error.response?.data?.message || "Failed to fetch details";
+  //     }
+  //   };
+
+  //   fetchOrgDetails(orgId)
+  //     .then((data) => {
+  //       console.log("Organization details:", data);
+  //       setOrganization(data?.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching organization details:", error);
+  //     });
+  // }, []);
+
+  const { data: subscriptionData, isLoading: isLoadingSubscription } = useQuery(
+    {
+      queryKey: ["subscription-plan"],
+      queryFn: getSubscriptionStatus,
+    }
+  );
+
+  const plan = subscriptionData?.plan || "trial";
 
   // Get plan-specific features
   const getPlanFeatures = (planName) => {
@@ -80,11 +114,28 @@ const Billing = () => {
     [plan]
   );
 
-
-   // Show loader while checking subscription
+  // Show loader while checking subscription
   if (isLoadingSubscription) {
     return <Loader />;
   }
+
+  // const handleContactSales = () => {
+  //   console.log("Contacting sales for organization:", organization);
+  //   const subject = `Enterprise Inquiry: ${organization.name}`;
+  //   const body = `
+  //   Hi Grantiv Team,
+
+  //   I am interested in the Enterprise plan.
+
+  //   --- SYSTEM INFO (DO NOT DELETE) ---
+  //   Organization ID: ${organization._id}
+  //   Owner Email: ${organization.owner.email}
+  //   -----------------------------------
+  // `;
+  //   window.location.href = `mailto:sales@grantiv.com?subject=${encodeURIComponent(
+  //     subject
+  //   )}&body=${encodeURIComponent(body)}`;
+  // };
 
   return (
     <div>

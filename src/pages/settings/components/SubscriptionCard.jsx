@@ -31,8 +31,8 @@ const SubscriptionCard = ({
     queryFn: getOrganizationSubscription,
   });
 
-
   const handleContactSales = () => {
+    console.log("Contacting sales for organization:", organization);
     const subject = `Enterprise Inquiry: ${organization?.data?.name}`;
     const body = `
     Organization ID: ${organization?.data?._id}
@@ -41,6 +41,11 @@ const SubscriptionCard = ({
     window.location.href = `mailto:hello@grantiv.com.au?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
+    // window.open(
+    //   `mailto:hello@grantiv.com.au?subject=${encodeURIComponent(
+    //     subject
+    //   )}&body=${encodeURIComponent(body)}`
+    // );
   };
 
   return (

@@ -29,8 +29,6 @@
 
 // export default axiosInstance;
 
-
-
 import axios from "axios";
 
 const axiosInstance = axios.create({
@@ -64,10 +62,9 @@ axiosInstance.interceptors.response.use(
 
     // 🔴 Token expired / Unauthorized
     if (status === 401) {
-      localStorage.clear();
-
+      //     localStorage.clear();
+      // window.location.href = "/auth";
       // redirect to auth
-      window.location.href = "/auth";
     }
 
     return Promise.reject(error);
